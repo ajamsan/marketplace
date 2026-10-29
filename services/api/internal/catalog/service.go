@@ -225,12 +225,12 @@ func (s *Service) signImage(ctx context.Context, key sql.NullString) *string {
 	return storage.BestEffortSignedURL(ctx, s.Storage, key, s.Cfg.SignedURLTTL)
 }
 
-const productCols = `p.id, p.stall_id, st.name, COALESCE(p.description,''), p.price_minor, p.currency, p.availability_status, p.image_key, p.created_at, p.archived_at`
+const productCols = `p.id, p.stall_id, st.name, p.name, COALESCE(p.description,''), p.price_minor, p.currency, p.availability_status, p.image_key, p.created_at, p.archived_at`
 
 func (s *Service) scanProduct(ctx context.Context, scan func(dest ...any) error) (*Product, error) {
 	var pr Product
 	var imageKey sql.NullString
-	if err := scan(&pr.ID, &pr.StallID, &pr.StallName, &pr.Description, &pr.PriceMinor,
+	if err := scan(&pr.ID, &pr.StallID, &pr.StallName, &pr.Name, &pr.Description, &pr.PriceMinor,
 		&pr.Currency, &pr.AvailabilityStatus, &imageKey, &pr.CreatedAt, &pr.ArchivedAt); err != nil {
 		return nil, err
 	}
