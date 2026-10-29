@@ -1,0 +1,25 @@
+"use client";
+
+import Link from "next/link";
+
+import { RegisterForm } from "@/features/auth/register-form";
+import { RedirectIfAuthenticated } from "@/features/auth/guards";
+
+export default function RegisterPage() {
+  return (
+    <RedirectIfAuthenticated>
+      <div className="flex flex-col gap-4">
+        <RegisterForm />
+        <p className="text-center text-sm text-muted-foreground">
+          Sudah punya akun?{" "}
+          <Link
+            href="/login"
+            className="font-semibold text-foreground underline underline-offset-4"
+          >
+            Masuk
+          </Link>
+        </p>
+      </div>
+    </RedirectIfAuthenticated>
+  );
+}

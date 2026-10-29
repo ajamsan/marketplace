@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS seller_stalls;
+DROP TABLE IF EXISTS stalls;

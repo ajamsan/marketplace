@@ -1,0 +1,104 @@
+"use client";
+
+import { Suspense, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
+import { safeNextPath } from "@/features/auth/login-form";
+import { OtpForm } from "@/features/auth/otp-form";
+import { Card, CardHeader } from "@/components/ui/card";
+import { FullPageLoader } from "@/components/ui/feedback";
+
+function VerifyContent() {
+  const searchParams = useSearchParams();
+  const mode = searchParams.get("mode") === "login" ? "login" : "register";
+  const email = searchParams.get("email") ?? "";
+  const preAuthToken = searchParams.get("pre_auth_token");
+  const next = safeNextPath(searchParams.get("next"));
+  const [verified, setVerified] = useState(false);
+
+  if (mode === "register" && verified) {
+    return (
+      <Card>
+        <CardHeader title="Akun terverifikasi. Silakan login." />
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">
+            Kode OTP valid dan akunmu sudah aktif.
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground"
+          >
+            Masuk
+          </Link>
+        </div>
+      </Card>
+    );
+  }
+
+  if (mode === "login" && !preAuthToken) {
+    return (
+      <Card>
+        <CardHeader title="Verifikasi login tidak lengkap" />
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">
+            Silakan ulangi login untuk meminta kode OTP baru.
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground"
+          >
+            Kembali ke login
+          </Link>
+        </div>
+      </Card>
+    );
+  }
+
+  if (mode === "register" && !email) {
+    return (
+      <Card>
+        <CardHeader title="Permintaan verifikasi tidak lengkap" />
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">
+            Silakan ulangi pendaftaran untuk meminta kode OTP baru.
+          </p>
+          <Link
+            href="/register"
+            className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground"
+          >
+            Kembali ke pendaftaran
+          </Link>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {mode === "register" ? (
+        <p
+          aria-live="polite"
+          className="rounded-lg border border-border bg-surface-muted p-3 text-sm text-foreground"
+        >
+          Jika email valid, kode OTP telah dikirim.
+        </p>
+      ) : null}
+      <OtpForm
+        purpose={mode}
+        email={email}
+        preAuthToken={preAuthToken ?? undefined}
+        next={next}
+        onVerified={mode === "register" ? () => setVerified(true) : undefined}
+      />
+    </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<FullPageLoader label="Memuat verifikasi..." />}>
+      <VerifyContent />
+    </Suspense>
+  );
+}
