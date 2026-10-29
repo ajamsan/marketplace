@@ -52,19 +52,18 @@ export function applyTheme(theme: ThemeMode, accent: AccentId) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") return DEFAULT_THEME;
-    const stored = window.localStorage.getItem(THEME_KEY);
-    if (stored === "light" || stored === "dark") return stored;
-    if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) return "dark";
-    return DEFAULT_THEME;
-  });
+  const [theme, setThemeState] = useState<ThemeMode>(DEFAULT_THEME);
+  const [accent, setAccentState] = useState<AccentId>(DEFAULT_ACCENT);
 
-  const [accent, setAccentState] = useState<AccentId>(() => {
-    if (typeof window === "undefined") return DEFAULT_ACCENT;
-    const stored = window.localStorage.getItem(ACCENT_KEY);
-    return isAccentId(stored) ? stored : DEFAULT_ACCENT;
-  });
+  // Hidrasi preferensi dari localStorage setelah mount agar tidak terjadi
+  // hydration mismatch (server & client awal sama, lalu client menyesuaikan).
+  useEffect(() => {
+    const storedTheme = readStoredTheme();
+    const storedAccent = readStoredAccent();
+    setThemeState(storedTheme);
+    setAccentState(storedAccent);
+    applyTheme(storedTheme, storedAccent);
+  }, []);
 
   useEffect(() => {
     applyTheme(theme, accent);
