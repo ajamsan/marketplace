@@ -150,7 +150,7 @@ export function PendingStalls({
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground">{stall.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      Pemilik: {stall.owner_username}
+                      Pemilik: {stall.owner_username} ({stall.owner_email})
                     </p>
                   </div>
                   <StallStatusBadge status={stall.status} />

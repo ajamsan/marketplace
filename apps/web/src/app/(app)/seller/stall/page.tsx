@@ -111,6 +111,7 @@ function SellerStallView() {
         )}
       </Card>
 
+      {stalls.length === 0 ? (
       <Card>
         <CardHeader
           title="Ajukan stan baru"
@@ -140,6 +141,7 @@ function SellerStallView() {
           </p>
         )}
       </Card>
+      ) : null}
     </div>
   );
 }

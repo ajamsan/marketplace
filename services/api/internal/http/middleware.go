@@ -186,6 +186,8 @@ func (s *Server) writeDomainError(w http.ResponseWriter, r *http.Request, err er
 			"Sesi aktif tidak dapat dicabut dari daftar; gunakan logout.", nil)
 	case errors.Is(err, users.ErrUsernameTaken):
 		httpx.WriteError(w, r, http.StatusConflict, "CONFLICT", err.Error(), nil)
+	case errors.Is(err, stalls.ErrAlreadyHasStall):
+		httpx.WriteError(w, r, http.StatusConflict, "CONFLICT", err.Error(), nil)
 	case errors.Is(err, users.ErrNotFound),
 		errors.Is(err, stalls.ErrNotFound),
 		errors.Is(err, catalog.ErrNotFound),

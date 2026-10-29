@@ -85,6 +85,18 @@ export function OrderQueue({
     payment: PaymentLine;
   } | null>(null);
 
+  function isOrderDone(order: SellerOrder): boolean {
+    if (order.status === "completed") return true;
+    return order.payments.length > 0 && order.payments.every((p) => p.status === "cash_paid");
+  }
+
+  const queueNumbers = new Map<string, number>();
+  const activeSorted = orders
+    .filter((order) => !isOrderDone(order))
+    .slice()
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  activeSorted.forEach((order, index) => queueNumbers.set(order.id, index + 1));
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3" aria-busy="true" aria-live="polite">
@@ -121,9 +133,16 @@ export function OrderQueue({
                   {order.public_code}
                 </p>
               </div>
-              <Badge tone={order.status === "completed" ? "success" : "info"}>
-                {orderStatusLabel(order.status)}
-              </Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                {isOrderDone(order) ? (
+                  <Badge tone="success">DONE</Badge>
+                ) : queueNumbers.has(order.id) ? (
+                  <Badge tone="info">Antrian #{queueNumbers.get(order.id)}</Badge>
+                ) : null}
+                <Badge tone={order.status === "completed" ? "success" : "info"}>
+                  {orderStatusLabel(order.status)}
+                </Badge>
+              </div>
             </div>
 
             <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">

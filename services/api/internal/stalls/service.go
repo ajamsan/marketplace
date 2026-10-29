@@ -13,6 +13,7 @@ import (
 )
 
 var ErrNotFound = errors.New("Stan tidak ditemukan")
+var ErrAlreadyHasStall = errors.New("Seller sudah memiliki stan")
 
 // Transisi status stan: pending_review → (active | inactive), dan sebaliknya
 // untuk admin. Seller tidak pernah mengubah status stan sendiri (D11/D12).
@@ -58,6 +59,14 @@ func (s *Service) Create(ctx context.Context, sellerID, name, description, locat
 	}
 	if len(fields) > 0 {
 		return nil, &InvalidError{Fields: fields}
+	}
+
+	var count int
+	if err := s.DB.QueryRowContext(ctx, `SELECT count(*) FROM seller_stalls WHERE seller_id = $1`, sellerID).Scan(&count); err != nil {
+		return nil, err
+	}
+	if count > 0 {
+		return nil, ErrAlreadyHasStall
 	}
 
 	id, err := crypto.NewUUID()
@@ -220,12 +229,13 @@ func (s *Service) byID(ctx context.Context, id string) (*Stall, error) {
 type AdminView struct {
 	Stall
 	OwnerUsername string `json:"owner_username"`
+	OwnerEmail    string `json:"owner_email"`
 }
 
 func (s *Service) AdminList(ctx context.Context, statusFilter string) ([]AdminView, error) {
 	q := `
 		SELECT st.id, st.name, COALESCE(st.description,''), COALESCE(st.location_label,''),
-		       st.status, st.created_at, COALESCE(u.username,'?')
+		       st.status, st.created_at, COALESCE(u.username,'?'), COALESCE(u.email_normalized,'?')
 		FROM stalls st
 		LEFT JOIN seller_stalls ss ON ss.stall_id = st.id AND ss.role = 'owner'
 		LEFT JOIN users u ON u.id = ss.seller_id`
@@ -244,7 +254,7 @@ func (s *Service) AdminList(ctx context.Context, statusFilter string) ([]AdminVi
 	for rows.Next() {
 		var v AdminView
 		if err := rows.Scan(&v.ID, &v.Name, &v.Description, &v.LocationLabel,
-			&v.Status, &v.CreatedAt, &v.OwnerUsername); err != nil {
+			&v.Status, &v.CreatedAt, &v.OwnerUsername, &v.OwnerEmail); err != nil {
 			return nil, err
 		}
 		out = append(out, v)

@@ -77,6 +77,7 @@ export interface Stall {
 
 export interface AdminStall extends Stall {
   owner_username: string;
+  owner_email: string;
 }
 
 export interface Product {
