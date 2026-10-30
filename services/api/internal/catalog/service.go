@@ -202,7 +202,7 @@ func (s *Service) UploadImage(ctx context.Context, sellerID, productID string, d
 	if err != nil {
 		return nil, err
 	}
-	key := "products/" + uid + ".webp"
+	key := "Products/" + uid + ".webp"
 	if err := s.Storage.Upload(ctx, key, "image/webp", webpData); err != nil {
 		return nil, err
 	}
