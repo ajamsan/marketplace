@@ -126,7 +126,7 @@ func (s *Service) Update(ctx context.Context, userID string, in UpdateInput, req
 // UploadPhoto mengganti foto profil: validasi konten (PROF-02), key objek acak,
 // objek lama dihapus best-effort setelah database diperbarui.
 func (s *Service) UploadPhoto(ctx context.Context, userID string, data []byte, requestID string) (*Profile, error) {
-	ext, err := imaging.ValidateImage(data, s.Cfg.MaxUploadBytes)
+	webpData, err := imaging.ToWebP(data, s.Cfg.MaxUploadBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -134,8 +134,8 @@ func (s *Service) UploadPhoto(ctx context.Context, userID string, data []byte, r
 	if err != nil {
 		return nil, err
 	}
-	key := "profiles/" + uid + "." + ext
-	if err := s.Storage.Upload(ctx, key, imaging.ContentType(ext), data); err != nil {
+	key := "PhotoProfile/" + uid + ".webp"
+	if err := s.Storage.Upload(ctx, key, "image/webp", webpData); err != nil {
 		return nil, err
 	}
 

@@ -6,6 +6,8 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+
+	"github.com/HugoSmits86/nativewebp"
 )
 
 // Validasi upload berdasarkan konten file (PROF-02, §11): magic bytes, ukuran,
@@ -56,5 +58,27 @@ func ContentType(ext string) string {
 	if ext == "png" {
 		return "image/png"
 	}
+	if ext == "webp" {
+		return "image/webp"
+	}
 	return "image/jpeg"
+}
+
+// ToWebP memvalidasi konten gambar (ukuran, tipe, dimensi) lalu mengonversi
+// ke format WebP. Mengembalikan bytes WebP siap simpan. (PROF-02, CAT-06)
+func ToWebP(data []byte, maxBytes int64) ([]byte, error) {
+	if _, err := ValidateImage(data, maxBytes); err != nil {
+		return nil, err
+	}
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return nil, ErrType
+	}
+	var buf bytes.Buffer
+	if err := nativewebp.Encode(&buf, img, &nativewebp.Options{
+		CompressionLevel: nativewebp.DefaultCompression,
+	}); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }

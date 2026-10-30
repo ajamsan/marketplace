@@ -181,7 +181,7 @@ func (s *Service) Archive(ctx context.Context, sellerID, productID, requestID st
 // UploadImage mengganti foto produk melalui alur server aman (CAT-06):
 // validasi konten, key objek acak, objek lama dihapus best-effort.
 func (s *Service) UploadImage(ctx context.Context, sellerID, productID string, data []byte, requestID string) (*Product, error) {
-	ext, err := imaging.ValidateImage(data, s.Cfg.MaxUploadBytes)
+	webpData, err := imaging.ToWebP(data, s.Cfg.MaxUploadBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -202,8 +202,8 @@ func (s *Service) UploadImage(ctx context.Context, sellerID, productID string, d
 	if err != nil {
 		return nil, err
 	}
-	key := "products/" + uid + "." + ext
-	if err := s.Storage.Upload(ctx, key, imaging.ContentType(ext), data); err != nil {
+	key := "products/" + uid + ".webp"
+	if err := s.Storage.Upload(ctx, key, "image/webp", webpData); err != nil {
 		return nil, err
 	}
 	if _, err := s.DB.ExecContext(ctx, `
