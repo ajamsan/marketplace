@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useState } from "react";
+import { memo, useState } from "react";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
@@ -24,30 +24,29 @@ export const ProductPhoto = memo(function ProductPhoto({
   alt: string;
   className?: string;
 }) {
-  const style = useMemo(
-    () =>
-      src
-        ? {
-            backgroundImage: `url(${JSON.stringify(src)})`,
-            backgroundPosition: "center",
-            backgroundSize: "cover",
-          }
-        : undefined,
-    [src],
-  );
+  if (!src) {
+    return (
+      <div
+        role="img"
+        aria-label={alt}
+        className={cn(
+          "flex items-center justify-center overflow-hidden bg-surface-muted text-xs text-muted-foreground",
+          className,
+        )}
+      >
+        Tanpa foto
+      </div>
+    );
+  }
 
   return (
-    <div
-      role="img"
-      aria-label={alt}
-      className={cn(
-        "flex items-center justify-center overflow-hidden bg-surface-muted text-xs text-muted-foreground",
-        className,
-      )}
-      style={style}
-    >
-      {src ? null : "Tanpa foto"}
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className={cn("object-cover", className)}
+    />
   );
 });
 
