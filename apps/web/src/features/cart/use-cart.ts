@@ -25,7 +25,6 @@ export function useSetCartQuantity() {
     onSuccess: (cart) => {
       queryClient.setQueryData(CART_QUERY_KEY, cart);
       void queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
-      void queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
     },
   });
 }
@@ -38,7 +37,6 @@ export function useRemoveCartItem() {
     onSuccess: (cart) => {
       queryClient.setQueryData(CART_QUERY_KEY, cart);
       void queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
-      void queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
     },
   });
 }
