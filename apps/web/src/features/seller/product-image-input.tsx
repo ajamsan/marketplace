@@ -13,7 +13,13 @@ import { uploadProductImage } from "./api";
 const MAX_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/png", "image/jpeg"];
 
-export function ProductImageInput({ product }: { product: Product }) {
+export function ProductImageInput({
+  product,
+  onUploaded,
+}: {
+  product: Product;
+  onUploaded?: () => void;
+}) {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<string | null>(null);
@@ -35,6 +41,7 @@ export function ProductImageInput({ product }: { product: Product }) {
       replacePreview(null);
       if (inputRef.current) inputRef.current.value = "";
       void queryClient.invalidateQueries({ queryKey: ["seller", "products"] });
+      onUploaded?.();
     },
     onError: (mutationError) => {
       if (mutationError instanceof ApiError) {

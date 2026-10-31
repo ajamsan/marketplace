@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
@@ -15,7 +15,7 @@ import type { Product } from "@/lib/api/types";
 import { formatIDR } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export function ProductPhoto({
+export const ProductPhoto = memo(function ProductPhoto({
   src,
   alt,
   className,
@@ -24,6 +24,18 @@ export function ProductPhoto({
   alt: string;
   className?: string;
 }) {
+  const style = useMemo(
+    () =>
+      src
+        ? {
+            backgroundImage: `url(${JSON.stringify(src)})`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+          }
+        : undefined,
+    [src],
+  );
+
   return (
     <div
       role="img"
@@ -32,20 +44,12 @@ export function ProductPhoto({
         "flex items-center justify-center overflow-hidden bg-surface-muted text-xs text-muted-foreground",
         className,
       )}
-      style={
-        src
-          ? {
-              backgroundImage: `url(${JSON.stringify(src)})`,
-              backgroundPosition: "center",
-              backgroundSize: "cover",
-            }
-          : undefined
-      }
+      style={style}
     >
       {src ? null : "Tanpa foto"}
     </div>
   );
-}
+});
 
 export function ProductCard({ product }: { product: Product }) {
   const role = useAuthStore((state) => state.user?.role);

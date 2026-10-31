@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -40,8 +41,22 @@ export function ProductList({ products }: { products: Product[] }) {
           const archived = Boolean(product.archived_at);
           return (
             <li key={product.id} className="rounded-lg border border-border bg-surface p-4">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="min-w-0">
+              <div className="flex flex-wrap items-start gap-3">
+                {product.image_url ? (
+                  <Image
+                    src={product.image_url}
+                    alt={`Foto ${product.name}`}
+                    width={64}
+                    height={64}
+                    unoptimized
+                    className="h-16 w-16 rounded-lg border border-border object-cover"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-border bg-surface-muted text-xs text-muted-foreground">
+                    Tanpa foto
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
                   <p className="font-semibold text-foreground">{product.name}</p>
                   <p className="text-sm text-muted-foreground">{product.stall_name}</p>
                 </div>
@@ -132,7 +147,9 @@ export function ProductList({ products }: { products: Product[] }) {
         description="Foto disimpan di server dan menggantikan foto sebelumnya bila ada."
         onClose={() => setImageTarget(null)}
       >
-        {imageTarget ? <ProductImageInput product={imageTarget} /> : null}
+        {imageTarget ? (
+          <ProductImageInput product={imageTarget} onUploaded={() => setImageTarget(null)} />
+        ) : null}
       </Dialog>
     </div>
   );

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
+import { X } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 /**
@@ -45,10 +47,18 @@ export function Dialog({
         aria-describedby={description ? "dialog-description" : undefined}
         tabIndex={-1}
         className={cn(
-          "w-full max-w-md rounded-lg border border-border bg-surface p-5 shadow-xl outline-none",
+          "relative w-full max-w-md rounded-lg border border-border bg-surface p-5 shadow-xl outline-none",
         )}
       >
-        <h2 id="dialog-title" className="text-base font-semibold text-foreground">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Tutup"
+          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-md text-danger hover:bg-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+        >
+          <X className="h-4 w-4" aria-hidden="true" />
+        </button>
+        <h2 id="dialog-title" className="text-base font-semibold text-foreground pr-8">
           {title}
         </h2>
         {description ? (
