@@ -32,6 +32,7 @@ export interface ProductFormProps {
   product?: Product;
   defaultStallId?: string;
   onSaved?: (product: Product) => void;
+  onCancel?: () => void;
 }
 
 export function ProductForm({
@@ -39,6 +40,7 @@ export function ProductForm({
   product,
   defaultStallId,
   onSaved,
+  onCancel,
 }: ProductFormProps) {
   const queryClient = useQueryClient();
   const isEdit = Boolean(product);
@@ -248,6 +250,11 @@ export function ProductForm({
               ? "Simpan perubahan produk"
               : "Simpan produk"}
         </Button>
+        {onCancel ? (
+          <Button type="button" variant="secondary" disabled={mutation.isPending} onClick={onCancel}>
+            Batal
+          </Button>
+        ) : null}
       </div>
     </form>
   );

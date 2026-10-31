@@ -72,6 +72,7 @@ function EditProductView() {
             stalls={[]}
             product={product}
             onSaved={() => router.push("/seller/products")}
+            onCancel={() => router.push("/seller/products")}
           />
         )}
       </Card>

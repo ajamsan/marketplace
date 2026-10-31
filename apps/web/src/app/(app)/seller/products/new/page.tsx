@@ -65,6 +65,7 @@ function NewProductView() {
           <ProductForm
             stalls={stalls}
             onSaved={() => router.push("/seller/products")}
+            onCancel={() => router.push("/seller/products")}
           />
         )}
       </Card>
