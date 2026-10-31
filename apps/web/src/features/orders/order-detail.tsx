@@ -45,9 +45,19 @@ function paymentMethodLabel(method: string): string {
 export function OrderDetail({ order }: { order: OrderDetailData }) {
   const groups = groupByStall(order.items);
 
+  const isPaid = order.payments.length > 0 && order.payments.every((p) => p.status === "cash_paid");
+  const showQueue = isPaid && order.queue_number > 0;
+
   return (
     <div className="flex flex-col gap-4">
-      <Card className="flex flex-col gap-2">
+      <Card className="relative flex flex-col gap-2">
+        {showQueue ? (
+          <div className="absolute right-4 top-4 rounded-lg border border-accent bg-accent-soft px-3 py-2 text-right">
+            <p className="text-xs font-medium text-muted-foreground">Antrian</p>
+            <p className="text-2xl font-bold text-accent">#{order.queue_number}</p>
+            <p className="text-xs text-muted-foreground">atas nama {order.buyer_username}</p>
+          </div>
+        ) : null}
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Kode pesanan
         </p>

@@ -14,9 +14,16 @@ const NEXT_STATUS: Record<string, string> = {
   ready_for_pickup: "completed",
 };
 
-export function FulfillmentControls({ fulfillment }: { fulfillment: FulfillmentLine }) {
+export function FulfillmentControls({
+  fulfillment,
+  paymentStatus,
+}: {
+  fulfillment: FulfillmentLine;
+  paymentStatus?: string;
+}) {
   const queryClient = useQueryClient();
   const nextStatus = NEXT_STATUS[fulfillment.status];
+  const isPaid = paymentStatus === "cash_paid";
 
   const mutation = useMutation({
     mutationFn: (status: string) => updateFulfillment(fulfillment.id, status),
@@ -24,6 +31,14 @@ export function FulfillmentControls({ fulfillment }: { fulfillment: FulfillmentL
       void queryClient.invalidateQueries({ queryKey: ["seller", "orders"] });
     },
   });
+
+  if (!isPaid) {
+    return (
+      <p className="text-xs font-medium text-warning">
+        Menunggu pembayaran tunai diterima sebelum memproses pesanan.
+      </p>
+    );
+  }
 
   if (!nextStatus) {
     return (

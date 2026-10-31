@@ -85,14 +85,17 @@ export function OrderQueue({
     payment: PaymentLine;
   } | null>(null);
 
-  function isOrderDone(order: SellerOrder): boolean {
-    if (order.status === "completed") return true;
+  function isPaid(order: SellerOrder): boolean {
     return order.payments.length > 0 && order.payments.every((p) => p.status === "cash_paid");
+  }
+
+  function isOrderDone(order: SellerOrder): boolean {
+    return order.status === "completed";
   }
 
   const queueNumbers = new Map<string, number>();
   const activeSorted = orders
-    .filter((order) => !isOrderDone(order))
+    .filter((order) => isPaid(order) && !isOrderDone(order))
     .slice()
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   activeSorted.forEach((order, index) => queueNumbers.set(order.id, index + 1));
@@ -126,20 +129,22 @@ export function OrderQueue({
         const slices = buildSlices(order);
         return (
           <Card key={order.id}>
-            <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs text-muted-foreground">Kode pesanan</p>
-                <p className="text-base font-semibold text-foreground">
+                <p className="text-2xl font-bold text-foreground">
                   {order.public_code}
                 </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
                 {isOrderDone(order) ? (
-                  <Badge tone="success">DONE</Badge>
+                  <Badge tone="success" className="mt-1">DONE</Badge>
                 ) : queueNumbers.has(order.id) ? (
-                  <Badge tone="info">Antrian #{queueNumbers.get(order.id)}</Badge>
+                  <Badge tone="info" className="mt-1 text-base">Antrian #{queueNumbers.get(order.id)}</Badge>
                 ) : null}
-                <Badge tone={order.status === "completed" ? "success" : "info"}>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">Pembeli</p>
+                <p className="text-lg font-semibold text-foreground">{order.buyer_username}</p>
+                <Badge tone={order.status === "completed" ? "success" : "info"} className="mt-1">
                   {orderStatusLabel(order.status)}
                 </Badge>
               </div>
@@ -230,7 +235,10 @@ export function OrderQueue({
                         Status pemenuhan: {fulfillmentStatusLabel(slice.fulfillment.status)}
                       </p>
                       <div className="mt-2">
-                        <FulfillmentControls fulfillment={slice.fulfillment} />
+                        <FulfillmentControls
+                          fulfillment={slice.fulfillment}
+                          paymentStatus={slice.payment?.status}
+                        />
                       </div>
                     </div>
                   ) : null}

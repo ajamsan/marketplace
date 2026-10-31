@@ -140,20 +140,31 @@ var nextFulfillmentStatus = map[string]string{
 func (s *Service) UpdateFulfillment(ctx context.Context, sellerID, fulfillmentID, newStatus, requestID string) (*FulfillmentResult, error) {
 	var result *FulfillmentResult
 	err := db.WithTx(ctx, s.DB, func(tx *sql.Tx) error {
-		var orderID, current string
+		var orderID, current, stallID string
 		err := tx.QueryRowContext(ctx, `
-			SELECT f.order_id, f.fulfillment_status
+			SELECT f.order_id, f.stall_id, f.fulfillment_status
 			FROM order_stall_fulfillments f
 			WHERE f.id = $1
 			  AND EXISTS (SELECT 1 FROM seller_stalls ss
 			              WHERE ss.stall_id = f.stall_id AND ss.seller_id = $2)
 			FOR UPDATE OF f`, fulfillmentID, sellerID).
-			Scan(&orderID, &current)
+			Scan(&orderID, &stallID, &current)
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrNotFound
 		}
 		if err != nil {
 			return err
+		}
+
+		// Guard: fulfillment hanya boleh diproses setelah pembayaran tunai diterima.
+		var payStatus string
+		if err := tx.QueryRowContext(ctx, `
+			SELECT status FROM payments WHERE order_id = $1 AND stall_id = $2`,
+			orderID, stallID).Scan(&payStatus); err != nil {
+			return err
+		}
+		if payStatus != "cash_paid" {
+			return ErrStateConflict
 		}
 
 		if newStatus == current {

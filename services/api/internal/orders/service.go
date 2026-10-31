@@ -85,6 +85,7 @@ type Detail struct {
 	ID           string            `json:"id"`
 	PublicCode   string            `json:"public_code"`
 	Status       string            `json:"status"`
+	QueueNumber  int               `json:"queue_number"`
 	BuyerUsername string            `json:"buyer_username"`
 	Currency     string            `json:"currency"`
 	SubtotalMinor int64            `json:"subtotal_minor"`
@@ -312,6 +313,10 @@ func (s *Service) Create(ctx context.Context, buyerID, method string, items []It
 				return err
 			}
 		}
+		// Bersihkan keranjang buyer setelah order dibuat (CART-06).
+		_, _ = tx.ExecContext(ctx, `
+			DELETE FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE buyer_id = $1)`,
+			buyerID)
 		_ = s.Audit.Insert(ctx, tx, audit.Entry{
 			ActorUserID: buyerID, Action: "order_create", ResourceType: "order",
 			ResourceID: orderID, Outcome: "success", RequestID: requestID,
@@ -397,6 +402,11 @@ func (s *Service) GetForBuyer(ctx context.Context, buyerID, orderID string) (*De
 	if err := s.fillDetail(ctx, d, ""); err != nil {
 		return nil, err
 	}
+	stallID := ""
+	if len(d.Items) > 0 {
+		stallID = d.Items[0].StallID
+	}
+	d.QueueNumber = s.queueNumber(ctx, d.ID, stallID, d.CreatedAt, d.Payments)
 	return d, nil
 }
 
@@ -520,6 +530,13 @@ func (s *Service) ListForSeller(ctx context.Context, sellerID string, cursor htt
 		if err := s.fillSellerSlice(ctx, sellerID, &out[i]); err != nil {
 			return nil, "", err
 		}
+		stallID := ""
+		if len(out[i].Items) > 0 {
+			stallID = out[i].Items[0].StallID
+		} else if len(out[i].Payments) > 0 {
+			stallID = out[i].Payments[0].StallID
+		}
+		out[i].QueueNumber = s.queueNumber(ctx, out[i].ID, stallID, out[i].CreatedAt, out[i].Payments)
 	}
 	return out, next, nil
 }
@@ -666,6 +683,32 @@ func (s *Service) RecalculateStatusTx(ctx context.Context, tx *sql.Tx, orderID s
 		UPDATE orders SET status = $2, updated_at = now()
 		WHERE id = $1 AND status IS DISTINCT FROM $2`, orderID, derived)
 	return derived, err
+}
+
+// queueNumber mengembalikan nomor antrian order ini di antara order yang sudah
+// dibayar (cash_paid) untuk stan yang sama, berdasarkan waktu pembuatan.
+// Mengembalikan 0 jika belum dibayar.
+func (s *Service) queueNumber(ctx context.Context, orderID, stallID string, createdAt time.Time, payments []PaymentLine) int {
+	for _, p := range payments {
+		if p.Status != "cash_paid" {
+			return 0
+		}
+	}
+	if len(payments) == 0 || stallID == "" {
+		return 0
+	}
+	var n int
+	err := s.DB.QueryRowContext(ctx, `
+		SELECT count(DISTINCT o.id) + 1
+		FROM orders o
+		WHERE o.created_at < $1
+		  AND EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.id AND oi.stall_id = $2)
+		  AND EXISTS (SELECT 1 FROM payments p WHERE p.order_id = o.id AND p.stall_id = $2 AND p.status = 'cash_paid')`,
+		createdAt, stallID).Scan(&n)
+	if err != nil {
+		return 0
+	}
+	return n
 }
 
 func nilable(s string) any {

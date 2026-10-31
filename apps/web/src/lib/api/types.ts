@@ -157,6 +157,7 @@ export interface OrderDetail {
   id: string;
   public_code: string;
   status: string;
+  queue_number: number;
   buyer_username: string;
   currency: string;
   subtotal_minor: number;
