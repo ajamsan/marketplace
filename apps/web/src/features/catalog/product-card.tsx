@@ -105,7 +105,7 @@ function ProductActions({ product, available }: { product: Product; available: b
     addToCart.mutate(
       { productId: product.id, quantity: inCart + 1 },
       {
-        onSuccess: () => setMessage("Masuk keranjang."),
+        onSuccess: () => setMessage(null),
         onError: (error) =>
           setMessage(
             error instanceof ApiError
