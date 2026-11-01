@@ -7,6 +7,7 @@ import { ShoppingCart } from "lucide-react";
 import { AvailabilityBadge } from "./availability-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CartQuantityStepper } from "@/features/cart/quantity-stepper";
 import { MAX_QUANTITY } from "@/features/cart/quantity-stepper";
 import { useCart, useSetCartQuantity } from "@/features/cart/use-cart";
 import { useAuthStore } from "@/features/auth/auth-store";
@@ -107,19 +108,30 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="text-base font-semibold text-foreground">
           {formatIDR(product.price_minor)}
         </p>
-        {inCart > 0 ? (
-          <p className="text-xs text-muted-foreground">Di keranjang: {inCart} item</p>
-        ) : null}
+        <p className="min-h-[1.25rem] text-xs text-muted-foreground">
+          {inCart > 0 ? `Di keranjang: ${inCart} item` : "\u00a0"}
+        </p>
         {available ? (
-          <Button
-            size="sm"
-            onClick={handleAdd}
-            disabled={addToCart.isPending || atLimit}
-            className="mt-auto w-full"
-          >
-            <ShoppingCart className="h-4 w-4" aria-hidden="true" />
-            {addToCart.isPending ? "Menambahkan..." : "Tambah ke keranjang"}
-          </Button>
+          inCart > 0 ? (
+            <div className="mt-auto w-full">
+              <CartQuantityStepper
+                productId={product.id}
+                quantity={inCart}
+                name={product.name}
+                available={available}
+              />
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              disabled={addToCart.isPending || atLimit}
+              className="mt-auto w-full"
+            >
+              <ShoppingCart className="h-4 w-4" aria-hidden="true" />
+              {addToCart.isPending ? "Menambahkan..." : "Tambah ke keranjang"}
+            </Button>
+          )
         ) : (
           <p className="mt-auto text-xs text-muted-foreground">
             Produk ini tidak dapat ditambahkan ke keranjang.

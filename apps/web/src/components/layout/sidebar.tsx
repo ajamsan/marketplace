@@ -34,7 +34,7 @@ export function Sidebar({ role }: { role: Role | null | undefined }) {
   return (
     <aside
       aria-label="Navigasi utama"
-      className="hidden w-60 shrink-0 border-r border-border bg-surface md:block"
+      className="hidden h-screen w-60 shrink-0 sticky top-0 overflow-y-auto border-r border-border bg-surface md:block"
     >
       <div className="flex h-16 items-center px-5">
         <span className="text-base font-bold text-foreground">Kantin Kampus</span>
