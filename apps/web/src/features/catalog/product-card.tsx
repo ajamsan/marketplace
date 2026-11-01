@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
@@ -54,33 +54,7 @@ export const ProductPhoto = memo(function ProductPhoto({
 export function ProductCard({ product }: { product: Product }) {
   const role = useAuthStore((state) => state.user?.role);
   const isBuyer = role === "buyer";
-  const { data: cart } = useCart({ enabled: isBuyer });
-  const addToCart = useSetCartQuantity();
-  const [message, setMessage] = useState<string | null>(null);
   const available = product.availability_status === "available";
-
-  const inCart = cart?.items.find((item) => item.product_id === product.id)?.quantity ?? 0;
-  const atLimit = inCart >= MAX_QUANTITY;
-
-  const handleAdd = () => {
-    setMessage(null);
-    if (atLimit) {
-      setMessage(`Kuantitas maksimum ${MAX_QUANTITY} untuk produk ini.`);
-      return;
-    }
-    addToCart.mutate(
-      { productId: product.id, quantity: inCart + 1 },
-      {
-        onSuccess: () => setMessage("Masuk keranjang."),
-        onError: (error) =>
-          setMessage(
-            error instanceof ApiError
-              ? (Object.values(error.fields ?? {})[0] ?? error.message)
-              : "Gagal menambahkan ke keranjang.",
-          ),
-      },
-    );
-  };
 
   return (
     <Card className="flex h-full flex-col overflow-hidden p-0">
@@ -108,47 +82,84 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="text-base font-semibold text-foreground">
           {formatIDR(product.price_minor)}
         </p>
-        <p className="min-h-[1.25rem] text-xs text-muted-foreground">
-          {inCart > 0 ? `Di keranjang: ${inCart} item` : "\u00a0"}
-        </p>
-        {available ? (
-          inCart > 0 ? (
-            <div className="mt-auto w-full">
-              <CartQuantityStepper
-                productId={product.id}
-                quantity={inCart}
-                name={product.name}
-                available={available}
-              />
-            </div>
-          ) : (
-            <Button
-              size="sm"
-              onClick={handleAdd}
-              disabled={addToCart.isPending || atLimit}
-              className="mt-auto w-full"
-            >
-              <ShoppingCart className="h-4 w-4" aria-hidden="true" />
-              {addToCart.isPending ? "Menambahkan..." : "Tambah ke keranjang"}
-            </Button>
-          )
-        ) : (
-          <p className="mt-auto text-xs text-muted-foreground">
-            Produk ini tidak dapat ditambahkan ke keranjang.
-          </p>
-        )}
-        {message ? (
-          <p
-            role="status"
-            className={cn(
-              "text-xs font-medium",
-              addToCart.isError ? "text-danger" : "text-muted-foreground",
-            )}
-          >
-            {message}
-          </p>
-        ) : null}
+        {isBuyer ? <ProductActions product={product} available={available} /> : null}
       </div>
     </Card>
+  );
+}
+
+function ProductActions({ product, available }: { product: Product; available: boolean }) {
+  const { data: cart } = useCart({ enabled: true });
+  const addToCart = useSetCartQuantity();
+  const [message, setMessage] = useState<string | null>(null);
+
+  const inCart = cart?.items.find((item) => item.product_id === product.id)?.quantity ?? 0;
+  const atLimit = inCart >= MAX_QUANTITY;
+
+  const handleAdd = () => {
+    setMessage(null);
+    if (atLimit) {
+      setMessage(`Kuantitas maksimum ${MAX_QUANTITY} untuk produk ini.`);
+      return;
+    }
+    addToCart.mutate(
+      { productId: product.id, quantity: inCart + 1 },
+      {
+        onSuccess: () => setMessage("Masuk keranjang."),
+        onError: (error) =>
+          setMessage(
+            error instanceof ApiError
+              ? (Object.values(error.fields ?? {})[0] ?? error.message)
+              : "Gagal menambahkan ke keranjang.",
+          ),
+      },
+    );
+  };
+
+  if (!available) {
+    return (
+      <p className="mt-auto text-xs text-muted-foreground">
+        Produk ini tidak dapat ditambahkan ke keranjang.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-1 flex-col gap-2">
+      <p className="min-h-[1.25rem] text-xs text-muted-foreground">
+        {inCart > 0 ? `Di keranjang: ${inCart} item` : "\u00a0"}
+      </p>
+      <div className="mt-auto w-full">
+        {inCart > 0 ? (
+          <CartQuantityStepper
+            productId={product.id}
+            quantity={inCart}
+            name={product.name}
+            available={available}
+          />
+        ) : (
+          <Button
+            size="sm"
+            onClick={handleAdd}
+            disabled={addToCart.isPending || atLimit}
+            className="w-full"
+          >
+            <ShoppingCart className="h-4 w-4" aria-hidden="true" />
+            {addToCart.isPending ? "Menambahkan..." : "Tambah ke keranjang"}
+          </Button>
+        )}
+      </div>
+      {message ? (
+        <p
+          role="status"
+          className={cn(
+            "text-xs font-medium",
+            addToCart.isError ? "text-danger" : "text-muted-foreground",
+          )}
+        >
+          {message}
+        </p>
+      ) : null}
+    </div>
   );
 }
