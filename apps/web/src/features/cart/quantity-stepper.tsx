@@ -27,30 +27,6 @@ export function QuantityStepper({
 }) {
   return (
     <div className="flex w-full items-center justify-between gap-2">
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => onChange(Math.max(MIN_QUANTITY, value - 1))}
-        disabled={disabled || busy || value <= MIN_QUANTITY}
-        aria-label={`Kurangi jumlah ${label}`}
-      >
-        <Minus className="h-4 w-4" aria-hidden="true" />
-      </Button>
-      <span
-        aria-live="polite"
-        className="min-w-8 text-center text-sm font-semibold tabular-nums text-foreground"
-      >
-        {value}
-      </span>
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => onChange(Math.min(MAX_QUANTITY, value + 1))}
-        disabled={disabled || busy || value >= MAX_QUANTITY}
-        aria-label={`Tambah jumlah ${label}`}
-      >
-        <Plus className="h-4 w-4" aria-hidden="true" />
-      </Button>
       {onRemove ? (
         <Button
           variant="ghost"
@@ -63,6 +39,32 @@ export function QuantityStepper({
           Hapus
         </Button>
       ) : null}
+      <div className="flex items-center gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => onChange(Math.max(MIN_QUANTITY, value - 1))}
+          disabled={disabled || busy || value <= MIN_QUANTITY}
+          aria-label={`Kurangi jumlah ${label}`}
+        >
+          <Minus className="h-4 w-4" aria-hidden="true" />
+        </Button>
+        <span
+          aria-live="polite"
+          className="min-w-8 text-center text-sm font-semibold tabular-nums text-foreground"
+        >
+          {value}
+        </span>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => onChange(Math.min(MAX_QUANTITY, value + 1))}
+          disabled={disabled || busy || value >= MAX_QUANTITY}
+          aria-label={`Tambah jumlah ${label}`}
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </div>
     </div>
   );
 }
