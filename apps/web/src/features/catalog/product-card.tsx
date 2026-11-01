@@ -129,7 +129,7 @@ function ProductActions({ product, available }: { product: Product; available: b
       <p className="min-h-[1.25rem] text-xs text-muted-foreground">
         {inCart > 0 ? `Di keranjang: ${inCart} item` : "\u00a0"}
       </p>
-      <div className="mt-auto w-full">
+      <div className="mt-auto min-h-[2.5rem] w-full">
         {inCart > 0 ? (
           <CartQuantityStepper
             productId={product.id}
