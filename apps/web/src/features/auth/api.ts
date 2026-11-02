@@ -14,7 +14,7 @@ export const authApi = {
 
   // Mengaktifkan akun setelah kode verifikasi email diterima.
   verifyRegister: (input: { email: string; otp: string }) =>
-    api.post<{ status: string }>("/auth/register/verify", input, { auth: false }),
+    api.post<AuthTokens>("/auth/register/verify", input, { auth: false }),
 
   // Mengirim ulang kode sesuai tujuan autentikasi yang sedang berlangsung.
   resendOtp: (input: { email: string; purpose: "register" | "login" }) =>

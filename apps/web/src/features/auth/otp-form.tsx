@@ -62,9 +62,9 @@ export function OtpForm({
     setPending(true);
     try {
       if (purpose === "register") {
-        await authApi.verifyRegister({ email, otp });
-        setStatus("Kode OTP terverifikasi.");
-        onVerified?.();
+        const tokens = await authApi.verifyRegister({ email, otp });
+        useAuthStore.getState().signIn(tokens);
+        router.replace(homePathForRole(tokens.user.role));
         return;
       }
 

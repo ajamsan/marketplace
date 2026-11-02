@@ -35,11 +35,21 @@ func (s *Server) handleAuthRegisterVerify(w http.ResponseWriter, r *http.Request
 			"Body permintaan tidak valid.", nil)
 		return
 	}
-	if err := s.Auth.VerifyRegistration(r.Context(), s.requestIP(r), req.Email, req.OTP, s.requestID(r)); err != nil {
+	ip := s.requestIP(r)
+	res, err := s.Auth.VerifyRegistration(r.Context(), ip, httpx.MaskIP(ip), r.UserAgent(), req.Email, req.OTP, s.requestID(r))
+	if err != nil {
 		s.writeDomainError(w, r, err)
 		return
 	}
-	httpx.WriteData(w, r, http.StatusOK, map[string]string{"status": "verified"})
+	s.setRefreshCookie(w, res.RefreshToken)
+	s.setCSRFCookie(w, res.CSRFToken)
+	httpx.WriteData(w, r, http.StatusOK, map[string]any{
+		"access_token": res.AccessToken,
+		"token_type":   "Bearer",
+		"expires_in":   res.ExpiresIn,
+		"csrf_token":   res.CSRFToken,
+		"user":         res.User,
+	})
 }
 
 // Meminta pengiriman ulang kode untuk proses autentikasi yang masih berjalan.

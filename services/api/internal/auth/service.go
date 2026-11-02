@@ -157,13 +157,13 @@ func (s *Service) Register(ctx context.Context, ip string, in RegisterInput, req
 }
 
 // VerifyRegistration memverifikasi OTP lalu membuat akun secara atomik.
-func (s *Service) VerifyRegistration(ctx context.Context, ip, emailRaw, otp, requestID string) error {
+func (s *Service) VerifyRegistration(ctx context.Context, ip, ipMasked, ua, emailRaw, otp, requestID string) (*LoginSuccess, error) {
 	email, err := validate.NormalizeEmail(emailRaw)
 	if err != nil {
-		return &ValidationError{Fields: map[string]string{"email": err.Error()}}
+		return nil, &ValidationError{Fields: map[string]string{"email": err.Error()}}
 	}
 	if err := validate.ValidateOTP(otp); err != nil {
-		return ErrOTPInvalid
+		return nil, ErrOTPInvalid
 	}
 
 	emailHash := crypto.HashEmailKey(s.Cfg.OTPHashKey, email)
@@ -171,23 +171,24 @@ func (s *Service) VerifyRegistration(ctx context.Context, ip, emailRaw, otp, req
 	emailIPHash := crypto.HashEmailIPKey(s.Cfg.OTPHashKey, email, ip)
 
 	if err := s.checkLocks(ctx, "otp_register", emailHash, emailIPHash); err != nil {
-		return err
+		return nil, err
 	}
 
 	ch, err := s.Repo.ActiveChallenge(ctx, email, "register")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if ch == nil || time.Now().After(ch.ExpiresAt) {
-		return ErrOTPInvalid
+		return nil, ErrOTPInvalid
 	}
 	if ch.AttemptCount >= otpAttemptsPerRound {
-		return &ThrottleError{RetryAfter: s.Cfg.OTPResendCooldown}
+		return nil, &ThrottleError{RetryAfter: s.Cfg.OTPResendCooldown}
 	}
 	if !crypto.VerifyOTP(s.Cfg.OTPHashKey, ch.OTPHash, otp) {
-		return s.recordOTPFailure(ctx, "otp_register", email, ip, ch, emailHash, ipHash, emailIPHash, requestID)
+		return nil, s.recordOTPFailure(ctx, "otp_register", email, ip, ch, emailHash, ipHash, emailIPHash, requestID)
 	}
 
+	var out *LoginSuccess
 	err = db.WithTx(ctx, s.DB, func(tx *sql.Tx) error {
 		consumed, err := s.Repo.ConsumeTx(ctx, tx, ch.ID)
 		if err != nil || !consumed {
@@ -205,23 +206,43 @@ func (s *Service) VerifyRegistration(ctx context.Context, ip, emailRaw, otp, req
 			return err
 		}
 		if err := s.Repo.CreateUserTx(ctx, tx, userID, username, email, passwordHash, role); err != nil {
-			// unik email/username berubah di tengah jalan → minta ulang.
 			return ErrRegisterConflict
 		}
 		if err := s.Repo.MarkPendingVerifiedTx(ctx, tx, ch.PendingRegistrationID); err != nil {
 			return err
 		}
+		created, err := s.Sessions.CreateTx(ctx, tx, sessions.CreateParams{
+			UserID:      userID,
+			UserAgent:   ua,
+			IPMasked:    ipMasked,
+			IPHash:      ipHash,
+			IdleTTL:     s.Cfg.RefreshIdleTTL,
+			AbsoluteTTL: s.Cfg.RefreshAbsoluteTTL,
+		})
+		if err != nil {
+			return err
+		}
+		access, expiresIn, err := s.SignAccess(userID, created.SessionID, role, time.Now())
+		if err != nil {
+			return err
+		}
 		s.Repo.Event(ctx, "register", "register_verified", "success", emailHash, ipHash, requestID)
+		out = &LoginSuccess{
+			AccessToken:  access,
+			ExpiresIn:    expiresIn,
+			RefreshToken: created.RefreshToken,
+			CSRFToken:    created.CSRFToken,
+			User:         UserInfo{ID: userID, Username: username, Role: role},
+		}
 		return nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	_ = s.Repo.ClearFailures(ctx, "otp_register", "email", emailHash)
 	_ = s.Repo.ClearFailures(ctx, "otp_register", "email_ip", emailIPHash)
-	return nil
+	return out, nil
 }
-
 // ResendOTP membuat ronde baru; cooldown & lock tidak di-reset (AUTH-04, §6.2).
 func (s *Service) ResendOTP(ctx context.Context, ip, emailRaw, purpose, requestID string) error {
 	email, err := validate.NormalizeEmail(emailRaw)

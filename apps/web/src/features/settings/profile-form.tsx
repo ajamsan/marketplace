@@ -18,6 +18,8 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 // Memuat dan mengubah nama profil sambil menjaga state akun tetap selaras.
+const USERNAME_PATTERN = /^[\p{L}][\p{L}' ]{1,28}[\p{L}'']$/u;
+
 export function ProfileForm() {
   const queryClient = useQueryClient();
   const profileQuery = useQuery({ queryKey: ["me"], queryFn: authApi.me });
@@ -71,8 +73,8 @@ export function ProfileForm() {
     setUsernameError(null);
 
     const value = (draft ?? profileQuery.data?.username ?? "").trim();
-    if (value.length < 3 || value.length > 30) {
-      setUsernameError("Username 3-30 karakter.");
+    if (value.length < 3 || value.length > 30 || !USERNAME_PATTERN.test(value) || value.includes("  ")) {
+      setUsernameError("Nama 3-30 karakter; hanya huruf, spasi, dan apostrof.");
       return;
     }
     mutation.mutate(value);
@@ -115,7 +117,7 @@ export function ProfileForm() {
             name="username"
             value={draft ?? profile.username}
             onChange={(event) => {
-              setDraft(event.target.value.toLowerCase());
+              setDraft(event.target.value);
               setUsernameError(null);
             }}
             autoComplete="username"
