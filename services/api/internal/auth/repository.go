@@ -148,7 +148,7 @@ func (r *Repo) UserEmailExists(ctx context.Context, email string) (bool, error) 
 func (r *Repo) UsernameExists(ctx context.Context, username string) (bool, error) {
 	var exists bool
 	err := r.DB.QueryRowContext(ctx,
-		`SELECT EXISTS (SELECT 1 FROM users WHERE username=$1)`, username).Scan(&exists)
+		`SELECT EXISTS (SELECT 1 FROM users WHERE LOWER(username)=LOWER($1))`, username).Scan(&exists)
 	return exists, err
 }
 

@@ -88,7 +88,15 @@ func (s *Service) Update(ctx context.Context, userID string, in UpdateInput, req
 		if err != nil {
 			fields["username"] = err.Error()
 		} else {
-			in.Username = &u
+			// Cegah penggunaan nama yang sudah dipakai (case-insensitive).
+			var taken bool
+			if err := s.DB.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM users WHERE LOWER(username)=LOWER($1) AND id <> $2)`, u, userID).Scan(&taken); err != nil {
+				fields["username"] = "Gagal memeriksa ketersediaan nama"
+			} else if taken {
+				fields["username"] = "Username sudah dipakai"
+			} else {
+				in.Username = &u
+			}
 		}
 	}
 	// Preferensi hanya ditulis bila klien mengirimnya;PATCH /me untuk
