@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 
+// Memvalidasi keranjang, memuat pratinjau harga, lalu menampilkan konfirmasi checkout.
 export default function CheckoutPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -32,10 +33,12 @@ export default function CheckoutPage() {
 
   const preview = useQuery({
     queryKey: ["orders", "preview", items],
+    // Menghitung ulang harga di server untuk item yang akan dipesan.
     queryFn: () => previewOrder(items),
     enabled: isBuyer && items.length > 0,
   });
 
+  // Membersihkan cache keranjang dan membuka detail pesanan yang baru dibuat.
   const handleCreated = (orderId: string) => {
     void queryClient.invalidateQueries({ queryKey: ["cart"] });
     void queryClient.invalidateQueries({ queryKey: ["orders"] });

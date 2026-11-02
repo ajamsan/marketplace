@@ -17,6 +17,7 @@ const ROLE_LABEL: Record<string, string> = {
   admin: "Admin",
 };
 
+// Memuat dan mengubah nama profil sambil menjaga state akun tetap selaras.
 export function ProfileForm() {
   const queryClient = useQueryClient();
   const profileQuery = useQuery({ queryKey: ["me"], queryFn: authApi.me });
@@ -27,7 +28,9 @@ export function ProfileForm() {
   const [status, setStatus] = useState<string | null>(null);
 
   const mutation = useMutation({
+    // Mengirim nama pengguna baru ke endpoint profil.
     mutationFn: (value: string) => authApi.updateMe({ username: value }),
+    // Memperbarui cache profil dan pengguna aktif setelah penyimpanan berhasil.
     onSuccess: (profile) => {
       queryClient.setQueryData(["me"], profile);
       const currentUser = useAuthStore.getState().user;
@@ -41,6 +44,7 @@ export function ProfileForm() {
       setFormError(null);
       setStatus("Profil berhasil diperbarui.");
     },
+    // Mengarahkan galat validasi ke kolom terkait atau pesan formulir umum.
     onError: (error) => {
       setStatus(null);
       if (error instanceof ApiError) {
@@ -59,6 +63,7 @@ export function ProfileForm() {
     },
   });
 
+  // Memeriksa batas nama sebelum meminta server menyimpan perubahan.
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);

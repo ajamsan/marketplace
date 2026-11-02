@@ -11,6 +11,7 @@ interface FetchCall {
   init: RequestInit;
 }
 
+// Membentuk respons JSON agar pengujian dapat mengendalikan keluaran fetch.
 function jsonResponse(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
     status,

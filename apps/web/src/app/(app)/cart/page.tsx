@@ -21,6 +21,7 @@ interface CartStallGroup {
   subtotal: number;
 }
 
+// Mengelompokkan barang agar subtotal keranjang dapat ditampilkan per stan.
 function groupByStall(items: CartItem[]): CartStallGroup[] {
   const groups = new Map<string, CartStallGroup>();
   for (const item of items) {
@@ -40,6 +41,7 @@ function groupByStall(items: CartItem[]): CartStallGroup[] {
   return [...groups.values()];
 }
 
+// Menyajikan isi keranjang, ketersediaan produk, dan jalur menuju checkout.
 export default function CartPage() {
   const router = useRouter();
   const role = useAuthStore((state) => state.user?.role);

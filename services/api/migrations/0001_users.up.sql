@@ -1,3 +1,4 @@
+-- Akun utama dan preferensi pengguna yang dipakai lintas alur aplikasi.
 CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     username text NOT NULL UNIQUE,

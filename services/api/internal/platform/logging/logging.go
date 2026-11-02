@@ -8,6 +8,7 @@ import (
 
 // New mengembalikan logger terstruktur JSON dengan level dari LOG_LEVEL.
 // Aplikasi wajib tidak pernah mencatat OTP, password, atau token (PRD §6.2).
+// Membuat logger terstruktur dengan tingkat keluaran dari konfigurasi aplikasi.
 func New(level string) *slog.Logger {
 	var lvl slog.Level
 	switch strings.ToLower(level) {

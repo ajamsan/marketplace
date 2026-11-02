@@ -11,6 +11,7 @@ import (
 
 const maxJSONBody = 1 << 20 // 1 MiB untuk payload JSON biasa
 
+// Menerima pendaftaran akun dan memulai pengiriman kode verifikasi.
 func (s *Server) handleAuthRegister(w http.ResponseWriter, r *http.Request) {
 	var req registerRequest
 	if err := httpx.ReadJSON(w, r, &req, maxJSONBody); err != nil {
@@ -26,6 +27,7 @@ func (s *Server) handleAuthRegister(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, map[string]string{"status": "otp_sent"})
 }
 
+// Memverifikasi kode pendaftaran agar akun dapat diaktifkan.
 func (s *Server) handleAuthRegisterVerify(w http.ResponseWriter, r *http.Request) {
 	var req verifyRegisterRequest
 	if err := httpx.ReadJSON(w, r, &req, maxJSONBody); err != nil {
@@ -40,6 +42,7 @@ func (s *Server) handleAuthRegisterVerify(w http.ResponseWriter, r *http.Request
 	httpx.WriteData(w, r, http.StatusOK, map[string]string{"status": "verified"})
 }
 
+// Meminta pengiriman ulang kode untuk proses autentikasi yang masih berjalan.
 func (s *Server) handleAuthResend(w http.ResponseWriter, r *http.Request) {
 	var req resendRequest
 	if err := httpx.ReadJSON(w, r, &req, maxJSONBody); err != nil {
@@ -54,6 +57,7 @@ func (s *Server) handleAuthResend(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, map[string]string{"status": "sent"})
 }
 
+// Memvalidasi kredensial awal dan mengembalikan token sementara untuk OTP.
 func (s *Server) handleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	var req loginRequest
 	if err := httpx.ReadJSON(w, r, &req, maxJSONBody); err != nil {
@@ -73,6 +77,7 @@ func (s *Server) handleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Menyelesaikan login setelah OTP valid dan menerbitkan kredensial sesi.
 func (s *Server) handleAuthLoginVerify(w http.ResponseWriter, r *http.Request) {
 	var req loginVerifyRequest
 	if err := httpx.ReadJSON(w, r, &req, maxJSONBody); err != nil {
@@ -98,6 +103,7 @@ func (s *Server) handleAuthLoginVerify(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Memutar refresh token dan menerbitkan access token baru untuk sesi aktif.
 func (s *Server) handleAuthRefresh(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(refreshCookieName)
 	if err != nil || cookie.Value == "" {
@@ -134,6 +140,7 @@ func (s *Server) handleAuthRefresh(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Mencabut sesi saat ini dan menghapus cookie autentikasi dari klien.
 func (s *Server) handleAuthLogout(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	_ = s.Sessions.RevokeCurrent(r.Context(), ac.SessionID, ac.UserID)
@@ -141,6 +148,7 @@ func (s *Server) handleAuthLogout(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, map[string]string{"status": "logged_out"})
 }
 
+// Menampilkan sesi aktif lain yang terkait dengan pengguna saat ini.
 func (s *Server) handleSessionsList(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	views, err := s.Sessions.List(r.Context(), ac.UserID, ac.SessionID)
@@ -151,6 +159,7 @@ func (s *Server) handleSessionsList(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, map[string]any{"sessions": views})
 }
 
+// Mencabut sesi lain yang dipilih tanpa mengakhiri sesi permintaan ini.
 func (s *Server) handleSessionRevoke(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	targetID := r.PathValue("id")

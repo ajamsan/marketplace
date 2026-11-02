@@ -13,6 +13,7 @@ import { uploadProductImage } from "./api";
 const MAX_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/png", "image/jpeg"];
 
+// Memeriksa berkas gambar, menampilkan pratinjau, dan mengunggahnya untuk produk.
 export function ProductImageInput({
   product,
   onUploaded,
@@ -34,7 +35,9 @@ export function ProductImageInput({
   }, []);
 
   const mutation = useMutation({
+    // Mengirim berkas pilihan ke layanan gambar produk.
     mutationFn: (selected: File) => uploadProductImage(product.id, selected),
+    // Membersihkan pratinjau dan memuat ulang daftar setelah unggahan berhasil.
     onSuccess: () => {
       setFile(null);
       setError(null);
@@ -43,6 +46,7 @@ export function ProductImageInput({
       void queryClient.invalidateQueries({ queryKey: ["seller", "products"] });
       onUploaded?.();
     },
+    // Menyajikan alasan kegagalan unggah tanpa menutup formulir.
     onError: (mutationError) => {
       if (mutationError instanceof ApiError) {
         setError(mutationError.message);
@@ -52,12 +56,14 @@ export function ProductImageInput({
     },
   });
 
+  // Mencabut URL objek lama sebelum mengganti pratinjau agar memori dapat dilepas.
   function replacePreview(next: string | null) {
     if (previewRef.current) URL.revokeObjectURL(previewRef.current);
     previewRef.current = next;
     setPreview(next);
   }
 
+  // Memvalidasi tipe dan ukuran berkas sebelum membuat pratinjau lokal.
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = event.target.files?.[0] ?? null;
     setError(null);

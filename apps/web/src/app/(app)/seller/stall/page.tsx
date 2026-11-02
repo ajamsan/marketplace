@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 
+// Membatasi pengelolaan stan kepada akun penjual.
 export default function SellerStallPage() {
   return (
     <RequireRole roles={["seller"]}>
@@ -21,6 +22,7 @@ export default function SellerStallPage() {
   );
 }
 
+// Menyajikan stan penjual dan mengatur formulir buat atau ubah.
 function SellerStallView() {
   const query = useQuery({ queryKey: ["seller", "stalls"], queryFn: listSellerStalls });
   const [editingId, setEditingId] = useState<string | null>(null);

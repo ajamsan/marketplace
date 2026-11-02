@@ -15,12 +15,14 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password wajib diisi."),
 });
 
+// Menolak tujuan redirect eksternal agar parameter setelah login tetap di situs ini.
 export function safeNextPath(value: string | null): string | null {
   if (!value) return null;
   if (!value.startsWith("/") || value.startsWith("//")) return null;
   return value;
 }
 
+// Mengumpulkan kredensial, menangani hasil autentikasi, lalu melanjutkan ke verifikasi OTP.
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,11 +34,12 @@ export function LoginForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  // Memvalidasi kredensial dan menampilkan kegagalan tanpa mengirim formulir ulang.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
 
-    const parsed = loginSchema.safeParse({ email: email.trim().toLowerCase(), password });
+    const parsed = loginSchema.safeParse({ email: email.trim().toLowerCase(), password: password.trim() });
     if (!parsed.success) {
       setFieldErrors({
         email: parsed.error.issues.find((issue) => issue.path[0] === "email")?.message,

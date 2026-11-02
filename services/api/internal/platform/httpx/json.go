@@ -7,6 +7,7 @@ import (
 )
 
 // ReadJSON membatasi ukuran body dan mewajibkan Content-Type JSON (PRD §10).
+// Membatasi, memeriksa tipe konten, lalu membaca JSON ke struktur tujuan.
 func ReadJSON(w http.ResponseWriter, r *http.Request, dst any, maxBytes int64) error {
 	if ct := r.Header.Get("Content-Type"); ct != "" && !strings.HasPrefix(ct, "application/json") {
 		return errContentType
@@ -21,6 +22,7 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, dst any, maxBytes int64) e
 
 type httpError struct{ msg string }
 
+// Menyediakan pesan ringkas untuk kesalahan pembacaan badan permintaan.
 func (e httpError) Error() string { return e.msg }
 
 var (
@@ -29,7 +31,9 @@ var (
 )
 
 // IsContentTypeError melaporkan error Content-Type JSON untuk di-mapping handler.
+// Mengenali penolakan karena tipe konten tidak didukung.
 func IsContentTypeError(err error) bool { return err == errContentType }
 
 // IsBodyError melaporkan body JSON yang tidak bisa dibaca.
+// Mengenali badan permintaan yang terlalu besar atau tidak dapat diurai.
 func IsBodyError(err error) bool { return err == errMalformedBody }

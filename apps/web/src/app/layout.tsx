@@ -38,6 +38,7 @@ const themeBootstrap = `
 })();
 `;
 
+// Menyediakan dokumen HTML bahasa Indonesia, provider, dan pemulihan tema awal.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html

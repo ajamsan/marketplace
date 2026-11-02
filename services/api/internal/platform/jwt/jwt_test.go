@@ -8,6 +8,7 @@ import (
 
 var testKey = []byte("unit-test-signing-key-1234567890")
 
+// Memastikan token yang diterbitkan dapat diverifikasi dengan klaim aslinya.
 func TestSignAndVerify(t *testing.T) {
 	now := time.Now()
 	claims := Claims{
@@ -28,6 +29,7 @@ func TestSignAndVerify(t *testing.T) {
 	}
 }
 
+// Memastikan perubahan payload membatalkan signature token.
 func TestVerifyRejectsTamperedPayload(t *testing.T) {
 	now := time.Now()
 	tok, err := Sign(testKey, Claims{
@@ -43,6 +45,7 @@ func TestVerifyRejectsTamperedPayload(t *testing.T) {
 	}
 }
 
+// Memastikan verifier menolak token yang meminta algoritma tanpa signature.
 func TestVerifyRejectsAlgNone(t *testing.T) {
 	now := time.Now()
 	// header {"alg":"none","typ":"JWT"} tanpa signature
@@ -53,6 +56,7 @@ func TestVerifyRejectsAlgNone(t *testing.T) {
 	}
 }
 
+// Memastikan token tidak lolos verifikasi dengan kunci yang berbeda.
 func TestVerifyRejectsWrongKey(t *testing.T) {
 	now := time.Now()
 	tok, _ := Sign(testKey, Claims{Iss: "iss", Aud: "aud", Sub: "u", Sid: "s",
@@ -62,6 +66,7 @@ func TestVerifyRejectsWrongKey(t *testing.T) {
 	}
 }
 
+// Memastikan klaim waktu kedaluwarsa membatasi penggunaan token.
 func TestVerifyRejectsExpired(t *testing.T) {
 	now := time.Now()
 	tok, _ := Sign(testKey, Claims{Iss: "iss", Aud: "aud", Sub: "u", Sid: "s",
@@ -73,6 +78,7 @@ func TestVerifyRejectsExpired(t *testing.T) {
 	}
 }
 
+// Memastikan identitas penerbit dan penerima token harus cocok dengan konfigurasi.
 func TestVerifyRejectsWrongIssuerAndAudience(t *testing.T) {
 	now := time.Now()
 	tok, _ := Sign(testKey, Claims{Iss: "iss", Aud: "aud", Sub: "u", Sid: "s",

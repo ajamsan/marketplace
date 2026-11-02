@@ -9,11 +9,13 @@ import { ACCENTS, useTheme, type AccentId, type ThemeMode } from "@/lib/theme/us
 import { Card, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+// Mengelola tema dan aksen serta menyimpan preferensi ke akun bila tersedia.
 export function ThemeSection() {
   const { theme, accent, setTheme, setAccent } = useTheme();
   const authStatus = useAuthStore((state) => state.status);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
+  // Menyimpan preferensi ke akun atau memberi tahu pengguna bahwa pilihan lokal dipakai.
   function persist(nextTheme: ThemeMode, nextAccent: AccentId) {
     if (authStatus !== "authenticated") {
       setStatusMessage("Pilihan disimpan di perangkat ini.");
@@ -31,12 +33,14 @@ export function ThemeSection() {
       });
   }
 
+  // Mengganti mode tampilan dan menyimpan pilihan terbaru.
   function handleThemeToggle() {
     const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
     persist(nextTheme, accent);
   }
 
+  // Mengubah warna aksen dan menyimpan preferensi tampilan.
   function handleAccent(nextAccent: AccentId) {
     setAccent(nextAccent);
     persist(theme, nextAccent);

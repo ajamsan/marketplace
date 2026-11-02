@@ -7,6 +7,7 @@ import { useCart } from "./use-cart";
 import { useAuthStore } from "@/features/auth/auth-store";
 import { formatIDR } from "@/lib/format";
 
+// Menampilkan jumlah dan subtotal keranjang sebagai akses cepat bagi pembeli.
 export function CartBar() {
   const role = useAuthStore((state) => state.user?.role);
   const isBuyer = role === "buyer";

@@ -71,6 +71,7 @@ type fulfillmentRequest struct {
 	Status string `json:"status"`
 }
 
+// Mengubah item dari payload HTTP menjadi masukan yang dipakai domain pesanan.
 func toOrderItems(in []orderItemReq) []orders.ItemIn {
 	out := make([]orders.ItemIn, 0, len(in))
 	for _, it := range in {

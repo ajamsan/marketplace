@@ -24,6 +24,7 @@ export interface StallFormProps {
   onSaved?: (stall: Stall) => void;
 }
 
+// Mengirim data pembuatan atau perubahan stan beserta hasil validasinya.
 export function StallForm({ stall, onSaved }: StallFormProps) {
   const queryClient = useQueryClient();
   const [name, setName] = useState(stall?.name ?? "");
@@ -33,14 +34,17 @@ export function StallForm({ stall, onSaved }: StallFormProps) {
   const [formError, setFormError] = useState<string | null>(null);
 
   const mutation = useMutation({
+    // Memilih operasi simpan sesuai apakah formulir sedang membuat atau mengubah stan.
     mutationFn: (payload: { name: string; description: string; location_label: string }) =>
       stall ? updateStall(stall.id, payload) : createStall(payload),
+    // Menyegarkan daftar stan dan meneruskan data yang tersimpan ke pemilik formulir.
     onSuccess: (saved) => {
       setFieldErrors({});
       setFormError(null);
       void queryClient.invalidateQueries({ queryKey: ["seller", "stalls"] });
       onSaved?.(saved);
     },
+    // Memisahkan galat validasi server dari kegagalan permintaan lainnya.
     onError: (error) => {
       if (error instanceof ApiError) {
         setFormError(error.message);
@@ -51,6 +55,7 @@ export function StallForm({ stall, onSaved }: StallFormProps) {
     },
   });
 
+  // Menormalkan dan memvalidasi isian sebelum memulai penyimpanan.
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const payload = {

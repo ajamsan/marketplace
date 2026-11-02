@@ -29,6 +29,7 @@ type Service struct {
 	Audit *audit.Repo
 }
 
+// Menyiapkan layanan pengelolaan stan beserta repositori audit.
 func NewService(db *sql.DB, a *audit.Repo) *Service {
 	return &Service{DB: db, Audit: a}
 }
@@ -114,6 +115,7 @@ func (s *Service) ListActive(ctx context.Context) ([]Stall, error) {
 	return scanStalls(rows)
 }
 
+// Mengambil rincian stan hanya bila statusnya aktif.
 func (s *Service) GetActive(ctx context.Context, id string) (*Stall, error) {
 	var st Stall
 	err := s.DB.QueryRowContext(ctx, `
@@ -209,6 +211,7 @@ func (s *Service) UpdateBySeller(ctx context.Context, sellerID, stallID string, 
 	return s.byID(ctx, stallID)
 }
 
+// Memuat satu stan berdasarkan ID tanpa menerapkan filter status publik.
 func (s *Service) byID(ctx context.Context, id string) (*Stall, error) {
 	var st Stall
 	err := s.DB.QueryRowContext(ctx, `
@@ -224,7 +227,7 @@ func (s *Service) byID(ctx context.Context, id string) (*Stall, error) {
 	return &st, nil
 }
 
-// --- admin ---
+// Admin.
 
 type AdminView struct {
 	Stall
@@ -232,6 +235,7 @@ type AdminView struct {
 	OwnerEmail    string `json:"owner_email"`
 }
 
+// Menyajikan daftar stan administrasi dengan filter status opsional.
 func (s *Service) AdminList(ctx context.Context, statusFilter string) ([]AdminView, error) {
 	q := `
 		SELECT st.id, st.name, COALESCE(st.description,''), COALESCE(st.location_label,''),
@@ -309,10 +313,12 @@ type InvalidError struct {
 	Fields map[string]string
 }
 
+// Menyediakan pesan validasi yang aman untuk ditampilkan ke klien.
 func (e *InvalidError) Error() string { return "Data tidak valid" }
 
 var ErrInvalidTransition = errors.New("Status stan tidak dapat diubah ke tujuan tersebut")
 
+// Membaca kumpulan stan dari hasil query dan meneruskan error iterasi.
 func scanStalls(rows *sql.Rows) ([]Stall, error) {
 	out := []Stall{}
 	for rows.Next() {

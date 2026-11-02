@@ -17,6 +17,7 @@ interface StallGroup {
   items: OrderItemLine[];
 }
 
+// Mengelompokkan item per stan agar subtotal dan alur pengambilan mudah dibaca.
 function groupByStall(items: OrderItemLine[]): StallGroup[] {
   const groups = new Map<string, StallGroup>();
   for (const item of items) {
@@ -36,12 +37,14 @@ function groupByStall(items: OrderItemLine[]): StallGroup[] {
   return [...groups.values()];
 }
 
+// Mengubah kode metode pembayaran menjadi keterangan yang dapat dipahami pembeli.
 function paymentMethodLabel(method: string): string {
   if (method === "cash") return "Tunai";
   if (method === "qris_placeholder") return "QRIS (belum tersedia)";
   return method;
 }
 
+// Menampilkan rincian pesanan, termasuk antrean dan status tiap stan.
 export function OrderDetail({ order }: { order: OrderDetailData }) {
   const groups = groupByStall(order.items);
 

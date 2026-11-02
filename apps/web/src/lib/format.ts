@@ -28,6 +28,7 @@ export function formatDateTime(value: string | Date | null | undefined): string 
   }).format(date);
 }
 
+/** Menampilkan tanggal berdasarkan zona waktu tampilan aplikasi. */
 export function formatDate(value: string | Date | null | undefined): string {
   if (!value) return "-";
   const date = value instanceof Date ? value : new Date(value);
@@ -78,14 +79,17 @@ export const STALL_STATUS_LABEL: Record<string, string> = {
   inactive: "Nonaktif",
 };
 
+/** Mencari label bahasa Indonesia untuk status pesanan. */
 export function orderStatusLabel(status: string): string {
   return ORDER_STATUS_LABEL[status] ?? status;
 }
 
+/** Mengembalikan label bahasa Indonesia untuk status pembayaran. */
 export function paymentStatusLabel(status: string): string {
   return PAYMENT_STATUS_LABEL[status] ?? status;
 }
 
+/** Mengembalikan label bahasa Indonesia untuk tahap pemenuhan pesanan. */
 export function fulfillmentStatusLabel(status: string): string {
   return FULFILLMENT_STATUS_LABEL[status] ?? status;
 }

@@ -31,6 +31,7 @@ type InvalidError struct {
 	Fields map[string]string
 }
 
+// Menyediakan pesan aman untuk kesalahan validasi pesanan.
 func (e *InvalidError) Error() string { return "Data tidak valid" }
 
 type Service struct {
@@ -39,6 +40,7 @@ type Service struct {
 	Audit *audit.Repo
 }
 
+// Menyiapkan layanan pesanan dengan konfigurasi dan repositori audit.
 func NewService(cfg *config.Config, d *sql.DB, a *audit.Repo) *Service {
 	return &Service{Cfg: cfg, DB: d, Audit: a}
 }
@@ -216,6 +218,7 @@ type Preview struct {
 	Currency      string          `json:"currency"`
 }
 
+// Menghitung total dan ringkasan stan dari produk yang tersedia saat ini.
 func (s *Service) Preview(ctx context.Context, items []ItemIn) (*Preview, error) {
 	lines, summaries, subtotal, err := loadAndValidate(ctx, s.DB, items, false)
 	if err != nil {
@@ -341,6 +344,7 @@ type Summary struct {
 	PaymentsPaid  int     `json:"payments_paid"`
 }
 
+// Mengambil pesanan pembeli dalam halaman yang mengikuti cursor.
 func (s *Service) ListForBuyer(ctx context.Context, buyerID string, cursor httpx.Cursor, limit int) ([]Summary, string, error) {
 	query := `
 		SELECT o.id, o.public_code, o.status, o.total_minor, o.currency, o.created_at,
@@ -384,6 +388,7 @@ func (s *Service) ListForBuyer(ctx context.Context, buyerID string, cursor httpx
 }
 
 // GetForBuyer: hanya pemilik; order orang lain → 404 (acceptance no 6).
+// Mengambil rincian pesanan hanya jika pesanan dimiliki pembeli yang meminta.
 func (s *Service) GetForBuyer(ctx context.Context, buyerID, orderID string) (*Detail, error) {
 	d := &Detail{Items: []ItemLine{}, Payments: []PaymentLine{}, Fulfillments: []FulfillmentLine{}}
 	err := s.DB.QueryRowContext(ctx, `
@@ -412,6 +417,7 @@ func (s *Service) GetForBuyer(ctx context.Context, buyerID, orderID string) (*De
 
 // fillDetail mengisi item/pembayaran/pemenuhan; stallFilter kosong = semua,
 // otherwise hanya untuk stan tsb (untuk slice seller).
+// Melengkapi detail pesanan dengan item dan status pembayaran per stan.
 func (s *Service) fillDetail(ctx context.Context, d *Detail, stallFilter string) error {
 	itemQuery := `
 		SELECT oi.product_id, oi.product_name_snapshot, oi.stall_id, st.name,
@@ -487,6 +493,7 @@ type SellerOrder struct {
 
 // ListForSeller: hanya order yang memuat item stan yang dikelola seller
 // (ORD-02), ditampilkan sebagai slice per stan (PRD 5.4.3).
+// Mengambil antrean pesanan penjual dengan batas halaman yang ditentukan.
 func (s *Service) ListForSeller(ctx context.Context, sellerID string, cursor httpx.Cursor, limit int) ([]SellerOrder, string, error) {
 	query := `
 		SELECT DISTINCT o.id, o.public_code, o.status, u.username, o.currency,
@@ -543,6 +550,7 @@ func (s *Service) ListForSeller(ctx context.Context, sellerID string, cursor htt
 
 // fillSellerSlice mengisi item/pembayaran/pemenuhan hanya untuk stan milik
 // seller ini pada order tersebut.
+// Melengkapi pesanan penjual dengan bagian item dan status yang ia kelola.
 func (s *Service) fillSellerSlice(ctx context.Context, sellerID string, so *SellerOrder) error {
 	rows, err := s.DB.QueryContext(ctx, `
 		SELECT oi.product_id, oi.product_name_snapshot, oi.stall_id, st.name,
@@ -616,6 +624,7 @@ func (s *Service) fillSellerSlice(ctx context.Context, sellerID string, so *Sell
 }
 
 // GetForSeller: slice seller untuk satu order; order tanpa item miliknya → 404.
+// Mengambil detail pesanan hanya jika penjual terkait memiliki item di dalamnya.
 func (s *Service) GetForSeller(ctx context.Context, sellerID, orderID string) (*SellerOrder, error) {
 	so := &SellerOrder{Detail: Detail{Items: []ItemLine{}, Payments: []PaymentLine{}, Fulfillments: []FulfillmentLine{}}}
 	err := s.DB.QueryRowContext(ctx, `
@@ -711,6 +720,7 @@ func (s *Service) queueNumber(ctx context.Context, orderID, stallID string, crea
 	return n
 }
 
+// Mengubah teks kosong menjadi nilai null untuk parameter query opsional.
 func nilable(s string) any {
 	if s == "" {
 		return nil

@@ -20,6 +20,7 @@ type Supabase struct {
 	client  *http.Client
 }
 
+// Menyiapkan klien REST Supabase untuk bucket yang dikonfigurasi server.
 func NewSupabase(baseURL, apiKey, bucket string) *Supabase {
 	return &Supabase{
 		baseURL: strings.TrimRight(baseURL, "/"),
@@ -29,6 +30,7 @@ func NewSupabase(baseURL, apiKey, bucket string) *Supabase {
 	}
 }
 
+// Mengirim permintaan terautentikasi dan memetakan respons REST penyimpanan.
 func (s *Supabase) do(ctx context.Context, method, path, contentType string, body []byte, out any) error {
 	var rdr io.Reader
 	if body != nil {
@@ -57,6 +59,7 @@ func (s *Supabase) do(ctx context.Context, method, path, contentType string, bod
 	return nil
 }
 
+// Mengunggah objek menggunakan kunci acak yang ditentukan layanan.
 func (s *Supabase) Upload(ctx context.Context, key, contentType string, data []byte) error {
 	path := fmt.Sprintf("/storage/v1/object/%s/%s", s.bucket, key)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.baseURL+path, bytes.NewReader(data))
@@ -78,6 +81,7 @@ func (s *Supabase) Upload(ctx context.Context, key, contentType string, data []b
 	return nil
 }
 
+// Menghapus objek dari bucket setelah referensinya dilepas oleh domain.
 func (s *Supabase) Delete(ctx context.Context, key string) error {
 	return s.do(ctx, http.MethodDelete,
 		fmt.Sprintf("/storage/v1/object/%s/%s", s.bucket, key), "", nil, nil)
@@ -87,6 +91,7 @@ type signResponse struct {
 	SignedURL string `json:"signedURL"`
 }
 
+// Meminta URL bertanda tangan yang berlaku terbatas untuk objek privat.
 func (s *Supabase) SignedURL(ctx context.Context, key string, ttl time.Duration) (string, error) {
 	body, _ := json.Marshal(map[string]int64{"expiresIn": int64(ttl.Seconds())})
 	var out signResponse

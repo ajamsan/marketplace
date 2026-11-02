@@ -19,6 +19,7 @@ type ValidationError struct {
 	Fields map[string]string
 }
 
+// Menyediakan pesan umum untuk validasi gagal tanpa menyertakan rincian sensitif.
 func (e *ValidationError) Error() string { return "Data yang dimasukkan tidak valid" }
 
 // ThrottleError menyatakan lockout aktif; RetryAfter untuk header Retry-After.
@@ -27,4 +28,5 @@ type ThrottleError struct {
 	RetryAfter time.Duration
 }
 
+// Menyediakan pesan umum saat kebijakan membatasi percobaan.
 func (e *ThrottleError) Error() string { return "Terlalu banyak percobaan; coba lagi nanti" }

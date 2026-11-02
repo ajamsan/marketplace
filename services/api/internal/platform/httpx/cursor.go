@@ -14,11 +14,13 @@ type Cursor struct {
 	ID        string
 }
 
+// Mengodekan posisi dan ID agar cursor dapat dikirim tanpa mengekspos strukturnya.
 func EncodeCursor(c Cursor) string {
 	s := fmt.Sprintf("%d|%s", c.Timestamp.UnixMicro(), c.ID)
 	return base64.RawURLEncoding.EncodeToString([]byte(s))
 }
 
+// Memvalidasi dan mengurai cursor buram yang dikirim dari klien.
 func DecodeCursor(s string) (Cursor, error) {
 	var c Cursor
 	if s == "" {

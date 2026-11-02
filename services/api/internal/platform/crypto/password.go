@@ -25,6 +25,7 @@ const (
 var ErrInvalidHash = errors.New("format hash password tidak valid")
 
 // HashPassword menghasilkan string PHC argon2id.
+// Membuat hash kata sandi yang disalt untuk penyimpanan aman.
 func HashPassword(password string) (string, error) {
 	salt := make([]byte, argonSaltLen)
 	if _, err := rand.Read(salt); err != nil {
@@ -39,6 +40,7 @@ func HashPassword(password string) (string, error) {
 }
 
 // VerifyPassword membandingkan password dengan hash PHC secara constant-time.
+// Membandingkan kata sandi masukan dengan hash tanpa mengungkap nilainya.
 func VerifyPassword(encoded, password string) bool {
 	parts := strings.Split(encoded, "$")
 	if len(parts) != 6 || parts[1] != "argon2id" {
@@ -67,6 +69,7 @@ func VerifyPassword(encoded, password string) bool {
 
 var dummyHash = mustDummy()
 
+// Menyiapkan hash dummy untuk menyamakan biaya pemeriksaan akun yang tidak ada.
 func mustDummy() string {
 	h, err := HashPassword("dummy-timing-equalizer")
 	if err != nil {
@@ -77,6 +80,7 @@ func mustDummy() string {
 
 // DummyVerify menghabiskan waktu argon2 untuk email yang tidak terdaftar agar
 // respons login tidak bisa dibedakan lewat timing (PRD §6.2, AUTH-06).
+// Menjalankan verifikasi dummy saat akun tidak ditemukan untuk meredam timing.
 func DummyVerify(password string) {
 	_ = VerifyPassword(dummyHash, password)
 }

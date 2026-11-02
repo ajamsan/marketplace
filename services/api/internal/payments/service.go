@@ -22,6 +22,7 @@ type Service struct {
 	Audit   *audit.Repo
 }
 
+// Menghubungkan operasi pembayaran dengan pesanan dan pencatatan audit.
 func NewService(d *sql.DB, o *orders.Service, a *audit.Repo) *Service {
 	return &Service{DB: d, Orders: o, Audit: a}
 }
@@ -46,6 +47,7 @@ type ConfirmCashResult struct {
 // ConfirmCash menandai tunai lunas SETELAH uang diterima; hanya seller stan
 // terkait; idempotent; perubahan status ilegal ditolak (ORD-03/04/05).
 // Status dijaga dengan UPDATE bersyarat (optimistic concurrency).
+// Mengonfirmasi pembayaran tunai dengan memeriksa hak penjual dan status transaksi.
 func (s *Service) ConfirmCash(ctx context.Context, sellerID, paymentID, requestID string) (*ConfirmCashResult, error) {
 	var result *ConfirmCashResult
 	err := db.WithTx(ctx, s.DB, func(tx *sql.Tx) error {
@@ -137,6 +139,7 @@ var nextFulfillmentStatus = map[string]string{
 	"ready_for_pickup": "completed",
 }
 
+// Mengubah tahap pemenuhan pesanan setelah memvalidasi transisi yang diizinkan.
 func (s *Service) UpdateFulfillment(ctx context.Context, sellerID, fulfillmentID, newStatus, requestID string) (*FulfillmentResult, error) {
 	var result *FulfillmentResult
 	err := db.WithTx(ctx, s.DB, func(tx *sql.Tx) error {

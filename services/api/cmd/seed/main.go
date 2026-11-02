@@ -103,6 +103,7 @@ func main() {
 	fmt.Println("Kredensial ini hanya untuk lingkungan pengembangan.")
 }
 
+// Memilih nilai konfigurasi demo dari environment atau memakai nilai cadangan.
 func envOr(key, def string) string {
 	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
 		return v
@@ -110,6 +111,7 @@ func envOr(key, def string) string {
 	return def
 }
 
+// Memastikan akun seed tersedia tanpa membuat duplikat pada basis data.
 func ensureUser(ctx context.Context, database *sql.DB, username, email, password, role string) (string, error) {
 	var id string
 	err := database.QueryRowContext(ctx,
@@ -138,6 +140,7 @@ func ensureUser(ctx context.Context, database *sql.DB, username, email, password
 	return newID, nil
 }
 
+// Memastikan stan demo beserta relasi pemiliknya sudah tersimpan.
 func ensureStall(ctx context.Context, database *sql.DB, ownerID, name, description, location, status string) (string, error) {
 	var id string
 	err := database.QueryRowContext(ctx,
@@ -167,6 +170,7 @@ func ensureStall(ctx context.Context, database *sql.DB, ownerID, name, descripti
 	return newID, nil
 }
 
+// Membuat produk demo hanya bila produk tersebut belum ada di stan.
 func ensureProduct(ctx context.Context, database *sql.DB, stallID, sellerID, name, description string, priceMinor int64) error {
 	var id string
 	err := database.QueryRowContext(ctx,

@@ -27,6 +27,7 @@ export function Dialog({
 
   useEffect(() => {
     if (!open) return;
+    // Menutup dialog melalui Escape agar kontrol tetap dapat digunakan dengan keyboard.
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };

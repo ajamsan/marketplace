@@ -7,6 +7,7 @@ import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 
+// Mengonfirmasi pencabutan sesi perangkat lain dan melaporkan hasilnya.
 export function RevokeSessionButton({
   sessionId,
   sessionLabel,
@@ -20,6 +21,7 @@ export function RevokeSessionButton({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Meminta server mencabut sesi terpilih lalu memperbarui tampilan pemanggil.
   async function confirmRevoke() {
     setPending(true);
     setError(null);

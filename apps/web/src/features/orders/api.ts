@@ -6,15 +6,18 @@ export interface OrderItemInput {
   quantity: number;
 }
 
+// Menyeragamkan cursor kosong sebelum dipakai pada paginasi pesanan.
 function normalizeCursor(cursor: string | null | undefined): string | null {
   const trimmed = cursor?.trim();
   return trimmed ? trimmed : null;
 }
 
+// Menghitung ringkasan harga dan ketersediaan sebelum pesanan dibuat.
 export async function previewOrder(items: OrderItemInput[]): Promise<OrderPreview> {
   return api.post<OrderPreview>("/orders/preview", { items });
 }
 
+// Membuat pesanan dengan kunci idempotensi agar pengiriman ulang tidak menggandakan transaksi.
 export async function createOrder(
   items: OrderItemInput[],
   paymentMethod: string,
@@ -27,6 +30,7 @@ export async function createOrder(
   );
 }
 
+// Memuat pesanan pembeli berikut cursor untuk permintaan halaman berikutnya.
 export async function listOrders(cursor?: string): Promise<OrderPage> {
   const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
   const page = await api.get<{
@@ -40,6 +44,7 @@ export async function listOrders(cursor?: string): Promise<OrderPage> {
   };
 }
 
+// Mengambil rincian satu pesanan untuk ditampilkan kepada pembeli.
 export async function getOrder(id: string): Promise<OrderDetail> {
   return api.get<OrderDetail>(`/orders/${encodeURIComponent(id)}`);
 }

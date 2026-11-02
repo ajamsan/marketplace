@@ -19,6 +19,7 @@ type Service struct {
 	Storage storage.Storage
 }
 
+// Menyiapkan layanan keranjang dengan konfigurasi, basis data, dan penyimpanan foto.
 func NewService(cfg *config.Config, d *sql.DB, st storage.Storage) *Service {
 	return &Service{Cfg: cfg, DB: d, Storage: st}
 }
@@ -28,6 +29,7 @@ type InvalidError struct {
 	Fields map[string]string
 }
 
+// Menyediakan pesan aman untuk kesalahan validasi keranjang.
 func (e *InvalidError) Error() string { return "Data tidak valid" }
 
 type Item struct {
@@ -48,6 +50,7 @@ type Cart struct {
 	Currency     string `json:"currency"`
 }
 
+// Memuat item keranjang pembeli beserta harga dan ketersediaan terkini.
 func (s *Service) Get(ctx context.Context, buyerID string) (*Cart, error) {
 	rows, err := s.DB.QueryContext(ctx, `
 		SELECT ci.product_id, p.name, p.stall_id, st.name,
@@ -127,6 +130,7 @@ func (s *Service) SetQuantity(ctx context.Context, buyerID, productID string, qu
 	return s.Get(ctx, buyerID)
 }
 
+// Menghapus satu produk dari keranjang dan mengembalikan isi terbaru.
 func (s *Service) RemoveItem(ctx context.Context, buyerID, productID string) (*Cart, error) {
 	_, err := s.DB.ExecContext(ctx, `
 		DELETE FROM cart_items ci

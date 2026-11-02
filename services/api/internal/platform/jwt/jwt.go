@@ -41,6 +41,7 @@ var (
 	ErrBadAud    = errors.New("audience token tidak cocok")
 )
 
+// Mengodekan komponen token dengan Base64 URL-safe tanpa padding.
 func b64(b []byte) string { return base64.RawURLEncoding.EncodeToString(b) }
 
 // Sign menerbitkan access token berumur pendek.

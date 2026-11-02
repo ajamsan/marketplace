@@ -14,11 +14,13 @@ import (
 // dengan domain separation; nonce acak per pesan (AES-256-GCM).
 var ErrDecrypt = errors.New("dekripsi payload email gagal")
 
+// Menurunkan kunci khusus untuk enkripsi rahasia email.
 func mailKey(key []byte) []byte {
 	derived := sha256.Sum256(append(append([]byte{}, key...), []byte("outbox-mail")...))
 	return derived[:]
 }
 
+// Mengenkripsi nilai rahasia sebelum disimpan sebagai data aplikasi.
 func EncryptSecret(key []byte, plaintext string) (string, error) {
 	block, err := aes.NewCipher(mailKey(key))
 	if err != nil {
@@ -36,6 +38,7 @@ func EncryptSecret(key []byte, plaintext string) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(sealed), nil
 }
 
+// Membuka rahasia tersimpan yang sebelumnya dienkripsi dengan kunci aplikasi.
 func DecryptSecret(key []byte, encoded string) (string, error) {
 	data, err := base64.RawURLEncoding.DecodeString(encoded)
 	if err != nil {

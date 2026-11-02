@@ -11,6 +11,7 @@ type DevMailer struct {
 	Log *slog.Logger
 }
 
+// Mencatat OTP ke log lokal agar alur verifikasi dapat diuji tanpa provider email.
 func (m *DevMailer) SendOTP(_ context.Context, to, code, purpose string) (string, error) {
 	m.Log.Warn("DEV MODE: kode OTP dicetak ke log",
 		"purpose", purpose, "recipient", to, "otp", code)

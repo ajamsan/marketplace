@@ -7,6 +7,7 @@ import (
 )
 
 // NewToken menghasilkan token acak 32-byte base64url (refresh/CSRF/pre-auth).
+// Membuat token acak yang dipakai sebagai kredensial sesi.
 func NewToken() (string, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
@@ -16,6 +17,7 @@ func NewToken() (string, error) {
 }
 
 // NewUUID menghasilkan UUIDv4 acak (bukan urutan yang mudah ditebak).
+// Membuat identitas acak berformat UUID untuk data baru.
 func NewUUID() (string, error) {
 	b := make([]byte, 16)
 	if _, err := rand.Read(b); err != nil {
@@ -26,6 +28,7 @@ func NewUUID() (string, error) {
 	return formatUUID(b), nil
 }
 
+// Menyusun byte acak menjadi representasi UUID kanonis.
 func formatUUID(b []byte) string {
 	const hexDigits = "0123456789abcdef"
 	var sb []byte
@@ -43,6 +46,7 @@ const publicCodeAlphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
 
 // NewPublicCode menghasilkan kode order pendek 6 karakter untuk disebutkan
 // di kasir. Kode ini BUKAN token akses: otorisasi tetap dicek per user.
+// Membuat kode pesanan yang dapat dibaca tanpa mengungkap ID internal.
 func NewPublicCode() (string, error) {
 	out := make([]byte, 6)
 	for i := range out {

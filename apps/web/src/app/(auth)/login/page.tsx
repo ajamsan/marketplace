@@ -7,6 +7,7 @@ import { LoginForm } from "@/features/auth/login-form";
 import { RedirectIfAuthenticated } from "@/features/auth/guards";
 import { FullPageLoader } from "@/components/ui/feedback";
 
+// Menampilkan formulir login dan jalur menuju pendaftaran akun.
 export default function LoginPage() {
   return (
     <RedirectIfAuthenticated>

@@ -1,0 +1,20 @@
+name: kantin local
+values:
+  - key: base_url
+    value: ''
+  - key: access_token
+    value: ''
+  - key: csrf_token
+    value: ''
+  - key: buyer_email
+    value: ''
+  - key: buyer_password
+    value: ''
+  - key: seller_email
+    value: ''
+  - key: seller_password
+    value: ''
+  - key: pre_auth_token
+    value: ''
+  - key: csrf_token_buyer
+    value: ''

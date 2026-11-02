@@ -10,6 +10,7 @@ const PNG_1X1 = Buffer.from(
   "base64",
 );
 
+// Menyiapkan sesi pembeli sebelum pengujian pengelolaan foto profil.
 async function login(page: import("@playwright/test").Page) {
   const before = otpCount();
   await page.goto("/login");

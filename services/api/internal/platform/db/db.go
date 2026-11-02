@@ -10,6 +10,7 @@ import (
 )
 
 // Open membuat pool koneksi PostgreSQL via driver pgx (mode database/sql).
+// Membuka pool PostgreSQL dan memverifikasi koneksi sebelum dipakai layanan.
 func Open(ctx context.Context, dsn string) (*sql.DB, error) {
 	d, err := sql.Open("pgx", dsn)
 	if err != nil {
@@ -42,6 +43,7 @@ type DBTX interface {
 }
 
 // WithTx menjalankan fn dalam satu transaksi; rollback otomatis saat error/panic.
+// Menjalankan callback dalam transaksi dan membatalkan perubahan saat gagal.
 func WithTx(ctx context.Context, d *sql.DB, fn func(tx *sql.Tx) error) (err error) {
 	tx, err := d.BeginTx(ctx, nil)
 	if err != nil {

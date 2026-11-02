@@ -34,6 +34,7 @@ type Server struct {
 	Limiter  *httpx.Limiter
 }
 
+// Mendaftarkan endpoint, kebijakan akses, dan middleware untuk API.
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 
@@ -81,6 +82,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("POST /api/v1/seller/stalls/{stallId}/products", s.role("seller", s.handleProductCreate))
 	mux.HandleFunc("PATCH /api/v1/seller/products/{id}", s.role("seller", s.handleProductUpdate))
 	mux.HandleFunc("DELETE /api/v1/seller/products/{id}", s.role("seller", s.handleProductArchive))
+	mux.HandleFunc("POST /api/v1/seller/products/{id}/unarchive", s.role("seller", s.handleProductUnarchive))
 	mux.HandleFunc("POST /api/v1/seller/products/{id}/image", s.role("seller", s.handleProductImage))
 	mux.HandleFunc("GET /api/v1/seller/orders", s.role("seller", s.handleSellerOrdersList))
 	mux.HandleFunc("GET /api/v1/seller/orders/{id}", s.role("seller", s.handleSellerOrderGet))
@@ -104,6 +106,7 @@ func (s *Server) Routes() http.Handler {
 	)
 }
 
+// Menyediakan pemeriksaan ringan untuk memastikan server merespons.
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, map[string]string{"status": "ok"})
 }
@@ -123,11 +126,12 @@ func (s *Server) rate(group string, h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// Mengambil alamat klien dengan mempertimbangkan proxy yang dipercaya.
 func (s *Server) requestIP(r *http.Request) string {
 	return httpx.ClientIP(r, s.Cfg.TrustedProxyCIDRs)
 }
 
+// Mengambil identitas permintaan yang dipasang middleware.
 func (s *Server) requestID(r *http.Request) string {
 	return httpx.RequestID(r.Context())
 }
-

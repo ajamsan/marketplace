@@ -8,6 +8,7 @@ import { onSessionLost } from "@/lib/api/token-store";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { useAuthStore } from "@/features/auth/auth-store";
 
+// Menyediakan cache query, tema, dan pengelolaan sesi untuk seluruh aplikasi.
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -15,6 +16,7 @@ export function Providers({ children }: { children: ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 30_000,
+            // Menghindari retry untuk galat klien dan membatasi pengulangan server.
             retry: (failureCount, error) => {
               if (error instanceof ApiError && error.status < 500) return false;
               return failureCount < 2;

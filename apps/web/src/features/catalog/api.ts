@@ -8,11 +8,13 @@ export interface ProductListParams {
   limit?: number;
 }
 
+// Mengubah cursor kosong atau hanya spasi menjadi nilai yang aman untuk query.
 function normalizeCursor(cursor: string | null | undefined): string | null {
   const trimmed = cursor?.trim();
   return trimmed ? trimmed : null;
 }
 
+// Menyusun parameter pencarian dan memastikan hasil katalog memiliki daftar serta cursor yang valid.
 export async function listProducts(params: ProductListParams = {}): Promise<ProductPage> {
   const search = new URLSearchParams();
   if (params.stall_id) search.set("stall_id", params.stall_id);
@@ -32,11 +34,13 @@ export async function listProducts(params: ProductListParams = {}): Promise<Prod
   };
 }
 
+// Mengambil stan yang tersedia untuk pilihan dan penyaringan katalog.
 export async function listStalls(): Promise<Stall[]> {
   const response = await api.get<{ stalls?: Stall[] | null } | null>("/stalls");
   return response?.stalls ?? [];
 }
 
+// Memuat detail produk untuk halaman produk berdasarkan identitasnya.
 export async function getProduct(id: string): Promise<Product> {
   return api.get<Product>(`/products/${encodeURIComponent(id)}`);
 }

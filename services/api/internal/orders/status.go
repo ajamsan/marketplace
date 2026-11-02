@@ -6,6 +6,7 @@ package orders
 //
 // QRIS placeholder TIDAK PERNAH menghasilkan status paid otomatis (ORD-06):
 // payment 'awaiting_external_confirmation' dianggap belum lunas.
+// Menurunkan status pesanan gabungan dari kondisi pembayaran dan pemenuhannya.
 func DeriveOrderStatus(paymentStatuses, fulfillmentStatuses []string) string {
 	for _, p := range paymentStatuses {
 		if p != "cash_paid" {

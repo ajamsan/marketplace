@@ -35,6 +35,7 @@ export interface ProductFormProps {
   onCancel?: () => void;
 }
 
+// Mengelola pembuatan atau perubahan produk dengan validasi harga dan stan.
 export function ProductForm({
   stalls,
   product,
@@ -59,6 +60,7 @@ export function ProductForm({
   const [formError, setFormError] = useState<string | null>(null);
 
   const mutation = useMutation({
+    // Memilih endpoint pembuatan atau perubahan sesuai mode formulir.
     mutationFn: (payload: {
       name: string;
       description: string;
@@ -68,12 +70,14 @@ export function ProductForm({
       isEdit
         ? updateProduct(product!.id, payload)
         : createProduct(stallId, payload),
+    // Menyegarkan daftar produk setelah perubahan berhasil disimpan.
     onSuccess: (saved) => {
       setFieldErrors({});
       setFormError(null);
       void queryClient.invalidateQueries({ queryKey: ["seller", "products"] });
       onSaved?.(saved);
     },
+    // Menampilkan galat API dan memetakan kesalahan harga ke kolom rupiah.
     onError: (error) => {
       if (error instanceof ApiError) {
         setFormError(error.message);
@@ -91,6 +95,7 @@ export function ProductForm({
   const priceNumber = Number(priceRupiah.trim());
   const priceMinor = Number.isFinite(priceNumber) ? Math.round(priceNumber * 100) : 0;
 
+  // Mengubah harga rupiah ke satuan minor dan memvalidasi payload sebelum dikirim.
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!priceRupiah.trim() || !Number.isFinite(priceNumber)) {

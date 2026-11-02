@@ -11,25 +11,43 @@ import { AVAILABILITY_LABEL, formatIDR } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
-import { archiveProduct } from "./api";
+import { archiveProduct, unarchiveProduct } from "./api";
 import { ProductImageInput } from "./product-image-input";
 
+// Menyajikan produk penjual dengan aksi ubah, arsip, dan unggah foto.
 export function ProductList({ products }: { products: Product[] }) {
   const queryClient = useQueryClient();
   const [archiveTarget, setArchiveTarget] = useState<Product | null>(null);
   const [imageTarget, setImageTarget] = useState<Product | null>(null);
   const [archiveError, setArchiveError] = useState<string | null>(null);
+  const [unarchiveError, setUnarchiveError] = useState<string | null>(null);
 
   const archiveMutation = useMutation({
+    // Meminta server mengarsipkan produk yang dipilih.
     mutationFn: (id: string) => archiveProduct(id),
+    // Menutup dialog dan menyegarkan daftar setelah pengarsipan berhasil.
     onSuccess: () => {
       setArchiveTarget(null);
       setArchiveError(null);
       void queryClient.invalidateQueries({ queryKey: ["seller", "products"] });
     },
+    // Menjaga dialog tetap terbuka agar alasan kegagalan dapat ditampilkan.
     onError: (error) => {
       setArchiveError(
         error instanceof ApiError ? error.message : "Produk gagal diarsipkan. Coba lagi.",
+      );
+    },
+  });
+
+  const unarchiveMutation = useMutation({
+    mutationFn: (id: string) => unarchiveProduct(id),
+    onSuccess: () => {
+      setUnarchiveError(null);
+      void queryClient.invalidateQueries({ queryKey: ["seller", "products"] });
+    },
+    onError: (error) => {
+      setUnarchiveError(
+        error instanceof ApiError ? error.message : "Produk gagal diaktifkan kembali. Coba lagi.",
       );
     },
   });
@@ -95,7 +113,19 @@ export function ProductList({ products }: { products: Product[] }) {
                   >
                     Arsipkan
                   </Button>
-                ) : null}
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={unarchiveMutation.isPending}
+                    onClick={() => {
+                      setUnarchiveError(null);
+                      unarchiveMutation.mutate(product.id);
+                    }}
+                  >
+                    {unarchiveMutation.isPending ? "Mengaktifkan..." : "Aktifkan kembali"}
+                  </Button>
+                )}
                 <Button size="sm" variant="ghost" onClick={() => setImageTarget(product)}>
                   Unggah foto
                 </Button>
@@ -104,6 +134,9 @@ export function ProductList({ products }: { products: Product[] }) {
           );
         })}
       </ul>
+      {unarchiveError ? (
+        <p role="alert" className="text-sm font-medium text-danger">{unarchiveError}</p>
+      ) : null}
 
       <Dialog
         open={archiveTarget !== null}

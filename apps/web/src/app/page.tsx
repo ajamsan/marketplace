@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { homePathForRole, useAuthStore } from "@/features/auth/auth-store";
 import { FullPageLoader } from "@/components/ui/feedback";
 
+// Memulihkan sesi lalu mengarahkan pengguna ke area sesuai status dan perannya.
 export default function HomePage() {
   const router = useRouter();
   const status = useAuthStore((state) => state.status);

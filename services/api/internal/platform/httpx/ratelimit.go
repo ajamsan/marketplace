@@ -22,6 +22,7 @@ type bucket struct {
 	last   time.Time
 }
 
+// Membuat limiter token bucket dengan laju dan kapasitas burst yang dikonfigurasi.
 func NewLimiter(rps float64, burst int) *Limiter {
 	if rps <= 0 {
 		rps = 1
@@ -32,6 +33,7 @@ func NewLimiter(rps float64, burst int) *Limiter {
 	return &Limiter{rps: rps, burst: burst, buckets: map[string]*bucket{}, now: time.Now}
 }
 
+// Mengizinkan permintaan bila bucket kunci masih memiliki token.
 func (l *Limiter) Allow(key string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()

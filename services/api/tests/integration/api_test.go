@@ -42,6 +42,7 @@ type testMailer struct {
 	codes []string
 }
 
+// Menyimpan OTP yang dikirim agar pengujian dapat membacanya tanpa layanan email.
 func (m *testMailer) SendOTP(_ context.Context, _ string, code string, _ string) (string, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -49,6 +50,7 @@ func (m *testMailer) SendOTP(_ context.Context, _ string, code string, _ string)
 	return "test-message-id", nil
 }
 
+// Mengambil kode OTP terbaru yang direkam oleh mailer pengujian.
 func (m *testMailer) last() string {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -58,12 +60,14 @@ func (m *testMailer) last() string {
 	return m.codes[len(m.codes)-1]
 }
 
+// Menghitung pesan OTP yang telah dikirim selama skenario berlangsung.
 func (m *testMailer) count() int {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return len(m.codes)
 }
 
+// Mengambil kode OTP pada posisi tertentu untuk pemeriksaan urutan kirim.
 func (m *testMailer) at(i int) string {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -83,6 +87,7 @@ type env struct {
 	cfg    *config.Config
 }
 
+// Menyiapkan basis data, server, dan mailer untuk pengujian API terintegrasi.
 func newEnv(t *testing.T) *env {
 	t.Helper()
 	dsn := os.Getenv("KANTIN_TEST_DATABASE_URL")
@@ -142,6 +147,7 @@ func newEnv(t *testing.T) *env {
 }
 
 // awaitOTP menunggu kode OTP berikutnya yang dikirim worker outbox.
+// Menunggu sampai worker mengirim OTP baru setelah jumlah sebelumnya.
 func (e *env) awaitOTP(t *testing.T, prev int) string {
 	t.Helper()
 	deadline := time.Now().Add(5 * time.Second)
@@ -155,6 +161,7 @@ func (e *env) awaitOTP(t *testing.T, prev int) string {
 	return ""
 }
 
+// Menerapkan seluruh skema sebelum pengujian menyentuh endpoint aplikasi.
 func applyMigrations(t *testing.T, database *sql.DB) {
 	t.Helper()
 	var exists bool
@@ -181,6 +188,7 @@ func applyMigrations(t *testing.T, database *sql.DB) {
 	}
 }
 
+// Mengosongkan tabel domain agar setiap skenario memakai data terisolasi.
 func truncate(t *testing.T, database *sql.DB) {
 	t.Helper()
 	_, err := database.Exec(`TRUNCATE users, pending_registrations, otp_challenges, auth_throttles,
@@ -198,6 +206,7 @@ type apiResponse struct {
 	raw    []byte
 }
 
+// Membuat permintaan API uji dan mengurai envelope respons yang dikembalikan.
 func (e *env) do(t *testing.T, method, path string, body any, token string, headers map[string]string) apiResponse {
 	t.Helper()
 	var reader io.Reader
@@ -230,6 +239,7 @@ func (e *env) do(t *testing.T, method, path string, body any, token string, head
 }
 
 // seedUser membuat user terverifikasi langsung di DB agar test bisa login.
+// Menambahkan akun aktif untuk skenario yang tidak menguji pendaftaran.
 func (e *env) seedUser(t *testing.T, username, email, password, role string) string {
 	t.Helper()
 	hash, err := crypto.HashPassword(password)
@@ -249,6 +259,7 @@ func (e *env) seedUser(t *testing.T, username, email, password, role string) str
 }
 
 // loginThroughOTP melakukan login penuh (password + OTP) dan mengembalikan access token.
+// Menjalankan login dua tahap dan mengembalikan access token hasil verifikasi.
 func (e *env) loginThroughOTP(t *testing.T, email, password string) string {
 	t.Helper()
 	mark := e.mailer.count()
@@ -274,6 +285,7 @@ func (e *env) loginThroughOTP(t *testing.T, email, password string) string {
 	return token
 }
 
+// Memeriksa pendaftaran, verifikasi OTP, dan login hingga sesi terbentuk.
 func TestRegisterVerifyAndLoginFlow(t *testing.T) {
 	e := newEnv(t)
 
@@ -320,6 +332,7 @@ func TestRegisterVerifyAndLoginFlow(t *testing.T) {
 	}
 }
 
+// Memastikan respons pendaftaran tidak mengungkap apakah email telah terdaftar.
 func TestRegisterAntiEnumeration(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "sudah.ada", "ada@example.com", "password-kuat-123", "buyer")
@@ -342,6 +355,7 @@ func TestRegisterAntiEnumeration(t *testing.T) {
 	}
 }
 
+// Memastikan batas percobaan OTP mengunci tantangan setelah kegagalan berulang.
 func TestOTPAttemptLimitBlocksChallenge(t *testing.T) {
 	e := newEnv(t)
 	reg := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
@@ -366,6 +380,7 @@ func TestOTPAttemptLimitBlocksChallenge(t *testing.T) {
 	}
 }
 
+// Memastikan retry tidak menggandakan pesanan dan data penjual tetap terisolasi.
 func TestOrderIdempotencyAndSellerIsolation(t *testing.T) {
 	e := newEnv(t)
 	buyerID := e.seedUser(t, "buyer.idem", "buyer@example.com", "password-kuat-123", "buyer")
@@ -485,6 +500,7 @@ func TestOrderIdempotencyAndSellerIsolation(t *testing.T) {
 	_ = buyerID
 }
 
+// Memastikan QRIS placeholder ditolak dan pesanan mempertahankan harga snapshot.
 func TestQRISPlaceholderRejectedAndPriceSnapshotKept(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "buyer.qris", "qris@example.com", "password-kuat-123", "buyer")
@@ -539,6 +555,7 @@ func TestQRISPlaceholderRejectedAndPriceSnapshotKept(t *testing.T) {
 	}
 }
 
+// Memastikan pencabutan perangkat lain tidak mengakhiri sesi yang sedang digunakan.
 func TestSessionRevokeKeepsCurrentSession(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "buyer.revoke", "revoke@example.com", "password-kuat-123", "buyer")
@@ -558,6 +575,7 @@ func TestSessionRevokeKeepsCurrentSession(t *testing.T) {
 	}
 }
 
+// Memastikan endpoint menolak akses anonim dan peran yang tidak sesuai.
 func TestUnauthenticatedAndRoleGuards(t *testing.T) {
 	e := newEnv(t)
 	anon := e.do(t, http.MethodGet, "/api/v1/cart", nil, "", nil)
@@ -580,6 +598,7 @@ func TestUnauthenticatedAndRoleGuards(t *testing.T) {
 	}
 }
 
+// Memastikan produk yang tidak tersedia tidak dapat dimasukkan ke pesanan baru.
 func TestProductNotAvailableCannotBeOrdered(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "buyer.na", "na@example.com", "password-kuat-123", "buyer")

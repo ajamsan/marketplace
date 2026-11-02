@@ -14,6 +14,7 @@ const NEXT_STATUS: Record<string, string> = {
   ready_for_pickup: "completed",
 };
 
+// Menawarkan transisi pemenuhan berikutnya setelah pembayaran diterima.
 export function FulfillmentControls({
   fulfillment,
   paymentStatus,
@@ -26,7 +27,9 @@ export function FulfillmentControls({
   const isPaid = paymentStatus === "cash_paid";
 
   const mutation = useMutation({
+    // Meminta server mengubah tahap pemenuhan pesanan.
     mutationFn: (status: string) => updateFulfillment(fulfillment.id, status),
+    // Memuat ulang antrean agar status terbaru segera terlihat.
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["seller", "orders"] });
     },

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 
+// Menampilkan indikator saat halaman belum siap menyajikan konten.
 export function FullPageLoader({ label = "Memuat..." }: { label?: string }) {
   return (
     <div
@@ -13,10 +14,12 @@ export function FullPageLoader({ label = "Memuat..." }: { label?: string }) {
   );
 }
 
+// Menyediakan placeholder bentuk konten selama pemuatan data.
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse rounded bg-surface-muted", className)} />;
 }
 
+// Menjelaskan kondisi tanpa data dan dapat menyertakan aksi lanjutan.
 export function EmptyState({
   title,
   description,
@@ -35,6 +38,7 @@ export function EmptyState({
   );
 }
 
+// Menampilkan kegagalan dan opsi untuk mengulangi proses bila tersedia.
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div

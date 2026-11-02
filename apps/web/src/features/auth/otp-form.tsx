@@ -15,6 +15,7 @@ const RESEND_COOLDOWN_SECONDS = 60;
 
 export type OtpPurpose = "register" | "login";
 
+// Menangani verifikasi pendaftaran atau login serta pengiriman ulang kode.
 export function OtpForm({
   purpose,
   email,
@@ -43,6 +44,7 @@ export function OtpForm({
     return () => window.clearTimeout(timer);
   }, [resendSeconds]);
 
+  // Memvalidasi kode lalu mengaktifkan akun atau menyelesaikan sesi login.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
@@ -88,6 +90,7 @@ export function OtpForm({
     }
   }
 
+  // Meminta kode baru dan menerapkan jeda agar pengiriman tidak berulang terlalu cepat.
   async function handleResend() {
     setFormError(null);
     setStatus(null);

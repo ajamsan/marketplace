@@ -9,6 +9,7 @@ import { OtpForm } from "@/features/auth/otp-form";
 import { Card, CardHeader } from "@/components/ui/card";
 import { FullPageLoader } from "@/components/ui/feedback";
 
+// Memilih keadaan verifikasi berdasarkan parameter pendaftaran atau login.
 function VerifyContent() {
   const searchParams = useSearchParams();
   const mode = searchParams.get("mode") === "login" ? "login" : "register";
@@ -95,6 +96,7 @@ function VerifyContent() {
   );
 }
 
+// Membungkus konten verifikasi dengan fallback selama parameter dimuat.
 export default function VerifyPage() {
   return (
     <Suspense fallback={<FullPageLoader label="Memuat verifikasi..." />}>

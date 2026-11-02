@@ -5,12 +5,14 @@ import "strings"
 // Summarize menghasilkan label browser/platform PERKIRAAN dari User-Agent
 // (SESS-01, §12.2). User-Agent bisa dipalsukan; UI menampilkan "perkiraan".
 
+// Menyusun label sesi ringkas dari sistem operasi dan peramban pengguna.
 func label(ua string) string {
 	b := browser(ua)
 	p := platform(ua)
 	return b + " · " + p
 }
 
+// Mengelompokkan user-agent ke nama platform untuk daftar sesi.
 func platform(ua string) string {
 	u := strings.ToLower(ua)
 	switch {
@@ -29,6 +31,7 @@ func platform(ua string) string {
 	}
 }
 
+// Mengenali peramban utama dari user-agent tanpa menyimpan seluruh string mentah.
 func browser(ua string) string {
 	u := strings.ToLower(ua)
 	switch {

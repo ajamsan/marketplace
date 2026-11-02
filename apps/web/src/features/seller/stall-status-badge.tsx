@@ -7,6 +7,7 @@ const toneByStatus: Record<string, "neutral" | "success" | "warning"> = {
   inactive: "neutral",
 };
 
+// Menampilkan status persetujuan stan sebagai label yang mudah dikenali.
 export function StallStatusBadge({ status }: { status: string }) {
   return (
     <Badge tone={toneByStatus[status] ?? "neutral"}>

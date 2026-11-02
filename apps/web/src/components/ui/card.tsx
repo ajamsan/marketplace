@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 
+// Menyediakan wadah konsisten untuk mengelompokkan konten halaman.
 export function Card({
   className,
   children,
@@ -15,6 +16,7 @@ export function Card({
   );
 }
 
+// Menyusun judul kartu beserta keterangan dan aksi opsional.
 export function CardHeader({
   title,
   description,
@@ -48,6 +50,7 @@ const toneClass: Record<BadgeTone, string> = {
   info: "bg-info-soft text-foreground border-info/40",
 };
 
+// Menampilkan label status dengan warna yang sesuai konteksnya.
 export function Badge({
   tone = "neutral",
   className,

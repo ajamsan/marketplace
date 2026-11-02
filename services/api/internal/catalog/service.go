@@ -24,6 +24,7 @@ type InvalidError struct {
 	Fields map[string]string
 }
 
+// Menyediakan pesan aman untuk kesalahan validasi katalog.
 func (e *InvalidError) Error() string { return "Data tidak valid" }
 
 type Service struct {
@@ -33,6 +34,7 @@ type Service struct {
 	Audit   *audit.Repo
 }
 
+// Menyiapkan katalog dengan konfigurasi media dan pencatatan audit.
 func NewService(cfg *config.Config, db *sql.DB, st storage.Storage, a *audit.Repo) *Service {
 	return &Service{Cfg: cfg, DB: db, Storage: st, Audit: a}
 }
@@ -58,6 +60,7 @@ type ProductInput struct {
 	AvailabilityStatus string
 }
 
+// Mengumpulkan kesalahan masukan produk sebelum perubahan basis data dilakukan.
 func (s *Service) validateInput(in ProductInput) map[string]string {
 	fields := map[string]string{}
 	name := strings.TrimSpace(in.Name)
@@ -178,6 +181,29 @@ func (s *Service) Archive(ctx context.Context, sellerID, productID, requestID st
 	return s.GetForSeller(ctx, sellerID, productID)
 }
 
+// Unarchive mengaktifkan kembali produk yang sebelumnya diarsipkan.
+func (s *Service) Unarchive(ctx context.Context, sellerID, productID, requestID string) (*Product, error) {
+	res, err := s.DB.ExecContext(ctx, `
+		UPDATE products p
+		SET archived_at = NULL,
+		    availability_status = 'available',
+		    updated_at = now()
+		WHERE p.id = $1
+		  AND EXISTS (SELECT 1 FROM seller_stalls ss WHERE ss.stall_id = p.stall_id AND ss.seller_id = $2)`,
+		productID, sellerID)
+	if err != nil {
+		return nil, err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return nil, ErrNotFound
+	}
+	_ = s.Audit.Insert(ctx, s.DB, audit.Entry{
+		ActorUserID: sellerID, Action: "product_unarchive", ResourceType: "product",
+		ResourceID: productID, Outcome: "success", RequestID: requestID,
+	})
+	return s.GetForSeller(ctx, sellerID, productID)
+}
+
 // UploadImage mengganti foto produk melalui alur server aman (CAT-06):
 // validasi konten, key objek acak, objek lama dihapus best-effort.
 func (s *Service) UploadImage(ctx context.Context, sellerID, productID string, data []byte, requestID string) (*Product, error) {
@@ -221,12 +247,15 @@ func (s *Service) UploadImage(ctx context.Context, sellerID, productID string, d
 	return s.GetForSeller(ctx, sellerID, productID)
 }
 
+// Membuat URL bertanda tangan bila kunci gambar tersedia pada penyimpanan.
+// Menghasilkan URL akses sementara untuk gambar yang kuncinya tersimpan.
 func (s *Service) signImage(ctx context.Context, key sql.NullString) *string {
 	return storage.BestEffortSignedURL(ctx, s.Storage, key, s.Cfg.SignedURLTTL)
 }
 
 const productCols = `p.id, p.stall_id, st.name, p.name, COALESCE(p.description,''), p.price_minor, p.currency, p.availability_status, p.image_key, p.created_at, p.archived_at`
 
+// Membaca satu produk dan melengkapi URL gambar sebelum dikembalikan.
 func (s *Service) scanProduct(ctx context.Context, scan func(dest ...any) error) (*Product, error) {
 	var pr Product
 	var imageKey sql.NullString
@@ -239,6 +268,7 @@ func (s *Service) scanProduct(ctx context.Context, scan func(dest ...any) error)
 }
 
 // GetPublic: hanya produk non-arsip pada stan aktif (CAT-01/02).
+// Mengambil produk yang layak ditampilkan pada katalog publik.
 func (s *Service) GetPublic(ctx context.Context, id string) (*Product, error) {
 	row := s.DB.QueryRowContext(ctx, `
 		SELECT `+productCols+`
@@ -304,6 +334,7 @@ func (s *Service) ListPublic(ctx context.Context, stallID, q string, cursor http
 }
 
 // GetForSeller: produk milik seller termasuk yang diarsip.
+// Mengambil detail produk yang dikelola oleh penjual yang meminta.
 func (s *Service) GetForSeller(ctx context.Context, sellerID, productID string) (*Product, error) {
 	row := s.DB.QueryRowContext(ctx, `
 		SELECT `+productCols+`
@@ -323,6 +354,7 @@ func (s *Service) GetForSeller(ctx context.Context, sellerID, productID string) 
 
 // ListForSeller: semua produk pada stan yang dikelola seller (semua status),
 // termasuk yang diarsipkan; stallID opsional untuk memfilter satu stan.
+// Menyajikan produk milik penjual dan menambahkan URL gambar yang tersedia.
 func (s *Service) ListForSeller(ctx context.Context, sellerID, stallID string) ([]Product, error) {
 	query := `
 		SELECT ` + productCols + `
@@ -350,6 +382,8 @@ func (s *Service) ListForSeller(ctx context.Context, sellerID, stallID string) (
 	return out, rows.Err()
 }
 
+// Mengamankan karakter khusus LIKE agar pencarian diperlakukan sebagai teks.
+// Mengutip wildcard LIKE agar masukan pencarian dicocokkan sebagai teks biasa.
 func escapeLike(s string) string {
 	r := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
 	return r.Replace(s)

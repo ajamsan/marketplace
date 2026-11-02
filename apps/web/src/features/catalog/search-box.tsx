@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { Field, Input } from "@/components/ui/form";
 
+// Menunda pembaruan pencarian agar perubahan cepat tidak memicu permintaan berulang.
 export function SearchBox({
   value,
   onChange,

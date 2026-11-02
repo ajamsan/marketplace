@@ -9,6 +9,7 @@ import { ThemeSync } from "./theme-sync";
 import { RequireAuth } from "@/features/auth/guards";
 import { useAuthStore } from "@/features/auth/auth-store";
 
+// Menyusun navigasi dan konten utama dalam kerangka yang memerlukan sesi aktif.
 export function AppShell({ children }: { children: ReactNode }) {
   const user = useAuthStore((state) => state.user);
 

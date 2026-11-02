@@ -19,6 +19,7 @@ export interface CashConfirmDialogProps {
   onConfirmed?: () => void;
 }
 
+// Meminta konfirmasi eksplisit sebelum penjual mencatat uang tunai diterima.
 export function CashConfirmDialog({
   open,
   paymentId,
@@ -32,7 +33,9 @@ export function CashConfirmDialog({
   const [acknowledged, setAcknowledged] = useState(false);
 
   const mutation = useMutation({
+    // Mencatat penerimaan pembayaran untuk transaksi yang sedang ditinjau.
     mutationFn: () => confirmCash(paymentId),
+    // Menyegarkan pesanan dan menutup dialog setelah server menerima perubahan.
     onSuccess: () => {
       setAcknowledged(false);
       void queryClient.invalidateQueries({ queryKey: ["seller", "orders"] });
@@ -41,6 +44,7 @@ export function CashConfirmDialog({
     },
   });
 
+  // Menolak penutupan selama penyimpanan dan membersihkan status dialog lainnya.
   function handleClose() {
     if (mutation.isPending) return;
     setAcknowledged(false);

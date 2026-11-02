@@ -14,10 +14,12 @@ type Repo struct {
 	DB *sql.DB
 }
 
+// Menyediakan repositori yang menjalankan query autentikasi pada basis data.
 func NewRepo(db *sql.DB) *Repo { return &Repo{DB: db} }
 
-// --- throttle ---
+// Throttle.
 
+// Memeriksa apakah kunci percobaan masih aktif dan kapan masa berlakunya berakhir.
 func (r *Repo) CheckLocked(ctx context.Context, flow, scopeType, scopeKeyHash string) (time.Time, bool, error) {
 	var lockedUntil sql.NullTime
 	err := r.DB.QueryRowContext(ctx, `
@@ -36,6 +38,7 @@ func (r *Repo) CheckLocked(ctx context.Context, flow, scopeType, scopeKeyHash st
 	return time.Time{}, false, nil
 }
 
+// Menaikkan penghitung kegagalan untuk ruang lingkup autentikasi tertentu.
 func (r *Repo) RecordFailure(ctx context.Context, flow, scopeType, scopeKeyHash string) (int, error) {
 	var count int
 	err := r.DB.QueryRowContext(ctx, `
@@ -48,6 +51,7 @@ func (r *Repo) RecordFailure(ctx context.Context, flow, scopeType, scopeKeyHash 
 	return count, err
 }
 
+// Menyimpan batas akhir penguncian setelah ambang kegagalan tercapai.
 func (r *Repo) ApplyLock(ctx context.Context, flow, scopeType, scopeKeyHash string, until time.Time) error {
 	_, err := r.DB.ExecContext(ctx, `
 		INSERT INTO auth_throttles (scope_type, scope_key_hash, flow, locked_until, wave_number)
@@ -62,6 +66,7 @@ func (r *Repo) ApplyLock(ctx context.Context, flow, scopeType, scopeKeyHash stri
 
 // ClearFailures menghapus counter saat sukses; lock aktif TIDAK disentuh
 // (PRD §6.2: keberhasilan tidak boleh membersihkan lock aktif).
+// Menghapus penghitung kegagalan pada ruang lingkup yang berhasil diverifikasi.
 func (r *Repo) ClearFailures(ctx context.Context, flow, scopeType, scopeKeyHash string) error {
 	_, err := r.DB.ExecContext(ctx, `
 		UPDATE auth_throttles
@@ -71,8 +76,9 @@ func (r *Repo) ClearFailures(ctx context.Context, flow, scopeType, scopeKeyHash 
 	return err
 }
 
-// --- events (tanpa rahasia; email/ip hanya hash) ---
+// Events (tanpa rahasia; email/IP hanya hash).
 
+// Menulis peristiwa autentikasi tanpa menyimpan alamat email atau IP mentah.
 func (r *Repo) Event(ctx context.Context, flow, event, outcome, emailHash, ipHash, requestID string) {
 	var eh, ih, rid any
 	if emailHash != "" {
@@ -89,7 +95,7 @@ func (r *Repo) Event(ctx context.Context, flow, event, outcome, emailHash, ipHas
 		VALUES ($1,$2,$3,$4,$5,$6)`, flow, event, outcome, eh, ih, rid)
 }
 
-// --- users ---
+// Users.
 
 type User struct {
 	ID           string
@@ -99,6 +105,7 @@ type User struct {
 	Status       string
 }
 
+// Mencari pengguna berdasarkan alamat email yang telah dinormalisasi.
 func (r *Repo) UserByEmail(ctx context.Context, email string) (*User, error) {
 	var u User
 	err := r.DB.QueryRowContext(ctx, `
@@ -114,6 +121,7 @@ func (r *Repo) UserByEmail(ctx context.Context, email string) (*User, error) {
 	return &u, nil
 }
 
+// Memuat identitas pengguna berdasarkan ID untuk proses autentikasi.
 func (r *Repo) UserByID(ctx context.Context, id string) (*User, error) {
 	var u User
 	err := r.DB.QueryRowContext(ctx, `
@@ -128,6 +136,7 @@ func (r *Repo) UserByID(ctx context.Context, id string) (*User, error) {
 	return &u, nil
 }
 
+// Memeriksa keberadaan email tanpa mengambil atau mengungkap data akun.
 func (r *Repo) UserEmailExists(ctx context.Context, email string) (bool, error) {
 	var exists bool
 	err := r.DB.QueryRowContext(ctx,
@@ -135,6 +144,7 @@ func (r *Repo) UserEmailExists(ctx context.Context, email string) (bool, error) 
 	return exists, err
 }
 
+// Memeriksa ketersediaan nama pengguna sebelum pendaftaran disimpan.
 func (r *Repo) UsernameExists(ctx context.Context, username string) (bool, error) {
 	var exists bool
 	err := r.DB.QueryRowContext(ctx,
@@ -142,8 +152,9 @@ func (r *Repo) UsernameExists(ctx context.Context, username string) (bool, error
 	return exists, err
 }
 
-// --- pending registrations ---
+// Pending registrations.
 
+// Menghapus pendaftaran tertunda lama dalam transaksi pendaftaran baru.
 func (r *Repo) PurgePendingTx(ctx context.Context, tx *sql.Tx, email string) error {
 	_, err := tx.ExecContext(ctx, `
 		DELETE FROM pending_registrations
@@ -151,6 +162,7 @@ func (r *Repo) PurgePendingTx(ctx context.Context, tx *sql.Tx, email string) err
 	return err
 }
 
+// Menyimpan data akun yang menunggu verifikasi email dalam transaksi.
 func (r *Repo) InsertPendingTx(ctx context.Context, tx *sql.Tx, id, email, username, passwordHash, role, groupID string, expires time.Time) error {
 	_, err := tx.ExecContext(ctx, `
 		INSERT INTO pending_registrations
@@ -160,6 +172,7 @@ func (r *Repo) InsertPendingTx(ctx context.Context, tx *sql.Tx, id, email, usern
 	return err
 }
 
+// Memuat kredensial sementara untuk menyelesaikan aktivasi akun.
 func (r *Repo) PendingByIDTx(ctx context.Context, tx *sql.Tx, id string) (username, passwordHash, role string, ok bool, err error) {
 	err = tx.QueryRowContext(ctx, `
 		SELECT username, password_hash, role
@@ -175,13 +188,14 @@ func (r *Repo) PendingByIDTx(ctx context.Context, tx *sql.Tx, id string) (userna
 	return username, passwordHash, role, true, nil
 }
 
+// Menandai pendaftaran tertunda sebagai terverifikasi di dalam transaksi.
 func (r *Repo) MarkPendingVerifiedTx(ctx context.Context, tx *sql.Tx, id string) error {
 	_, err := tx.ExecContext(ctx,
 		`UPDATE pending_registrations SET verified_at = now() WHERE id = $1`, id)
 	return err
 }
 
-// --- challenges ---
+// Challenges.
 
 type Challenge struct {
 	ID                   string
@@ -197,6 +211,7 @@ type Challenge struct {
 	LastSentAt           time.Time
 }
 
+// Mengambil tantangan OTP aktif untuk email dan alur yang diminta.
 func (r *Repo) ActiveChallenge(ctx context.Context, email, purpose string) (*Challenge, error) {
 	var c Challenge
 	var userID, pendingID, preAuth sql.NullString
@@ -220,6 +235,7 @@ func (r *Repo) ActiveChallenge(ctx context.Context, email, purpose string) (*Cha
 	return &c, nil
 }
 
+// Mengambil tantangan login yang terkait dengan hash token praauthentikasi.
 func (r *Repo) ActiveChallengeByPreAuth(ctx context.Context, preAuthHash string) (*Challenge, error) {
 	var c Challenge
 	var userID, pendingID sql.NullString
@@ -242,6 +258,7 @@ func (r *Repo) ActiveChallengeByPreAuth(ctx context.Context, preAuthHash string)
 	return &c, nil
 }
 
+// Menentukan ronde OTP tertinggi yang masih berada dalam jendela waktu.
 func (r *Repo) MaxRoundRecent(ctx context.Context, email, purpose string, window time.Duration) (int, error) {
 	var round int
 	err := r.DB.QueryRowContext(ctx, `
@@ -253,6 +270,7 @@ func (r *Repo) MaxRoundRecent(ctx context.Context, email, purpose string, window
 	return round, err
 }
 
+// Menonaktifkan tantangan lama agar hanya kode terbaru yang dapat digunakan.
 func (r *Repo) SupersedeChallengesTx(ctx context.Context, tx *sql.Tx, email, purpose string) error {
 	_, err := tx.ExecContext(ctx, `
 		UPDATE otp_challenges
@@ -275,6 +293,7 @@ type InsertChallenge struct {
 	ExpiresAt    time.Time
 }
 
+// Menyimpan tantangan OTP baru bersama masa berlaku dan bukti yang dibutuhkan.
 func (r *Repo) InsertChallengeTx(ctx context.Context, tx *sql.Tx, c InsertChallenge) error {
 	var userID, pendingID, preAuth any
 	if c.UserID != "" {
@@ -298,6 +317,7 @@ func (r *Repo) InsertChallengeTx(ctx context.Context, tx *sql.Tx, c InsertChalle
 
 // IncAttempt menambah percobaan salah secara atomik dan mengembalikan hitungan
 // baru; ok=false bila tantangan sudah tidak aktif.
+// Menaikkan jumlah percobaan OTP secara atomik dan melaporkan tantangan aktif.
 func (r *Repo) IncAttempt(ctx context.Context, challengeID string) (attempt int, ok bool, err error) {
 	err = r.DB.QueryRowContext(ctx, `
 		UPDATE otp_challenges
@@ -314,6 +334,7 @@ func (r *Repo) IncAttempt(ctx context.Context, challengeID string) (attempt int,
 }
 
 // ConsumeTx menandai tantangan terpakai sekali (single-use, AUTH-04).
+// Mengonsumsi tantangan satu kali agar kode tidak dapat digunakan kembali.
 func (r *Repo) ConsumeTx(ctx context.Context, tx *sql.Tx, challengeID string) (bool, error) {
 	res, err := tx.ExecContext(ctx, `
 		UPDATE otp_challenges
@@ -327,6 +348,7 @@ func (r *Repo) ConsumeTx(ctx context.Context, tx *sql.Tx, challengeID string) (b
 }
 
 // CreateUserTx membuat akun HANYA setelah OTP valid (PRD §5.1).
+// Membuat akun aktif di dalam transaksi verifikasi pendaftaran.
 func (r *Repo) CreateUserTx(ctx context.Context, tx *sql.Tx, id, username, email, passwordHash, role string) error {
 	_, err := tx.ExecContext(ctx, `
 		INSERT INTO users (id, username, email_normalized, password_hash, role, status, email_verified_at)
@@ -335,6 +357,7 @@ func (r *Repo) CreateUserTx(ctx context.Context, tx *sql.Tx, id, username, email
 	return err
 }
 
+// Menghapus catatan autentikasi kedaluwarsa sesuai masa retensi audit.
 func (r *Repo) CleanupExpired(ctx context.Context, retentionDays int) error {
 	if _, err := r.DB.ExecContext(ctx,
 		`DELETE FROM pending_registrations WHERE expires_at < now() - interval '2 days'`); err != nil {
@@ -359,6 +382,7 @@ func (r *Repo) CleanupExpired(ctx context.Context, retentionDays int) error {
 	return err
 }
 
+// Mengubah nilai nullable dari SQL menjadi teks tanpa nilai null.
 func nullStr(ns sql.NullString) string {
 	if ns.Valid && ns.String != "" {
 		return ns.String
@@ -366,6 +390,7 @@ func nullStr(ns sql.NullString) string {
 	return ""
 }
 
+// Menyiapkan parameter SQL nullable dari teks yang mungkin kosong.
 func nullAny(s string) any {
 	if s == "" {
 		return nil

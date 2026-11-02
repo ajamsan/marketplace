@@ -27,6 +27,7 @@ const icons: Record<string, LucideIcon> = {
   admin: ShieldCheck,
 };
 
+// Menyajikan tautan navigasi peran pada area samping layar lebar.
 export function Sidebar({ role }: { role: Role | null | undefined }) {
   const pathname = usePathname();
   const items = navItemsForRole(role);

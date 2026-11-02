@@ -28,6 +28,7 @@ type Service struct {
 	Log *slog.Logger
 }
 
+// Menyediakan pengelola sesi dengan basis data dan pencatat peristiwa.
 func New(db *sql.DB, log *slog.Logger) *Service {
 	return &Service{DB: db, Log: log}
 }
@@ -47,6 +48,7 @@ type Created struct {
 	CSRFToken    string
 }
 
+// Membuat keluarga token sesi baru dalam transaksi pemanggil.
 func (s *Service) CreateTx(ctx context.Context, tx *sql.Tx, p CreateParams) (*Created, error) {
 	refresh, err := crypto.NewToken()
 	if err != nil {
@@ -95,6 +97,7 @@ type Rotation struct {
 	CSRFTokenHash   string
 }
 
+// Memutar refresh token secara atomik dan mencabut keluarga saat terdeteksi reuse.
 func (s *Service) Rotate(ctx context.Context, presented, csrfToken string, idleTTL time.Duration) (*Rotation, error) {
 	presentedHash := crypto.HashToken(presented)
 	var rotation *Rotation
@@ -169,6 +172,7 @@ type rotateArgs struct {
 	idleTTL                     time.Duration
 }
 
+// Memvalidasi token dalam transaksi lalu menyiapkan token pengganti.
 func (s *Service) rotateTx(ctx context.Context, tx *sql.Tx, a rotateArgs, out **Rotation) error {
 	newRefresh, err := crypto.NewToken()
 	if err != nil {
@@ -206,6 +210,7 @@ func (s *Service) rotateTx(ctx context.Context, tx *sql.Tx, a rotateArgs, out **
 	return nil
 }
 
+// Mencabut seluruh sesi yang berbagi keluarga refresh token.
 func (s *Service) revokeFamily(ctx context.Context, tx db.DBTX, family string) {
 	_, _ = tx.ExecContext(ctx, `
 		UPDATE login_sessions
@@ -224,6 +229,7 @@ type View struct {
 	IsCurrent bool      `json:"is_current"`
 }
 
+// Menyajikan sesi pengguna dan menandai sesi yang sedang digunakan.
 func (s *Service) List(ctx context.Context, userID, currentSessionID string) ([]View, error) {
 	rows, err := s.DB.QueryContext(ctx, `
 		SELECT id, user_agent_summary, platform, ip_masked, created_at, last_seen_at
@@ -310,6 +316,7 @@ func (s *Service) Access(ctx context.Context, sessionID string) (*AccessInfo, er
 	return &a, nil
 }
 
+// Menghapus data sesi yang melewati batas penyimpanan.
 func (s *Service) CleanupExpired(ctx context.Context) error {
 	_, err := s.DB.ExecContext(ctx, `
 		DELETE FROM login_sessions
@@ -318,18 +325,21 @@ func (s *Service) CleanupExpired(ctx context.Context) error {
 	return err
 }
 
+// Mencatat peristiwa sesi di luar transaksi bisnis.
 func (s *Service) event(ctx context.Context, flow, event, outcome string) {
 	_, _ = s.DB.ExecContext(ctx,
 		`INSERT INTO auth_events (flow, event, outcome) VALUES ($1,$2,$3)`,
 		flow, event, outcome)
 }
 
+// Menulis peristiwa sesi menggunakan transaksi yang sedang berlangsung.
 func (s *Service) eventTx(ctx context.Context, tx *sql.Tx, flow, event, outcome string) {
 	_, _ = tx.ExecContext(ctx,
 		`INSERT INTO auth_events (flow, event, outcome) VALUES ($1,$2,$3)`,
 		flow, event, outcome)
 }
 
+// Mengubah nilai nullable hasil query menjadi teks untuk keluaran API.
 func nullStr(ns sql.NullString) string {
 	if ns.Valid && ns.String != "" {
 		return ns.String
@@ -337,6 +347,7 @@ func nullStr(ns sql.NullString) string {
 	return "tidak diketahui"
 }
 
+// Menjalankan operasi dengan commit saat berhasil dan rollback saat gagal.
 func withTx(ctx context.Context, d *sql.DB, fn func(tx *sql.Tx) error) (err error) {
 	tx, err := d.BeginTx(ctx, nil)
 	if err != nil {

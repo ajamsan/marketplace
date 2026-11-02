@@ -31,6 +31,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+// Memulihkan tema dari penyimpanan lokal atau preferensi sistem perangkat.
 export function readStoredTheme(): ThemeMode {
   if (typeof window === "undefined") return DEFAULT_THEME;
   const stored = window.localStorage.getItem(THEME_KEY);
@@ -39,18 +40,21 @@ export function readStoredTheme(): ThemeMode {
   return DEFAULT_THEME;
 }
 
+// Memulihkan aksen tersimpan dan memakai nilai bawaan bila tidak dikenal.
 export function readStoredAccent(): AccentId {
   if (typeof window === "undefined") return DEFAULT_ACCENT;
   const stored = window.localStorage.getItem(ACCENT_KEY);
   return isAccentId(stored) ? stored : DEFAULT_ACCENT;
 }
 
+// Menerapkan pilihan visual pada elemen akar agar seluruh aplikasi mengikutinya.
 export function applyTheme(theme: ThemeMode, accent: AccentId) {
   if (typeof document === "undefined") return;
   document.documentElement.dataset.theme = theme;
   document.documentElement.dataset.accent = accent;
 }
 
+// Menyediakan tema aktif dan aksi perubahan ke seluruh komponen turunan.
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>(DEFAULT_THEME);
   const [accent, setAccentState] = useState<AccentId>(DEFAULT_ACCENT);
@@ -69,18 +73,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyTheme(theme, accent);
   }, [theme, accent]);
 
+  // Menyimpan mode pilihan dan menerapkannya tanpa menunggu render berikutnya.
   const setTheme = useCallback((next: ThemeMode) => {
     setThemeState(next);
     if (typeof window !== "undefined") window.localStorage.setItem(THEME_KEY, next);
     applyTheme(next, accent);
   }, [accent]);
 
+  // Menyimpan warna aksen dan memperbarui atribut tema global.
   const setAccent = useCallback((next: AccentId) => {
     setAccentState(next);
     if (typeof window !== "undefined") window.localStorage.setItem(ACCENT_KEY, next);
     applyTheme(theme, next);
   }, [theme]);
 
+  // Membalik mode aktif sambil memperbarui state, penyimpanan, dan dokumen.
   const toggleTheme = useCallback(() => {
     setThemeState((current) => {
       const next = current === "dark" ? "light" : "dark";
@@ -98,6 +105,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
+// Mengakses preferensi tema dan menolak pemakaian di luar providernya.
 export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
   if (!context) {

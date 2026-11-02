@@ -11,6 +11,7 @@ import { ProductForm } from "@/features/seller/product-form";
 import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 
+// Memastikan halaman pembuatan produk hanya diakses oleh penjual.
 export default function NewProductPage() {
   return (
     <RequireRole roles={["seller"]}>
@@ -19,6 +20,7 @@ export default function NewProductPage() {
   );
 }
 
+// Memuat stan penjual sebelum membuka formulir produk baru.
 function NewProductView() {
   const router = useRouter();
   const query = useQuery({ queryKey: ["seller", "stalls"], queryFn: listSellerStalls });

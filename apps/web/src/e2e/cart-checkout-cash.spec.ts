@@ -6,6 +6,7 @@ import { waitForApi } from "./support/api";
 const BUYER = { email: "buyer@kantin.local", password: "kantin-dev-buyer-123" };
 const SELLER = { email: "seller@kantin.local", password: "kantin-dev-seller-123" };
 
+// Menjalankan login dua tahap agar skenario transaksi memakai sesi pembeli valid.
 async function login(page: Page, account: { email: string; password: string }) {
   const before = otpCount();
   await page.goto("/login");

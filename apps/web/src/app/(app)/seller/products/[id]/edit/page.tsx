@@ -11,6 +11,7 @@ import { ProductForm } from "@/features/seller/product-form";
 import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 
+// Membatasi halaman perubahan produk kepada penjual.
 export default function EditProductPage() {
   return (
     <RequireRole roles={["seller"]}>
@@ -19,6 +20,7 @@ export default function EditProductPage() {
   );
 }
 
+// Mencari produk milik penjual sebelum menampilkan formulir perubahan.
 function EditProductView() {
   const router = useRouter();
   const params = useParams<{ id: string | string[] }>();
@@ -26,6 +28,7 @@ function EditProductView() {
 
   const query = useQuery({
     queryKey: ["seller", "products", "all"],
+    // Memuat produk yang dikelola untuk menemukan ID dari rute.
     queryFn: () => listSellerProducts(),
   });
 

@@ -23,8 +23,10 @@ type Entry struct {
 // konsisten dengan transaksi domain.
 type Repo struct{}
 
+// Menyediakan repositori untuk mencatat tindakan yang memerlukan audit.
 func NewRepo() *Repo { return &Repo{} }
 
+// Menulis peristiwa audit melalui DB atau transaksi domain yang sama.
 func (r *Repo) Insert(ctx context.Context, q db.DBTX, e Entry) error {
 	var meta []byte
 	if len(e.Metadata) == 0 {

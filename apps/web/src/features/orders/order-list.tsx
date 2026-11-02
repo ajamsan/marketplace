@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/feedback";
 import type { OrderSummary } from "@/lib/api/types";
 import { formatDateTime, formatIDR } from "@/lib/format";
 
+// Menampilkan daftar ringkas pesanan atau ajakan membuka katalog saat masih kosong.
 export function OrderList({ orders }: { orders: OrderSummary[] }) {
   if (orders.length === 0) {
     return (

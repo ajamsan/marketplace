@@ -34,8 +34,10 @@ interface StallSlice {
   items: OrderItemLine[];
 }
 
+// Menggabungkan item, pembayaran, dan pemenuhan menurut stan yang ditangani penjual.
 function buildSlices(order: SellerOrder): StallSlice[] {
   const slices = new Map<string, StallSlice>();
+  // Menyiapkan wadah stan sekali agar seluruh data stan masuk ke kelompok yang sama.
   const ensure = (stallId: string, stallName: string): StallSlice => {
     const existing = slices.get(stallId);
     if (existing) return existing;
@@ -71,6 +73,7 @@ export interface OrderQueueProps {
   onLoadMore?: () => void;
 }
 
+// Menyajikan antrean penjual dengan status pembayaran dan aksi pemenuhan per stan.
 export function OrderQueue({
   orders,
   isLoading,
@@ -85,10 +88,12 @@ export function OrderQueue({
     payment: PaymentLine;
   } | null>(null);
 
+  // Menentukan pesanan yang seluruh pembayarannya sudah diterima.
   function isPaid(order: SellerOrder): boolean {
     return order.payments.length > 0 && order.payments.every((p) => p.status === "cash_paid");
   }
 
+  // Mengecualikan pesanan selesai dari nomor antrean aktif.
   function isOrderDone(order: SellerOrder): boolean {
     return order.status === "completed";
   }

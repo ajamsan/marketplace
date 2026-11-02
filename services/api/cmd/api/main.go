@@ -29,6 +29,7 @@ import (
 	"kantinkampus/api/internal/users"
 )
 
+// Merakit layanan aplikasi dan mengelola siklus hidup server hingga shutdown.
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -141,4 +142,3 @@ func main() {
 	}
 	log.Info("server berhenti")
 }
-

@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 
 import { useTheme } from "@/lib/theme/use-theme";
 
+// Mengubah tema dan memberi label aksi sesuai tema yang sedang digunakan.
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   const nextLabel = theme === "dark" ? "Aktifkan tema terang" : "Aktifkan tema gelap";

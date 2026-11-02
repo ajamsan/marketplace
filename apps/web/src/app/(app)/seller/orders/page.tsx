@@ -7,6 +7,7 @@ import { RequireRole } from "@/features/auth/guards";
 import { listSellerOrders } from "@/features/seller/api";
 import { OrderQueue } from "@/features/seller/order-queue";
 
+// Membatasi antrean pesanan pada akun penjual.
 export default function SellerOrdersPage() {
   return (
     <RequireRole roles={["seller"]}>
@@ -15,11 +16,14 @@ export default function SellerOrdersPage() {
   );
 }
 
+// Memuat dan menggabungkan halaman antrean untuk ditampilkan per stan.
 function SellerOrdersView() {
   const query = useInfiniteQuery({
     queryKey: ["seller", "orders"],
+    // Mengambil halaman antrean berdasarkan cursor terakhir dari server.
     queryFn: ({ pageParam }) => listSellerOrders(pageParam),
     initialPageParam: null as string | null,
+    // Meneruskan cursor untuk memuat batch antrean berikutnya.
     getNextPageParam: (lastPage) => lastPage.next_cursor,
   });
 

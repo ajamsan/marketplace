@@ -25,6 +25,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
 };
 
+// Mengembalikan navigasi yang sesuai peran dan daftar kosong untuk sesi anonim.
 export function navItemsForRole(role: Role | null | undefined): NavItem[] {
   if (!role) return [];
   return NAV_ITEMS[role] ?? [];

@@ -16,6 +16,7 @@ type rawResponse struct {
 	cookies map[string]*http.Cookie
 }
 
+// Mengirim permintaan mentah agar cookie refresh dan header CSRF dapat diuji langsung.
 func (e *env) rawRequest(t *testing.T, method, path string, body any, token, csrf, refresh string) rawResponse {
 	t.Helper()
 	var reader io.Reader
@@ -56,6 +57,7 @@ func (e *env) rawRequest(t *testing.T, method, path string, body any, token, csr
 
 // loginWithCookies melakukan login penuh dan mengembalikan access token serta
 // cookie refresh/CSRF yang perlu diuji.
+// Menyelesaikan login dan mengambil token serta cookie yang diperlukan pengujian.
 func (e *env) loginWithCookies(t *testing.T, email, password string) (accessToken, refresh, csrf string) {
 	t.Helper()
 	mark := e.mailer.count()
@@ -87,6 +89,7 @@ func (e *env) loginWithCookies(t *testing.T, email, password string) (accessToke
 
 // TestRefreshRotationAndReuseDetection memverifikasi rotasi refresh token dan
 // pencabutan keluarga token saat token lama dipakai ulang (AUTH-09).
+// Memastikan rotasi refresh token mendeteksi pemakaian ulang dan mencabut keluarganya.
 func TestRefreshRotationAndReuseDetection(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "buyer.rot", "rot@example.com", "password-kuat-123", "buyer")
@@ -131,6 +134,7 @@ func TestRefreshRotationAndReuseDetection(t *testing.T) {
 }
 
 // TestLogoutRevokesSession memastikan logout mencabut sesi saat ini.
+// Memastikan logout mencabut sesi server dan membersihkan cookie klien.
 func TestLogoutRevokesSession(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "buyer.out", "out@example.com", "password-kuat-123", "buyer")
@@ -149,6 +153,7 @@ func TestLogoutRevokesSession(t *testing.T) {
 }
 
 // TestSellerProductsList memastikan seller hanya melihat produk stan yang dikelolanya.
+// Memastikan penjual hanya melihat produk dari stan yang dikelolanya.
 func TestSellerProductsList(t *testing.T) {
 	e := newEnv(t)
 	sellerA := e.seedUser(t, "seller.lista", "selleraa@example.com", "password-kuat-123", "seller")

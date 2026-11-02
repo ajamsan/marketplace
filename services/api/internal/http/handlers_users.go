@@ -11,6 +11,7 @@ import (
 	"kantinkampus/api/internal/users"
 )
 
+// Mengambil profil pengguna yang terautentikasi.
 func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	p, err := s.Users.Me(r.Context(), ac.UserID)
@@ -21,6 +22,7 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, p)
 }
 
+// Memvalidasi dan menyimpan perubahan profil pengguna.
 func (s *Server) handleMeUpdate(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	var req meUpdateRequest
@@ -70,6 +72,7 @@ func (s *Server) readUploadFile(w http.ResponseWriter, r *http.Request) ([]byte,
 	return data, true
 }
 
+// Memproses foto profil setelah membatasi ukuran dan memeriksa jenis gambar.
 func (s *Server) handleProfilePhotoUpload(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	data, ok := s.readUploadFile(w, r)
@@ -93,6 +96,7 @@ func (s *Server) handleProfilePhotoUpload(w http.ResponseWriter, r *http.Request
 	httpx.WriteData(w, r, http.StatusOK, p)
 }
 
+// Menghapus foto profil pengguna dan mengembalikan profil terbaru.
 func (s *Server) handleProfilePhotoDelete(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	p, err := s.Users.DeletePhoto(r.Context(), ac.UserID, s.requestID(r))

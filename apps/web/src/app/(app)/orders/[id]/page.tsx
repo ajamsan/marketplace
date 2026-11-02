@@ -10,12 +10,14 @@ import { OrderDetail } from "@/features/orders/order-detail";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 
+// Memuat satu pesanan dari parameter rute dan menyediakan tampilan saat gagal.
 export default function OrderDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
 
   const order = useQuery({
     queryKey: ["orders", id],
+    // Mengambil rincian pesanan sesuai ID pada alamat halaman.
     queryFn: () => getOrder(id),
   });
 

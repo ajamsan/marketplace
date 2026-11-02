@@ -12,12 +12,14 @@ import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 
+// Memuat katalog berhalaman dan menggabungkannya untuk pencarian pembeli.
 export default function CatalogPage() {
   const [search, setSearch] = useState("");
   const [stallId, setStallId] = useState("");
 
   const products = useInfiniteQuery({
     queryKey: ["products", { stall_id: stallId, q: search }],
+    // Mengambil hasil sesuai filter dan posisi halaman yang sedang diminta.
     queryFn: ({ pageParam }) =>
       listProducts({
         stall_id: stallId || undefined,
@@ -25,6 +27,7 @@ export default function CatalogPage() {
         cursor: pageParam,
       }),
     initialPageParam: undefined as string | undefined,
+    // Menghentikan paginasi saat server tidak lagi memberikan cursor lanjutan.
     getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined,
   });
 

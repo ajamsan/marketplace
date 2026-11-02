@@ -9,6 +9,7 @@ import (
 )
 
 // doWithoutFatal melakukan request tanpa memanggil t.Fatal di dalam goroutine.
+// Mengirim permintaan uji yang mengembalikan hasil tanpa menghentikan skenario.
 func (e *env) doWithoutFatal(method, path string, body any, token string) (int, error) {
 	var reader *bytes.Reader
 	if body != nil {
@@ -35,6 +36,7 @@ func (e *env) doWithoutFatal(method, path string, body any, token string) (int, 
 
 // TestConcurrentOTPAttemptsCannotBypassLimit memastikan percobaan paralel tidak
 // melewati ambang 5 percobaan per ronde (PRD §6.2).
+// Memastikan permintaan paralel tidak melewati batas percobaan OTP.
 func TestConcurrentOTPAttemptsCannotBypassLimit(t *testing.T) {
 	e := newEnv(t)
 	reg := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
@@ -77,6 +79,7 @@ func TestConcurrentOTPAttemptsCannotBypassLimit(t *testing.T) {
 }
 
 // TestResendDoesNotClearLockout memastikan resend tidak menghapus lock aktif.
+// Memastikan pengiriman ulang kode tidak menghapus masa penguncian aktif.
 func TestResendDoesNotClearLockout(t *testing.T) {
 	e := newEnv(t)
 	reg := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
@@ -110,6 +113,7 @@ func TestResendDoesNotClearLockout(t *testing.T) {
 
 // TestPasswordFailuresAreCountedAcrossRequests memastikan request login baru
 // tidak mereset counter password yang sedang berjalan.
+// Memastikan kegagalan kata sandi dihitung lintas permintaan terpisah.
 func TestPasswordFailuresAreCountedAcrossRequests(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "buyer.pw", "pw@example.com", "password-kuat-123", "buyer")

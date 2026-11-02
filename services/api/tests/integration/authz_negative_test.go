@@ -10,6 +10,7 @@ import (
 // TestNegativeAuthorizationMatrix memverifikasi matriks negatif PRD §2.4:
 // buyer tidak boleh memakai endpoint seller/admin, seller tidak boleh
 // mengakses stan seller lain, dan seller bukan admin tidak boleh menyetujui stan.
+// Memastikan peran tidak dapat membaca atau mengubah resource di luar izinnya.
 func TestNegativeAuthorizationMatrix(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "buyer.neg", "buyerneg@example.com", "password-kuat-123", "buyer")
@@ -91,6 +92,7 @@ func TestNegativeAuthorizationMatrix(t *testing.T) {
 }
 
 // TestBuyerCannotReadForeignOrder memastikan detail pesanan hanya terlihat oleh pemiliknya.
+// Memastikan pembeli tidak dapat mengambil pesanan milik akun lain.
 func TestBuyerCannotReadForeignOrder(t *testing.T) {
 	e := newEnv(t)
 	e.seedUser(t, "buyer.a", "buyera@example.com", "password-kuat-123", "buyer")

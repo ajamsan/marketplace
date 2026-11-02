@@ -12,6 +12,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Field, Select } from "@/components/ui/form";
 
+// Membatasi daftar produk pengelolaan kepada penjual.
 export default function SellerProductsPage() {
   return (
     <RequireRole roles={["seller"]}>
@@ -20,12 +21,14 @@ export default function SellerProductsPage() {
   );
 }
 
+// Memuat produk dan stan agar penjual dapat memfilter daftar yang dikelola.
 function SellerProductsView() {
   const [stallId, setStallId] = useState("");
 
   const stallsQuery = useQuery({ queryKey: ["seller", "stalls"], queryFn: listSellerStalls });
   const productsQuery = useQuery({
     queryKey: ["seller", "products", stallId || "all"],
+    // Mengambil produk pada stan terpilih atau seluruh stan penjual.
     queryFn: () => listSellerProducts(stallId || undefined),
   });
 

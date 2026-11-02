@@ -24,6 +24,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   size?: ButtonSize;
 }
 
+// Menggabungkan ukuran, varian, dan atribut native ke kontrol tombol bersama.
 export function Button({
   className,
   variant = "primary",

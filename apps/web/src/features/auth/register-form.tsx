@@ -19,7 +19,7 @@ type RegisterValues = {
 
 type FieldKey = keyof RegisterValues;
 
-const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._]{1,28}[a-z0-9]$/;
+const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._ ]{1,28}[a-z0-9]$/;
 
 const ROLE_OPTIONS: { id: "buyer" | "seller"; label: string; description: string }[] = [
   {
@@ -48,6 +48,7 @@ const registerSchema = z.object({
   role: z.enum(["buyer", "seller"], { error: "Pilih peran akun." }),
 });
 
+// Mengubah daftar masalah validasi menjadi pesan per kolom formulir.
 function issuesToFieldErrors(error: z.ZodError): Partial<Record<FieldKey, string>> {
   const result: Partial<Record<FieldKey, string>> = {};
   for (const issue of error.issues) {
@@ -57,6 +58,7 @@ function issuesToFieldErrors(error: z.ZodError): Partial<Record<FieldKey, string
   return result;
 }
 
+// Mengelola pendaftaran akun dan meneruskan pengguna ke langkah verifikasi email.
 export function RegisterForm() {
   const router = useRouter();
   const [values, setValues] = useState<RegisterValues>({
@@ -69,12 +71,14 @@ export function RegisterForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  // Memperbarui satu nilai formulir sekaligus membersihkan pesan terkait.
   function update<K extends FieldKey>(key: K, value: RegisterValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
     setFieldErrors((current) => ({ ...current, [key]: undefined }));
     setFormError(null);
   }
 
+  // Menormalisasi data, memvalidasinya, lalu mengirim permintaan pendaftaran.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
@@ -82,7 +86,7 @@ export function RegisterForm() {
     const payload = {
       username: values.username.trim(),
       email: values.email.trim().toLowerCase(),
-      password: values.password,
+      password: values.password.trim(),
       role: values.role,
     };
     const parsed = registerSchema.safeParse(payload);

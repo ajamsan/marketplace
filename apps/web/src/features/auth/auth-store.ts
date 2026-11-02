@@ -39,11 +39,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  // Menyimpan token sementara dan profil setelah verifikasi masuk berhasil.
   signIn: (tokens: AuthTokens) => {
     setAccessToken(tokens.access_token);
     set({ status: "authenticated", user: tokens.user });
   },
 
+  /**
+   * Mengakhiri sesi jarak jauh lalu membersihkan token lokal meski permintaan gagal.
+   */
   signOut: async () => {
     try {
       await authApi.logout();
@@ -54,14 +58,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ status: "anonymous", user: null });
   },
 
+  // Menghapus kredensial lokal saat sesi tidak lagi dapat dipulihkan.
   markAnonymous: () => {
     setAccessToken(null);
     set({ status: "anonymous", user: null });
   },
 
+  // Menyelaraskan profil aktif setelah data pengguna diperbarui.
   setUser: (user: UserInfo | null) => set({ user }),
 }));
 
+// Memilih halaman awal berdasarkan peran agar pengguna diarahkan ke area yang sesuai.
 export function homePathForRole(role?: UserInfo["role"] | null): string {
   switch (role) {
     case "seller":

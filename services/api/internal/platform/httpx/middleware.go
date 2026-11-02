@@ -12,6 +12,7 @@ import (
 type Middleware func(http.Handler) http.Handler
 
 // Chain menerapkan middleware dari luar ke dalam: Chain(h, m1, m2) -> m1(m2(h)).
+// Menerapkan middleware berurutan sehingga pembungkus pertama berjalan paling luar.
 func Chain(h http.Handler, mw ...Middleware) http.Handler {
 	for i := len(mw) - 1; i >= 0; i-- {
 		h = mw[i](h)
@@ -20,6 +21,7 @@ func Chain(h http.Handler, mw ...Middleware) http.Handler {
 }
 
 // NewRequestID menghasilkan id korelasi acak.
+// Menghasilkan ID acak untuk menghubungkan log dan respons satu permintaan.
 func NewRequestID() string {
 	b := make([]byte, 12)
 	_, _ = rand.Read(b)
@@ -27,6 +29,7 @@ func NewRequestID() string {
 }
 
 // RequestIDMiddleware memberi setiap request correlation id (SESS-04, §12.4).
+// Memasang ID permintaan pada konteks dan header respons.
 func RequestIDMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := r.Header.Get("X-Request-Id")
@@ -39,6 +42,7 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 }
 
 // RecoverMiddleware mencegah crash proses dari panic handler; respons 500 generik.
+// Mengubah panic handler menjadi respons aman sambil mencatat detail di server.
 func RecoverMiddleware(log *slog.Logger) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -60,12 +64,14 @@ type statusRecorder struct {
 	status int
 }
 
+// Merekam status pertama sambil meneruskannya ke ResponseWriter asli.
 func (s *statusRecorder) WriteHeader(code int) {
 	s.status = code
 	s.ResponseWriter.WriteHeader(code)
 }
 
 // AccessLogMiddleware mencatat akses terstruktur tanpa body (PRD §12.4).
+// Mencatat status dan durasi setiap permintaan tanpa membocorkan isi sensitif.
 func AccessLogMiddleware(log *slog.Logger) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -86,6 +92,7 @@ func AccessLogMiddleware(log *slog.Logger) Middleware {
 }
 
 // SecureHeadersMiddleware menyetel header keamanan dasar untuk API.
+// Menambahkan header keamanan pada seluruh respons HTTP.
 func SecureHeadersMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := w.Header()
@@ -99,6 +106,7 @@ func SecureHeadersMiddleware(next http.Handler) http.Handler {
 }
 
 // CORSMiddleware hanya mengizinkan origin terdaftar; kosong berarti same-origin (proxy).
+// Membatasi akses lintas origin pada daftar domain yang dikonfigurasi.
 func CORSMiddleware(allowed []string) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -126,6 +134,7 @@ func CORSMiddleware(allowed []string) Middleware {
 }
 
 // MaxBodyLimit menerapkan http.MaxBytesReader untuk seluruh request.
+// Menolak badan permintaan yang melampaui batas ukuran aplikasi.
 func MaxBodyLimit(n int64) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

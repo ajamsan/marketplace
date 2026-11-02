@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"strings"
 	"time"
 
 	"kantinkampus/api/internal/outbox"
@@ -39,6 +40,7 @@ type Service struct {
 	Log      *slog.Logger
 }
 
+// Menyatukan repositori, sesi, outbox, dan kebijakan autentikasi ke satu layanan.
 func NewService(cfg *config.Config, d *sql.DB, sess *sessions.Service, ob *outbox.Repo, log *slog.Logger) *Service {
 	return &Service{Cfg: cfg, DB: d, Repo: NewRepo(d), Sessions: sess, Outbox: ob, Log: log}
 }
@@ -63,8 +65,9 @@ func (s *Service) Register(ctx context.Context, ip string, in RegisterInput, req
 	if err != nil {
 		fields["email"] = err.Error()
 	}
-	if err := validate.ValidatePassword(in.Password); err != nil {
-		fields["password"] = err.Error()
+	password, pErr := validate.NormalizePassword(in.Password)
+	if pErr != nil {
+		fields["password"] = pErr.Error()
 	}
 	if err := validate.ValidateRole(in.Role); err != nil {
 		fields["role"] = err.Error()
@@ -105,7 +108,7 @@ func (s *Service) Register(ctx context.Context, ip string, in RegisterInput, req
 		return ErrEscalation
 	}
 
-	passwordHash, err := crypto.HashPassword(in.Password)
+	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {
 		return err
 	}
@@ -292,11 +295,13 @@ type LoginInput struct {
 
 // Login: password benar tanpa OTP tidak menghasilkan sesi (AUTH-03); respon
 // publik generik untuk email salah vs password salah (AUTH-06).
+// Memeriksa kata sandi dan memulai tahap OTP tanpa membuat sesi lebih awal.
 func (s *Service) Login(ctx context.Context, ip, emailRaw, password, requestID string) (string, error) {
 	email, err := validate.NormalizeEmail(emailRaw)
 	if err != nil {
 		return "", &ValidationError{Fields: map[string]string{"email": err.Error()}}
 	}
+	password = strings.TrimSpace(password)
 	emailHash := crypto.HashEmailKey(s.Cfg.OTPHashKey, email)
 	ipHash := crypto.HashIPKey(s.Cfg.OTPHashKey, ip)
 	emailIPHash := crypto.HashEmailIPKey(s.Cfg.OTPHashKey, email, ip)
@@ -392,6 +397,7 @@ type UserInfo struct {
 }
 
 // VerifyLogin menuntaskan login: konsumsi tantangan pre-auth + buat sesi baru.
+// Menukar bukti login dan OTP dengan sesi baru setelah seluruh batasan diperiksa.
 func (s *Service) VerifyLogin(ctx context.Context, ip, ipMasked, ua, preAuth, otp, requestID string) (*LoginSuccess, error) {
 	if err := validate.ValidateOTP(otp); err != nil {
 		return nil, ErrOTPInvalid
@@ -462,6 +468,7 @@ func (s *Service) VerifyLogin(ctx context.Context, ip, ipMasked, ua, preAuth, ot
 }
 
 // SignAccess menerbitkan access token JWT pendek dengan session id (AUTH-08).
+// Membuat access token singkat yang terikat pada pengguna dan sesi aktif.
 func (s *Service) SignAccess(userID, sessionID, role string, now time.Time) (string, int64, error) {
 	claims := jwt.Claims{
 		Iss: s.Cfg.JWTIssuer, Aud: s.Cfg.JWTAudience,
@@ -472,8 +479,9 @@ func (s *Service) SignAccess(userID, sessionID, role string, now time.Time) (str
 	return tok, int64(s.Cfg.AccessTokenTTL.Seconds()), err
 }
 
-// --- kebijakan throttle (PRD §6.2) ---
+// Kebijakan throttle (PRD §6.2).
 
+// Memeriksa penguncian percobaan sebelum alur autentikasi diteruskan.
 func (s *Service) checkLocks(ctx context.Context, flow, emailHash, emailIPHash string) error {
 	for _, sc := range []struct{ scope, key string }{
 		{"email", emailHash},
@@ -490,6 +498,7 @@ func (s *Service) checkLocks(ctx context.Context, flow, emailHash, emailIPHash s
 	return nil
 }
 
+// Mencatat kegagalan kata sandi dan menerapkan penguncian sesuai ambang batas.
 func (s *Service) recordPasswordFailure(ctx context.Context, emailHash, ipHash, emailIPHash string) error {
 	count, err := s.Repo.RecordFailure(ctx, "password", "email", emailHash)
 	if err != nil {
@@ -514,6 +523,7 @@ func (s *Service) recordPasswordFailure(ctx context.Context, emailHash, ipHash, 
 	return nil
 }
 
+// Mencatat kegagalan OTP dan menentukan kapan tantangan atau alur harus dikunci.
 func (s *Service) recordOTPFailure(ctx context.Context, flow, email, ip string, ch *Challenge, emailHash, ipHash, emailIPHash, requestID string) error {
 	attempt, ok, err := s.Repo.IncAttempt(ctx, ch.ID)
 	if err != nil {
@@ -545,4 +555,5 @@ func (s *Service) recordOTPFailure(ctx context.Context, flow, email, ip string, 
 	return ErrOTPInvalid
 }
 
+// Mengembalikan galat internal saat sesi baru merujuk ke pengguna yang hilang.
 func errInvalidUser() error { return errors.New("user tidak ditemukan untuk sesi baru") }

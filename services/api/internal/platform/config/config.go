@@ -57,6 +57,7 @@ type Config struct {
 const devJWTKey = "dev-insecure-jwt-key-change-me"
 const devOTPKey = "dev-insecure-otp-key-change-me"
 
+// Memuat konfigurasi environment dan menolak nilai yang tidak konsisten.
 func Load() (*Config, error) {
 	cfg := &Config{
 		AppEnv:     getEnv("APP_ENV", "development"),
@@ -128,9 +129,12 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
+// Menentukan apakah konfigurasi menjalankan layanan pada lingkungan produksi.
 func (c *Config) IsProduction() bool { return c.AppEnv == "production" }
+// Menandai konfigurasi nonproduksi untuk perilaku khusus pengembangan.
 func (c *Config) IsDevelopment() bool { return c.AppEnv != "production" }
 
+// Membaca teks environment dengan nilai cadangan saat variabel tidak terisi.
 func getEnv(key, def string) string {
 	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
 		return v
@@ -138,6 +142,7 @@ func getEnv(key, def string) string {
 	return def
 }
 
+// Membaca durasi dari environment dan mempertahankan nilai cadangan bila invalid.
 func getDuration(key string, def time.Duration) time.Duration {
 	v := strings.TrimSpace(os.Getenv(key))
 	if v == "" {
@@ -152,6 +157,7 @@ func getDuration(key string, def time.Duration) time.Duration {
 	return def
 }
 
+// Membaca bilangan bulat konfigurasi dengan fallback untuk masukan tidak valid.
 func getInt(key string, def int) int {
 	if n, err := strconv.Atoi(strings.TrimSpace(os.Getenv(key))); err == nil && n > 0 {
 		return n
@@ -159,6 +165,7 @@ func getInt(key string, def int) int {
 	return def
 }
 
+// Membaca nilai pecahan konfigurasi tanpa membiarkan nilai tak hingga.
 func getFloat(key string, def float64) float64 {
 	if f, err := strconv.ParseFloat(strings.TrimSpace(os.Getenv(key)), 64); err == nil && f > 0 {
 		return f
@@ -166,6 +173,7 @@ func getFloat(key string, def float64) float64 {
 	return def
 }
 
+// Membaca opsi boolean dari environment atau memakai nilai cadangan.
 func getBool(key string, def bool) bool {
 	switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
 	case "1", "true", "yes":
@@ -176,6 +184,7 @@ func getBool(key string, def bool) bool {
 	return def
 }
 
+// Memvalidasi daftar CIDR proxy yang dipercaya sebelum dipakai membaca IP klien.
 func parseCIDRs(s string) ([]*net.IPNet, error) {
 	var out []*net.IPNet
 	for _, part := range strings.Split(s, ",") {

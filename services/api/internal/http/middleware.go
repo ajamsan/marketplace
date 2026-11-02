@@ -28,6 +28,7 @@ type authCtx struct {
 	SessionID string
 }
 
+// Mengambil identitas autentikasi yang telah disimpan pada konteks permintaan.
 func currentAuth(r *http.Request) authCtx {
 	if v, ok := r.Context().Value(authCtxKey{}).(authCtx); ok {
 		return v
@@ -67,6 +68,7 @@ func (s *Server) authenticate(w http.ResponseWriter, r *http.Request) (authCtx, 
 	}, true
 }
 
+// Membungkus handler dengan validasi sesi tanpa membatasi peran tertentu.
 func (s *Server) authed(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ac, ok := s.authenticate(w, r)
@@ -99,6 +101,7 @@ const (
 	csrfCookieName    = "kk_csrf"
 )
 
+// Menyimpan refresh token pada cookie HttpOnly dengan masa berlaku konfigurasi.
 func (s *Server) setRefreshCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     refreshCookieName,
@@ -111,6 +114,7 @@ func (s *Server) setRefreshCookie(w http.ResponseWriter, token string) {
 	})
 }
 
+// Menyediakan token CSRF yang dapat dibaca klien untuk mekanisme double-submit.
 func (s *Server) setCSRFCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     csrfCookieName,
@@ -123,6 +127,7 @@ func (s *Server) setCSRFCookie(w http.ResponseWriter, token string) {
 	})
 }
 
+// Menghapus cookie sesi dan CSRF saat sesi berakhir atau tidak dapat dipakai.
 func (s *Server) clearAuthCookies(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{Name: refreshCookieName, Value: "", Path: "/api/v1/auth", MaxAge: -1})
 	http.SetCookie(w, &http.Cookie{Name: csrfCookieName, Value: "", Path: "/", MaxAge: -1})
@@ -139,7 +144,7 @@ func csrfPair(r *http.Request) (string, bool) {
 	return header, true
 }
 
-// --- error mapping domain → envelope (PRD §10.7) ---
+// Pemetaan error domain ke envelope (PRD §10.7).
 
 func (s *Server) writeDomainError(w http.ResponseWriter, r *http.Request, err error) {
 	fields := map[string]string{}
@@ -211,6 +216,7 @@ func (s *Server) writeDomainError(w http.ResponseWriter, r *http.Request, err er
 	}
 }
 
+// Menetapkan jeda minimum dan respons standar untuk permintaan yang dibatasi.
 func (s *Server) writeThrottle(w http.ResponseWriter, r *http.Request, retryAfter time.Duration) {
 	if retryAfter < time.Second {
 		retryAfter = time.Second

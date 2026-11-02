@@ -10,6 +10,7 @@ export const ACCENTS: { id: AccentId; label: string; swatch: string }[] = [
 
 export const DEFAULT_ACCENT: AccentId = "blue";
 
+// Memastikan nilai tersimpan termasuk salah satu aksen yang didukung aplikasi.
 export function isAccentId(value: unknown): value is AccentId {
   return ACCENTS.some((accent) => accent.id === value);
 }

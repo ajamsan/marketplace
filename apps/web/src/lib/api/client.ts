@@ -13,6 +13,7 @@ export class ApiError extends Error {
   readonly fields?: Record<string, string>;
   readonly requestId?: string;
 
+  // Membentuk galat terstruktur agar pemanggil dapat membaca status dan rincian API.
   constructor(status: number, body: ApiFailure) {
     super(body.error?.message ?? "Terjadi kesalahan pada server.");
     this.name = "ApiError";
@@ -22,15 +23,18 @@ export class ApiError extends Error {
     this.requestId = body.meta?.request_id;
   }
 
+  // Menandai kegagalan yang memerlukan autentikasi ulang.
   get isUnauthorized() {
     return this.status === 401;
   }
 
+  // Menandai kegagalan yang membatasi frekuensi permintaan.
   get isRateLimited() {
     return this.status === 429;
   }
 }
 
+// Membaca cookie browser yang dipakai untuk melindungi permintaan lintas situs.
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
@@ -39,6 +43,7 @@ function readCookie(name: string): string | null {
 
 const CSRF_COOKIE = "kk_csrf";
 
+// Mengambil token perlindungan permintaan dari cookie yang dikelola server.
 function csrfToken(): string | null {
   return readCookie(CSRF_COOKIE);
 }
@@ -55,6 +60,7 @@ export interface RequestOptions {
   signal?: AbortSignal;
 }
 
+// Mengubah respons menjadi data terstruktur dan mengabaikan badan yang bukan JSON.
 async function parseBody(response: Response): Promise<ApiFailure | ApiSuccess<unknown> | null> {
   const text = await response.text();
   if (!text) return null;
@@ -86,6 +92,7 @@ async function refreshSession(): Promise<boolean> {
   }
 }
 
+// Menyatukan header, CSRF, pemulihan sesi, dan pemetaan galat untuk permintaan API.
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const {
     method = "GET",
@@ -147,14 +154,19 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 }
 
 export const api = {
+  // Menyediakan permintaan baca dengan metode HTTP yang sesuai.
   get: <T>(path: string, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: "GET" }),
+  // Mengirim data baru dan meneruskan opsi autentikasi pemanggil.
   post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: "POST", body }),
+  // Mengganti data yang sudah ada melalui permintaan PUT.
   put: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: "PUT", body }),
+  // Mengirim perubahan sebagian tanpa mengganti seluruh data.
   patch: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: "PATCH", body }),
+  // Menghapus data melalui endpoint yang ditentukan.
   delete: <T>(path: string, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: "DELETE" }),
 };

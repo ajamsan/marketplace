@@ -9,11 +9,13 @@ import { ThemeToggle } from "./theme-toggle";
 import { useAuthStore } from "@/features/auth/auth-store";
 import { Button } from "@/components/ui/button";
 
+// Menampilkan identitas pengguna, preferensi tampilan, dan aksi keluar.
 export function Header() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const signOut = useAuthStore((state) => state.signOut);
 
+  // Mengakhiri sesi sebelum mengarahkan pengguna ke halaman masuk.
   const handleSignOut = async () => {
     await signOut();
     router.replace("/login");

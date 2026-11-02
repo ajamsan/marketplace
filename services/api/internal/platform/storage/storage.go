@@ -20,8 +20,13 @@ var ErrDisabled = errors.New("penyimpanan foto belum dikonfigurasi")
 // Disabled mengembalikan error untuk semua operasi.
 type Disabled struct{}
 
+// Menolak unggahan secara eksplisit saat penyimpanan belum dikonfigurasi.
 func (Disabled) Upload(context.Context, string, string, []byte) error { return ErrDisabled }
+
+// Menolak penghapusan saat backend penyimpanan tidak tersedia.
 func (Disabled) Delete(context.Context, string) error                 { return ErrDisabled }
+
+// Menolak pembuatan URL saat backend penyimpanan tidak tersedia.
 func (Disabled) SignedURL(context.Context, string, time.Duration) (string, error) {
 	return "", ErrDisabled
 }

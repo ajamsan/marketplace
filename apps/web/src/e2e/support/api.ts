@@ -2,6 +2,7 @@ import type { APIRequestContext } from "@playwright/test";
 
 export const API_BASE_URL = process.env.E2E_API_BASE_URL ?? "http://localhost:8080";
 
+// Menunggu endpoint kesehatan aktif sebelum pengujian browser dimulai.
 export async function waitForApi(request: APIRequestContext): Promise<void> {
   const deadline = Date.now() + 30_000;
   let lastError = "tidak diketahui";
@@ -24,6 +25,7 @@ export interface RegisteredUser {
   password: string;
 }
 
+// Membuat kredensial unik agar data uji tidak bertabrakan antarproses.
 export function uniqueUser(prefix: string): RegisteredUser {
   const suffix = Math.random().toString(36).slice(2, 8);
   return {

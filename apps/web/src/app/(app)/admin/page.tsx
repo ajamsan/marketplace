@@ -8,6 +8,7 @@ import { RequireRole } from "@/features/auth/guards";
 import { listAdminStalls, type AdminStallStatus } from "@/features/admin/api";
 import { PendingStalls } from "@/features/admin/pending-stalls";
 
+// Membatasi halaman administrasi untuk peran admin.
 export default function AdminPage() {
   return (
     <RequireRole roles={["admin"]}>
@@ -16,11 +17,13 @@ export default function AdminPage() {
   );
 }
 
+// Memuat dan memfilter stan yang menunggu keputusan administrasi.
 function AdminStallsView() {
   const [status, setStatus] = useState<AdminStallStatus | "">("");
 
   const query = useQuery({
     queryKey: ["admin", "stalls", status || "all"],
+    // Menyesuaikan daftar stan dengan filter status terkini.
     queryFn: () => listAdminStalls(status),
   });
 

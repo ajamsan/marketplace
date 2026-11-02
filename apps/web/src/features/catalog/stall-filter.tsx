@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listStalls } from "./api";
 import { Field, Select } from "@/components/ui/form";
 
+// Menyediakan pilihan stan dari data server dan mempertahankan status pemuatan.
 export function StallFilter({
   value,
   onChange,

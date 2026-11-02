@@ -17,6 +17,7 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+// Menukar panel pengaturan dan mendukung perpindahan tab dengan keyboard.
 export default function SettingsPage() {
   const [active, setActive] = useState<TabId>("profil");
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({
@@ -26,6 +27,7 @@ export default function SettingsPage() {
     tampilan: null,
   });
 
+  // Mengelola tombol panah, Home, dan End pada daftar tab aksesibel.
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const index = TABS.findIndex((tab) => tab.id === active);
     let nextIndex = index;

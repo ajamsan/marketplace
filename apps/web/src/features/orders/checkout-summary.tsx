@@ -9,6 +9,7 @@ import { ApiError } from "@/lib/api/client";
 import type { OrderPreview } from "@/lib/api/types";
 import { formatIDR } from "@/lib/format";
 
+// Menampilkan ringkasan biaya dan mengirim pesanan dengan kunci idempotensi.
 export function CheckoutSummary({
   preview,
   items,
@@ -29,6 +30,7 @@ export function CheckoutSummary({
     idempotencyKeyRef.current = null;
   }, [itemsSignature]);
 
+  // Mengirim konfirmasi checkout dan meneruskan ID pesanan setelah tersimpan.
   const handleConfirm = async () => {
     setError(null);
     setFieldErrors({});

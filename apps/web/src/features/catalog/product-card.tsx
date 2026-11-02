@@ -16,6 +16,7 @@ import type { Product } from "@/lib/api/types";
 import { formatIDR } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+// Menampilkan foto produk atau placeholder yang tetap memiliki nama aksesibel.
 export const ProductPhoto = memo(function ProductPhoto({
   src,
   alt,
@@ -51,6 +52,7 @@ export const ProductPhoto = memo(function ProductPhoto({
   );
 });
 
+// Menyajikan informasi produk serta kontrol keranjang khusus pembeli.
 export function ProductCard({ product }: { product: Product }) {
   const role = useAuthStore((state) => state.user?.role);
   const isBuyer = role === "buyer";
@@ -88,6 +90,7 @@ export function ProductCard({ product }: { product: Product }) {
   );
 }
 
+// Mengatur penambahan produk dan menampilkan perubahan jumlah keranjang.
 function ProductActions({ product, available }: { product: Product; available: boolean }) {
   const { data: cart } = useCart({ enabled: true });
   const addToCart = useSetCartQuantity();
@@ -96,6 +99,7 @@ function ProductActions({ product, available }: { product: Product; available: b
   const inCart = cart?.items.find((item) => item.product_id === product.id)?.quantity ?? 0;
   const atLimit = inCart >= MAX_QUANTITY;
 
+  // Menambah satu unit ke keranjang sambil mencegah jumlah melampaui batas.
   const handleAdd = () => {
     setMessage(null);
     if (atLimit) {
@@ -105,7 +109,9 @@ function ProductActions({ product, available }: { product: Product; available: b
     addToCart.mutate(
       { productId: product.id, quantity: inCart + 1 },
       {
+        // Menghapus pesan lama setelah penambahan berhasil.
         onSuccess: () => setMessage(null),
+        // Menyajikan pesan server bila penambahan tidak dapat disimpan.
         onError: (error) =>
           setMessage(
             error instanceof ApiError

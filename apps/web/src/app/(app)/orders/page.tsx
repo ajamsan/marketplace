@@ -10,11 +10,14 @@ import { Button } from "@/components/ui/button";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 
+// Memuat riwayat pesanan secara bertahap dan menampilkan statusnya kepada pembeli.
 export default function OrdersPage() {
   const orders = useInfiniteQuery({
     queryKey: ["orders"],
+    // Meminta halaman riwayat berdasarkan cursor terakhir.
     queryFn: ({ pageParam }) => listOrders(pageParam),
     initialPageParam: undefined as string | undefined,
+    // Menggunakan cursor respons untuk menentukan apakah halaman lanjutan tersedia.
     getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined,
   });
 

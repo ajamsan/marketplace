@@ -20,6 +20,7 @@ type MailjetClient struct {
 	httpClient *http.Client
 }
 
+// Membentuk klien email dengan kredensial yang hanya digunakan di server.
 func NewMailjet(apiKey, secret, fromEmail, fromName string) *MailjetClient {
 	return &MailjetClient{
 		apiKey:     apiKey,
@@ -40,6 +41,7 @@ type mjResponse struct {
 	} `json:"Messages"`
 }
 
+// Mengirim kode verifikasi dan mengembalikan identitas pesan provider.
 func (c *MailjetClient) SendOTP(ctx context.Context, to, code, purpose string) (string, error) {
 	subject, text := otpCopy(code, purpose)
 	payload := map[string]any{
@@ -85,6 +87,7 @@ func (c *MailjetClient) SendOTP(ctx context.Context, to, code, purpose string) (
 	return fmt.Sprintf("%d", out.Messages[0].To[0].MessageID), nil
 }
 
+// Menyusun subjek dan isi email sesuai tujuan OTP.
 func otpCopy(code, purpose string) (subject, text string) {
 	switch purpose {
 	case "register":

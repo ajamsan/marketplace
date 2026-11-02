@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// Memastikan kata sandi yang benar lolos verifikasi dan yang berbeda ditolak.
 func TestHashAndVerifyPassword(t *testing.T) {
 	hash, err := HashPassword("rahasia-kuat-123")
 	if err != nil {
@@ -21,6 +22,7 @@ func TestHashAndVerifyPassword(t *testing.T) {
 	}
 }
 
+// Memastikan hash berbeda untuk kata sandi sama karena salt dibuat per pemanggilan.
 func TestHashPasswordUsesSaltedHash(t *testing.T) {
 	a, _ := HashPassword("sama-sama")
 	b, _ := HashPassword("sama-sama")
@@ -29,6 +31,7 @@ func TestHashPasswordUsesSaltedHash(t *testing.T) {
 	}
 }
 
+// Memastikan kode OTP memiliki format yang diharapkan dan hash-nya dapat diverifikasi.
 func TestOTPIsSixDigitsAndVerifies(t *testing.T) {
 	key := []byte("otp-key")
 	code, err := GenerateOTP()
@@ -53,6 +56,7 @@ func TestOTPIsSixDigitsAndVerifies(t *testing.T) {
 	}
 }
 
+// Memastikan rahasia yang dienkripsi dapat dipulihkan hanya dengan kunci yang sama.
 func TestSecretEncryptionRoundTrip(t *testing.T) {
 	key := []byte("otp-key")
 	enc, err := EncryptSecret(key, "123456")
@@ -74,6 +78,7 @@ func TestSecretEncryptionRoundTrip(t *testing.T) {
 	}
 }
 
+// Memastikan pembantu token menghasilkan nilai acak dan kode publik yang valid.
 func TestTokenHelpers(t *testing.T) {
 	tok, err := NewToken()
 	if err != nil || len(tok) < 40 {

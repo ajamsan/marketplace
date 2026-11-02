@@ -5,6 +5,7 @@ import { otpCount, waitForOtp } from "./support/otp";
 
 const BUYER = { email: "buyer@kantin.local", password: "kantin-dev-buyer-123" };
 
+// Membuat sesi terverifikasi untuk menguji pencabutan perangkat lain.
 async function login(page: import("@playwright/test").Page, account: { email: string; password: string }) {
   const before = otpCount();
   await page.goto("/login");
@@ -60,6 +61,7 @@ test.describe("Pengelolaan sesi", () => {
   });
 });
 
+// Mengambil cookie CSRF untuk menguji refresh sesi langsung melalui API.
 async function readCsrf(context: import("@playwright/test").BrowserContext): Promise<string> {
   const cookies = await context.cookies();
   const csrf = cookies.find((cookie) => cookie.name === "kk_csrf");

@@ -19,6 +19,7 @@ import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 import { formatIDR } from "@/lib/format";
 
+// Menampilkan rincian produk dan aksi penambahan jumlah ke keranjang.
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -31,6 +32,7 @@ export default function ProductDetailPage() {
 
   const product = useQuery({
     queryKey: ["products", id],
+    // Memuat data produk berdasarkan ID pada alamat halaman.
     queryFn: () => getProduct(id),
   });
 
@@ -39,6 +41,7 @@ export default function ProductDetailPage() {
   const inCart = cart?.items.find((item) => item.product_id === id)?.quantity ?? 0;
   const atLimit = inCart + quantity > MAX_QUANTITY;
 
+  // Memeriksa batas jumlah dan mengirim hasil pilihan ke keranjang.
   const handleAdd = () => {
     if (!data) return;
     setMessage(null);
@@ -49,7 +52,9 @@ export default function ProductDetailPage() {
     addToCart.mutate(
       { productId: data.id, quantity: inCart + quantity },
       {
+        // Memberi umpan balik setelah server menerima perubahan keranjang.
         onSuccess: () => setMessage("Masuk keranjang."),
+        // Menampilkan alasan kegagalan dari API atau pesan umum jaringan.
         onError: (error) =>
           setMessage(
             error instanceof ApiError

@@ -20,8 +20,10 @@ type Repo struct {
 	otpKey []byte
 }
 
+// Menyediakan repositori outbox dengan kunci untuk mengenkripsi kode sekali pakai.
 func NewRepo(otpKey []byte) *Repo { return &Repo{otpKey: otpKey} }
 
+// Menambahkan pesan email ke transaksi yang sama dengan pembuatan tantangan.
 func (r *Repo) Enqueue(ctx context.Context, q db.DBTX, purpose, recipient, challengeID, code string) error {
 	enc, err := crypto.EncryptSecret(r.otpKey, code)
 	if err != nil {
@@ -49,6 +51,7 @@ type Worker struct {
 	MaxAttempts int
 }
 
+// Menyiapkan pengirim latar belakang dengan jeda dan batas percobaan bawaan.
 func NewWorker(database *sql.DB, m mailer.Mailer, otpKey []byte, log *slog.Logger) *Worker {
 	return &Worker{DB: database, Mailer: m, OTPKey: otpKey, Log: log, Interval: 5 * time.Second, MaxAttempts: 5}
 }
@@ -61,6 +64,7 @@ type pendingMail struct {
 	CodeEnc     string
 }
 
+// Memproses antrean berkala sampai konteks aplikasi dibatalkan.
 func (w *Worker) Run(ctx context.Context) {
 	t := time.NewTicker(w.Interval)
 	defer t.Stop()
@@ -78,6 +82,7 @@ func (w *Worker) Run(ctx context.Context) {
 	}
 }
 
+// Mengunci batch pesan yang siap diproses agar worker lain tidak mengambilnya.
 func (w *Worker) processBatch(ctx context.Context) error {
 	return db.WithTx(ctx, w.DB, func(tx *sql.Tx) error {
 		rows, err := tx.QueryContext(ctx, `
@@ -117,6 +122,7 @@ func (w *Worker) processBatch(ctx context.Context) error {
 	})
 }
 
+// Mengirim satu pesan hanya selama tantangannya aktif dan menjadwalkan retry bila perlu.
 func (w *Worker) sendOne(ctx context.Context, tx *sql.Tx, m pendingMail) {
 	// Tantangan sudah dikonsumsi/kedaluwarsa/digantikan: pesan tidak relevan lagi.
 	var active bool

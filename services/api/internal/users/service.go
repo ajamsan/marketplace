@@ -30,6 +30,7 @@ type Service struct {
 	Audit   *audit.Repo
 }
 
+// Menyiapkan layanan profil dengan penyimpanan media dan pencatatan audit.
 func NewService(cfg *config.Config, db *sql.DB, st storage.Storage, a *audit.Repo) *Service {
 	return &Service{Cfg: cfg, DB: db, Storage: st, Audit: a}
 }
@@ -45,6 +46,7 @@ type Profile struct {
 	CreatedAt       time.Time         `json:"created_at"`
 }
 
+// Memuat profil aktif beserta preferensi dan URL foto yang ditandatangani.
 func (s *Service) Me(ctx context.Context, userID string) (*Profile, error) {
 	var p Profile
 	var imageKey sql.NullString
@@ -74,6 +76,7 @@ type InvalidError struct {
 	Fields map[string]string
 }
 
+// Menyediakan pesan aman untuk kesalahan validasi profil.
 func (e *InvalidError) Error() string { return "Data tidak valid" }
 
 // Update mengubah field profil yang diizinkan; email dan role tidak dapat
@@ -200,6 +203,7 @@ func (s *Service) DeletePhoto(ctx context.Context, userID string, requestID stri
 	return s.Me(ctx, userID)
 }
 
+// Membaca preferensi JSON dan memberi nilai kosong bila data lama tidak valid.
 func decodePrefs(b []byte) map[string]string {
 	out := map[string]string{}
 	if len(b) > 0 {
@@ -213,6 +217,7 @@ var allowedPrefs = map[string]map[string]bool{
 	"accent":     {"red": true, "yellow": true, "green": true, "blue": true, "purple": true},
 }
 
+// Memilih dan memvalidasi preferensi yang memang didukung aplikasi.
 func normalizePreferences(in map[string]string) (map[string]string, error) {
 	if in == nil {
 		return nil, nil
@@ -231,6 +236,7 @@ func normalizePreferences(in map[string]string) (map[string]string, error) {
 	return out, nil
 }
 
+// Mengenali konflik batas unik agar dapat dipetakan menjadi galat domain.
 func isUniqueViolation(err error) bool {
 	var pe *pgconn.PgError
 	return errors.As(err, &pe) && pe.Code == "23505"

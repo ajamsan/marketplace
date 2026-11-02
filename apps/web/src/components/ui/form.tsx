@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 
+// Menyeragamkan label formulir dengan gaya teks aplikasi.
 export function Label({
   className,
   children,
@@ -18,6 +19,7 @@ export function Label({
 const fieldClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none disabled:opacity-60";
 
+// Membungkus input native dengan gaya dan atribut yang diteruskan ke browser.
 export function Input({
   className,
   ...props
@@ -25,6 +27,7 @@ export function Input({
   return <input className={cn(fieldClass, className)} {...props} />;
 }
 
+// Membungkus kolom teks panjang dengan tampilan formulir bersama.
 export function Textarea({
   className,
   ...props
@@ -32,6 +35,7 @@ export function Textarea({
   return <textarea className={cn(fieldClass, "min-h-24", className)} {...props} />;
 }
 
+// Membungkus daftar pilihan native agar konsisten dengan kolom lain.
 export function Select({
   className,
   children,
@@ -44,6 +48,7 @@ export function Select({
   );
 }
 
+// Menghubungkan label, kontrol, petunjuk, dan galat dalam satu unit aksesibel.
 export function Field({
   label,
   htmlFor,

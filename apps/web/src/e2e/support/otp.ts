@@ -7,6 +7,7 @@ import { existsSync, readFileSync } from "node:fs";
  */
 const logPath = process.env.E2E_API_LOG ?? "";
 
+// Membaca kode OTP dari log pengembangan untuk menyelesaikan alur uji browser.
 function readOtpCodes(): string[] {
   if (!logPath || !existsSync(logPath)) return [];
   const raw = readFileSync(logPath, "utf8");
@@ -23,10 +24,12 @@ function readOtpCodes(): string[] {
   return codes;
 }
 
+// Mengambil jumlah kode yang tersedia sebagai titik awal penantian.
 export function otpCount(): number {
   return readOtpCodes().length;
 }
 
+// Menunggu kode baru muncul setelah indeks sebelumnya atau gagal saat timeout.
 export async function waitForOtp(since: number, timeoutMs = 20_000): Promise<string> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {

@@ -2,6 +2,7 @@ package validate
 
 import "testing"
 
+// Memastikan email dinormalisasi dan input yang tidak sesuai ditolak.
 func TestNormalizeEmail(t *testing.T) {
 	got, err := NormalizeEmail("  User@Example.COM ")
 	if err != nil || got != "user@example.com" {
@@ -14,6 +15,7 @@ func TestNormalizeEmail(t *testing.T) {
 	}
 }
 
+// Memastikan nama pengguna dibersihkan dan aturan karakternya ditegakkan.
 func TestNormalizeUsername(t *testing.T) {
 	got, err := NormalizeUsername("Bu_Sari")
 	if err != nil || got != "bu_sari" {
@@ -26,6 +28,7 @@ func TestNormalizeUsername(t *testing.T) {
 	}
 }
 
+// Memastikan kata sandi yang terlalu pendek tidak lolos kebijakan.
 func TestValidatePassword(t *testing.T) {
 	if err := ValidatePassword("rahasia-kuat-123"); err != nil {
 		t.Fatalf("password valid ditolak: %v", err)
@@ -42,6 +45,7 @@ func TestValidatePassword(t *testing.T) {
 	}
 }
 
+// Memastikan batas OTP, jumlah item, dan harga diterapkan pada nilai batas.
 func TestValidateOTPQuantityPrice(t *testing.T) {
 	if err := ValidateOTP("123456"); err != nil {
 		t.Fatalf("OTP valid ditolak: %v", err)

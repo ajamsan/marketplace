@@ -6,8 +6,9 @@ import (
 	"kantinkampus/api/internal/platform/httpx"
 )
 
-// --- keranjang buyer ---
+// Keranjang buyer.
 
+// Mengambil isi keranjang milik pembeli yang sedang masuk.
 func (s *Server) handleCartGet(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	c, err := s.Cart.Get(r.Context(), ac.UserID)
@@ -18,6 +19,7 @@ func (s *Server) handleCartGet(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, c)
 }
 
+// Mengatur jumlah produk pada keranjang pembeli.
 func (s *Server) handleCartSet(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	var req cartSetRequest
@@ -34,6 +36,7 @@ func (s *Server) handleCartSet(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, c)
 }
 
+// Menghapus satu produk dari keranjang pembeli.
 func (s *Server) handleCartDelete(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	c, err := s.Cart.RemoveItem(r.Context(), ac.UserID, r.PathValue("productId"))
@@ -44,8 +47,9 @@ func (s *Server) handleCartDelete(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, c)
 }
 
-// --- order buyer ---
+// Order buyer.
 
+// Menghitung pratinjau pesanan sebelum pembeli melakukan checkout.
 func (s *Server) handleOrderPreview(w http.ResponseWriter, r *http.Request) {
 	var req orderPreviewRequest
 	if err := httpx.ReadJSON(w, r, &req, maxJSONBody); err != nil {
@@ -61,6 +65,7 @@ func (s *Server) handleOrderPreview(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, p)
 }
 
+// Membuat pesanan dengan perlindungan idempotensi terhadap pengiriman ulang.
 func (s *Server) handleOrderCreate(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	var req orderCreateRequest
@@ -89,6 +94,7 @@ func (s *Server) handleOrderCreate(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusCreated, d)
 }
 
+// Menyajikan daftar pesanan pembeli secara bertahap.
 func (s *Server) handleOrdersList(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	q := r.URL.Query()
@@ -109,6 +115,7 @@ func (s *Server) handleOrdersList(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Mengambil rincian pesanan milik pembeli yang sedang masuk.
 func (s *Server) handleOrderGet(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	d, err := s.Orders.GetForBuyer(r.Context(), ac.UserID, r.PathValue("id"))
@@ -119,8 +126,9 @@ func (s *Server) handleOrderGet(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, d)
 }
 
-// --- antrian seller ---
+// Antrian seller.
 
+// Menampilkan pesanan yang perlu ditangani penjual secara bertahap.
 func (s *Server) handleSellerOrdersList(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	q := r.URL.Query()
@@ -141,6 +149,7 @@ func (s *Server) handleSellerOrdersList(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
+// Mengambil rincian pesanan yang menjadi tanggung jawab penjual.
 func (s *Server) handleSellerOrderGet(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	so, err := s.Orders.GetForSeller(r.Context(), ac.UserID, r.PathValue("id"))
@@ -151,6 +160,7 @@ func (s *Server) handleSellerOrderGet(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, so)
 }
 
+// Mencatat pembayaran tunai yang diterima penjual untuk pesanan.
 func (s *Server) handleConfirmCash(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	res, err := s.Payments.ConfirmCash(r.Context(), ac.UserID, r.PathValue("id"), s.requestID(r))
@@ -161,6 +171,7 @@ func (s *Server) handleConfirmCash(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, res)
 }
 
+// Memperbarui tahap pemenuhan pesanan yang dikelola penjual.
 func (s *Server) handleFulfillmentStatus(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	var req fulfillmentRequest

@@ -11,8 +11,9 @@ import (
 	"kantinkampus/api/internal/stalls"
 )
 
-// --- katalog publik ---
+// Katalog publik.
 
+// Mengembalikan stan aktif yang dapat dilihat pengunjung.
 func (s *Server) handleStallsList(w http.ResponseWriter, r *http.Request) {
 	list, err := s.Stalls.ListActive(r.Context())
 	if err != nil {
@@ -22,6 +23,7 @@ func (s *Server) handleStallsList(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, map[string]any{"stalls": list})
 }
 
+// Mengambil satu stan aktif berdasarkan identitas URL.
 func (s *Server) handleStallGet(w http.ResponseWriter, r *http.Request) {
 	st, err := s.Stalls.GetActive(r.Context(), r.PathValue("id"))
 	if err != nil {
@@ -31,6 +33,7 @@ func (s *Server) handleStallGet(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, st)
 }
 
+// Menyajikan produk publik dengan filter pencarian dan cursor paginasi.
 func (s *Server) handleProductsList(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	cursor, err := httpx.DecodeCursor(q.Get("cursor"))
@@ -50,6 +53,7 @@ func (s *Server) handleProductsList(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Mengambil rincian produk yang dapat diakses melalui katalog publik.
 func (s *Server) handleProductGet(w http.ResponseWriter, r *http.Request) {
 	p, err := s.Catalog.GetPublic(r.Context(), r.PathValue("id"))
 	if err != nil {
@@ -59,8 +63,9 @@ func (s *Server) handleProductGet(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, p)
 }
 
-// --- stan seller ---
+// Stan seller.
 
+// Membuat stan baru atas nama penjual yang sedang masuk.
 func (s *Server) handleSellerStallCreate(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	var req stallRequest
@@ -77,6 +82,7 @@ func (s *Server) handleSellerStallCreate(w http.ResponseWriter, r *http.Request)
 	httpx.WriteData(w, r, http.StatusCreated, st)
 }
 
+// Menampilkan stan yang dikelola oleh penjual saat ini.
 func (s *Server) handleSellerStallsList(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	list, err := s.Stalls.ListBySeller(r.Context(), ac.UserID)
@@ -87,6 +93,7 @@ func (s *Server) handleSellerStallsList(w http.ResponseWriter, r *http.Request) 
 	httpx.WriteData(w, r, http.StatusOK, map[string]any{"stalls": list})
 }
 
+// Memperbarui informasi stan setelah memverifikasi kepemilikan penjual.
 func (s *Server) handleSellerStallUpdate(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	var req stallRequest
@@ -107,8 +114,9 @@ func (s *Server) handleSellerStallUpdate(w http.ResponseWriter, r *http.Request)
 	httpx.WriteData(w, r, http.StatusOK, st)
 }
 
-// --- produk seller ---
+// Produk seller.
 
+// Mengubah payload HTTP menjadi data yang dapat diproses layanan katalog.
 func (s *Server) productInput(req productRequest) catalog.ProductInput {
 	return catalog.ProductInput{
 		Name:               req.Name,
@@ -118,6 +126,7 @@ func (s *Server) productInput(req productRequest) catalog.ProductInput {
 	}
 }
 
+// Menyajikan produk yang dikelola penjual, opsional dibatasi ke satu stan.
 func (s *Server) handleSellerProductsList(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	list, err := s.Catalog.ListForSeller(r.Context(), ac.UserID, r.URL.Query().Get("stall_id"))
@@ -128,6 +137,7 @@ func (s *Server) handleSellerProductsList(w http.ResponseWriter, r *http.Request
 	httpx.WriteData(w, r, http.StatusOK, map[string]any{"products": list})
 }
 
+// Membuat produk baru pada stan yang dimiliki penjual.
 func (s *Server) handleProductCreate(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	var req productRequest
@@ -144,6 +154,7 @@ func (s *Server) handleProductCreate(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusCreated, p)
 }
 
+// Memperbarui data produk setelah layanan memeriksa hak penjual.
 func (s *Server) handleProductUpdate(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	var req productRequest
@@ -160,6 +171,7 @@ func (s *Server) handleProductUpdate(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, p)
 }
 
+// Mengarsipkan produk agar tidak ditawarkan sebagai barang aktif.
 func (s *Server) handleProductArchive(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	p, err := s.Catalog.Archive(r.Context(), ac.UserID, r.PathValue("id"), s.requestID(r))
@@ -170,6 +182,18 @@ func (s *Server) handleProductArchive(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, p)
 }
 
+// Mengaktifkan kembali produk yang sebelumnya diarsipkan.
+func (s *Server) handleProductUnarchive(w http.ResponseWriter, r *http.Request) {
+	ac := currentAuth(r)
+	p, err := s.Catalog.Unarchive(r.Context(), ac.UserID, r.PathValue("id"), s.requestID(r))
+	if err != nil {
+		s.writeDomainError(w, r, err)
+		return
+	}
+	httpx.WriteData(w, r, http.StatusOK, p)
+}
+
+// Menyimpan gambar produk setelah validasi ukuran dan jenis berkas.
 func (s *Server) handleProductImage(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)
 	data, ok := s.readUploadFile(w, r)
@@ -193,8 +217,9 @@ func (s *Server) handleProductImage(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, p)
 }
 
-// --- admin ---
+// Admin.
 
+// Menyajikan daftar stan administrasi dengan status yang diminta.
 func (s *Server) handleAdminStallsList(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Query().Get("status") {
 	case "", "pending_review", "active", "inactive":
@@ -211,6 +236,7 @@ func (s *Server) handleAdminStallsList(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteData(w, r, http.StatusOK, map[string]any{"stalls": list})
 }
 
+// Membentuk handler yang menerapkan tindakan administrasi pada stan terpilih.
 func (s *Server) handleAdminTransition(action string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ac := currentAuth(r)
@@ -223,6 +249,7 @@ func (s *Server) handleAdminTransition(action string) http.HandlerFunc {
 	}
 }
 
+// Mengubah pointer opsional menjadi teks kosong untuk layanan domain.
 func deref(s *string) string {
 	if s == nil {
 		return ""
@@ -230,6 +257,7 @@ func deref(s *string) string {
 	return *s
 }
 
+// Membaca bilangan desimal dengan nilai cadangan untuk input yang tidak valid.
 func parseIntDefault(s string, def int) int {
 	if s == "" {
 		return def

@@ -8,13 +8,16 @@ import { formatDateTime } from "@/lib/format";
 import { Badge, Card, CardHeader } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 
+// Menampilkan sesi akun dengan kondisi muat, gagal, kosong, dan aksi pencabutan.
 export function SessionsList() {
   const queryClient = useQueryClient();
   const sessionsQuery = useQuery({
     queryKey: ["sessions"],
+    // Mengambil daftar sesi dari respons API untuk query cache.
     queryFn: async () => (await authApi.sessions()).sessions,
   });
 
+  // Meminta ulang daftar setelah sebuah sesi berhasil dicabut.
   function refresh() {
     void queryClient.invalidateQueries({ queryKey: ["sessions"] });
   }

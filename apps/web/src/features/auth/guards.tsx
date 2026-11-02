@@ -32,6 +32,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+// Memastikan halaman hanya muncul untuk pengguna yang memiliki salah satu peran yang diizinkan.
 export function RequireRole({ roles, children }: { roles: Role[]; children: ReactNode }) {
   const router = useRouter();
   const status = useAuthStore((state) => state.status);

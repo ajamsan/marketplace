@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
+// Menyediakan kerangka ringan untuk formulir autentikasi dan pengaturan tema.
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">

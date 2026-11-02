@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/form";
 const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/png", "image/jpeg"];
 
+// Memetakan galat unggah ke petunjuk yang dapat ditindaklanjuti pengguna.
 function uploadErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.status === 503) {
@@ -27,6 +28,7 @@ function uploadErrorMessage(error: unknown): string {
   return "Terjadi kesalahan jaringan. Coba lagi sebentar.";
 }
 
+// Mengelola pemilihan, pengunggahan, dan penghapusan foto profil.
 export function PhotoUpload() {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +39,9 @@ export function PhotoUpload() {
   const [status, setStatus] = useState<string | null>(null);
 
   const upload = useMutation({
+    // Mengirim berkas pilihan ke endpoint foto profil.
     mutationFn: (value: File) => authApi.uploadProfilePhoto(value),
+    // Memperbarui cache profil dan membersihkan pilihan setelah unggahan berhasil.
     onSuccess: (profile) => {
       queryClient.setQueryData(["me"], profile);
       setFormError(null);
@@ -45,6 +49,7 @@ export function PhotoUpload() {
       setFile(null);
       if (inputRef.current) inputRef.current.value = "";
     },
+    // Mengubah kegagalan server menjadi pesan formulir yang ringkas.
     onError: (error) => {
       setStatus(null);
       setFormError(uploadErrorMessage(error));
@@ -52,18 +57,22 @@ export function PhotoUpload() {
   });
 
   const remove = useMutation({
+    // Menghapus foto aktif dari profil melalui layanan autentikasi.
     mutationFn: () => authApi.deleteProfilePhoto(),
+    // Menyelaraskan profil lokal setelah foto dihapus.
     onSuccess: (profile) => {
       queryClient.setQueryData(["me"], profile);
       setFormError(null);
       setStatus("Foto profil dihapus.");
     },
+    // Mempertahankan profil dan menampilkan alasan bila penghapusan gagal.
     onError: (error) => {
       setStatus(null);
       setFormError(uploadErrorMessage(error));
     },
   });
 
+  // Memastikan berkas sesuai batas sebelum memulai unggahan.
   function handleSubmit() {
     setFormError(null);
     setStatus(null);

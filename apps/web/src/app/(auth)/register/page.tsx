@@ -5,6 +5,7 @@ import Link from "next/link";
 import { RegisterForm } from "@/features/auth/register-form";
 import { RedirectIfAuthenticated } from "@/features/auth/guards";
 
+// Menampilkan formulir pendaftaran dan tautan ke halaman masuk.
 export default function RegisterPage() {
   return (
     <RedirectIfAuthenticated>

@@ -2,6 +2,7 @@ package orders
 
 import "testing"
 
+// Memastikan kombinasi status pembayaran dan pemenuhan menghasilkan status pesanan yang tepat.
 func TestDeriveOrderStatus(t *testing.T) {
 	cases := []struct {
 		name        string

@@ -62,6 +62,7 @@ export interface PendingStallsProps {
   onStatusChange: (status: AdminStallStatus | "") => void;
 }
 
+// Menampilkan stan untuk ditinjau admin dan mengonfirmasi tindakan statusnya.
 export function PendingStalls({
   stalls,
   isLoading,
@@ -75,6 +76,7 @@ export function PendingStalls({
   const [actionError, setActionError] = useState<string | null>(null);
 
   const mutation = useMutation({
+    // Menjalankan transisi yang dipilih pada stan sasaran.
     mutationFn: ({ id, action }: { id: string; action: StallAction }) => {
       switch (action) {
         case "approve":
@@ -87,11 +89,13 @@ export function PendingStalls({
           return activateStall(id);
       }
     },
+    // Menutup dialog dan menyegarkan daftar setelah tindakan berhasil.
     onSuccess: () => {
       setTarget(null);
       setActionError(null);
       void queryClient.invalidateQueries({ queryKey: ["admin", "stalls"] });
     },
+    // Menampilkan galat layanan agar admin mengetahui tindakan yang gagal.
     onError: (mutationError) => {
       setActionError(
         mutationError instanceof ApiError
@@ -101,6 +105,7 @@ export function PendingStalls({
     },
   });
 
+  // Menyiapkan sasaran tindakan dan mereset pesan dari percobaan sebelumnya.
   function openAction(stall: AdminStall, action: StallAction) {
     setActionError(null);
     mutation.reset();
