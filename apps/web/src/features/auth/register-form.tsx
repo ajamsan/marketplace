@@ -19,7 +19,7 @@ type RegisterValues = {
 
 type FieldKey = keyof RegisterValues;
 
-const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._ ]{1,28}[a-z0-9]$/;
+const USERNAME_PATTERN = /^[\p{L}][\p{L}' ]{1,28}[\p{L}']$/u;
 
 const ROLE_OPTIONS: { id: "buyer" | "seller"; label: string; description: string }[] = [
   {
@@ -39,8 +39,8 @@ const registerSchema = z.object({
     .string()
     .min(3, "Username minimal 3 karakter.")
     .max(30, "Username maksimal 30 karakter.")
-    .regex(USERNAME_PATTERN, "Gunakan huruf kecil, angka, titik, atau underscore."),
-  email: z.email("Format email tidak valid."),
+    .regex(USERNAME_PATTERN, "Gunakan huruf, spasi, dan apostrof (nama asli).").refine((v) => !v.includes("  "), "Tidak boleh ada spasi ganda"),
+  email: z.email("Format email tidak valid.").regex(/^[^@\s]+@([A-Za-z0-9-]+\.)+[A-Za-z]{2,6}$/, "Domain email tidak valid."),
   password: z
     .string()
     .min(10, "Password minimal 10 karakter.")
@@ -124,13 +124,13 @@ export function RegisterForm() {
           label="Username"
           htmlFor="username"
           error={fieldErrors.username}
-          hint="3-30 karakter: huruf kecil, angka, titik, atau underscore."
+          hint="3-30 karakter: huruf, spasi, dan apostrof."
         >
           <Input
             id="username"
             name="username"
             value={values.username}
-            onChange={(event) => update("username", event.target.value.toLowerCase())}
+            onChange={(event) => update("username", event.target.value)}
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}

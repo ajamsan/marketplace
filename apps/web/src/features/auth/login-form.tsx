@@ -11,7 +11,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/form";
 
 const loginSchema = z.object({
-  email: z.email("Format email tidak valid."),
+  email: z.email("Format email tidak valid.").regex(/^[^@\s]+@([A-Za-z0-9-]+\.)+[A-Za-z]{2,6}$/, "Domain email tidak valid."),
   password: z.string().min(1, "Password wajib diisi."),
 });
 

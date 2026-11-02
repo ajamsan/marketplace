@@ -10,9 +10,9 @@ import (
 // Validasi server adalah otoritatif; frontend hanya membantu pengalaman (PRD §11).
 
 var (
-	emailRe   = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
-	usernameRe = regexp.MustCompile(`^[a-z0-9][a-z0-9_. ]{1,28}[a-z0-9]$`)
-	otpRe     = regexp.MustCompile(`^[0-9]{6}$`)
+	emailRe    = regexp.MustCompile(`^[^@\s]+@([A-Za-z0-9-]+\.)+[A-Za-z]{2,6}$`)
+	usernameRe = regexp.MustCompile(`^[\p{L}][\p{L}' ]{1,28}[\p{L}']$`)
+	otpRe      = regexp.MustCompile(`^[0-9]{6}$`)
 )
 
 const (
@@ -39,10 +39,10 @@ func NormalizeEmail(s string) (string, error) {
 // NormalizeUsername: lowercase; huruf/angka/underscore/titik; diawali & diakhiri alfanumerik.
 // Merapikan nama pengguna dan membatasi karakter serta panjangnya.
 func NormalizeUsername(s string) (string, error) {
-	u := strings.ToLower(strings.TrimSpace(s))
+	u := strings.TrimSpace(s)
 	if len(u) < MinUsernameLen || len(u) > MaxUsernameLen || !usernameRe.MatchString(u) ||
-		strings.Contains(u, "..") || strings.Contains(u, "__") || strings.Contains(u, "  ") {
-		return "", errors.New("Username 3-30 karakter; hanya huruf kecil, angka, titik, underscore, spasi")
+		strings.Contains(u, "  ") {
+		return "", errors.New("Nama 3-30 karakter; hanya huruf, spasi, dan apostrof")
 	}
 	return u, nil
 }

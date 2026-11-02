@@ -17,11 +17,11 @@ func TestNormalizeEmail(t *testing.T) {
 
 // Memastikan nama pengguna dibersihkan dan aturan karakternya ditegakkan.
 func TestNormalizeUsername(t *testing.T) {
-	got, err := NormalizeUsername("Bu_Sari")
-	if err != nil || got != "bu_sari" {
+	got, err := NormalizeUsername("Azzam San")
+	if err != nil || got != "Azzam San" {
 		t.Fatalf("normalisasi username salah: %q %v", got, err)
 	}
-	for _, bad := range []string{"ab", "serta banyak karakter...", "-leading", "trailing-", "double..dot"} {
+	for _, bad := range []string{"ab", "azzam123", "a.b", "a_b", "123", "  ", "Azzam  San"} {
 		if _, err := NormalizeUsername(bad); err == nil {
 			t.Fatalf("username %q harus ditolak", bad)
 		}
