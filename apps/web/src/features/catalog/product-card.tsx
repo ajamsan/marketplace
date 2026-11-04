@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useState } from "react";
+import { memo, useState } from "react";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 

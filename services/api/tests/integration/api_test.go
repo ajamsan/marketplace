@@ -290,7 +290,7 @@ func TestRegisterVerifyAndLoginFlow(t *testing.T) {
 	e := newEnv(t)
 
 	reg := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
-		"username": "buyer.baru", "email": "baru@example.com",
+		"username": "Buyer Baru", "email": "baru@example.com",
 		"password": "password-kuat-123", "role": "buyer",
 	}, "", nil)
 	if reg.status != http.StatusOK {
@@ -338,11 +338,11 @@ func TestRegisterAntiEnumeration(t *testing.T) {
 	e.seedUser(t, "sudah.ada", "ada@example.com", "password-kuat-123", "buyer")
 
 	first := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
-		"username": "baru.lain", "email": "ada@example.com",
+		"username": "Baru Lain", "email": "ada@example.com",
 		"password": "password-kuat-123", "role": "buyer",
 	}, "", nil)
 	second := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
-		"username": "baru.lain2", "email": "baru2@example.com",
+		"username": "Baru Lain Dua", "email": "baru2@example.com",
 		"password": "password-kuat-123", "role": "buyer",
 	}, "", nil)
 	if first.status != second.status {
@@ -359,7 +359,7 @@ func TestRegisterAntiEnumeration(t *testing.T) {
 func TestOTPAttemptLimitBlocksChallenge(t *testing.T) {
 	e := newEnv(t)
 	reg := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
-		"username": "limit.tester", "email": "limit@example.com",
+		"username": "Limit Tester", "email": "limit@example.com",
 		"password": "password-kuat-123", "role": "buyer",
 	}, "", nil)
 	if reg.status != http.StatusOK {

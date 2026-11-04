@@ -40,7 +40,7 @@ func (e *env) doWithoutFatal(method, path string, body any, token string) (int, 
 func TestConcurrentOTPAttemptsCannotBypassLimit(t *testing.T) {
 	e := newEnv(t)
 	reg := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
-		"username": "abuse.tester", "email": "abuse@example.com",
+		"username": "Abuse Tester", "email": "abuse@example.com",
 		"password": "password-kuat-123", "role": "buyer",
 	}, "", nil)
 	if reg.status != http.StatusOK {
@@ -83,7 +83,7 @@ func TestConcurrentOTPAttemptsCannotBypassLimit(t *testing.T) {
 func TestResendDoesNotClearLockout(t *testing.T) {
 	e := newEnv(t)
 	reg := e.do(t, http.MethodPost, "/api/v1/auth/register", map[string]string{
-		"username": "resend.tester", "email": "resend@example.com",
+		"username": "Resend Tester", "email": "resend@example.com",
 		"password": "password-kuat-123", "role": "buyer",
 	}, "", nil)
 	if reg.status != http.StatusOK {

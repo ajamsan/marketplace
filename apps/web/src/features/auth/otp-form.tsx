@@ -21,13 +21,11 @@ export function OtpForm({
   email,
   preAuthToken,
   next,
-  onVerified,
 }: {
   purpose: OtpPurpose;
   email: string;
   preAuthToken?: string;
   next?: string | null;
-  onVerified?: () => void;
 }) {
   const router = useRouter();
   const [otp, setOtp] = useState("");

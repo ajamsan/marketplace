@@ -64,6 +64,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedTheme = readStoredTheme();
     const storedAccent = readStoredAccent();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setThemeState(storedTheme);
     setAccentState(storedAccent);
     applyTheme(storedTheme, storedAccent);

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -16,26 +16,7 @@ function VerifyContent() {
   const email = searchParams.get("email") ?? "";
   const preAuthToken = searchParams.get("pre_auth_token");
   const next = safeNextPath(searchParams.get("next"));
-  const [verified, setVerified] = useState(false);
 
-  if (mode === "register" && verified) {
-    return (
-      <Card>
-        <CardHeader title="Akun terverifikasi. Silakan login." />
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">
-            Kode OTP valid dan akunmu sudah aktif.
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground"
-          >
-            Masuk
-          </Link>
-        </div>
-      </Card>
-    );
-  }
 
   if (mode === "login" && !preAuthToken) {
     return (
@@ -90,7 +71,6 @@ function VerifyContent() {
         email={email}
         preAuthToken={preAuthToken ?? undefined}
         next={next}
-        onVerified={mode === "register" ? () => setVerified(true) : undefined}
       />
     </div>
   );
