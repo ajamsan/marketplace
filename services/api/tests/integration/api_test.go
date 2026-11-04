@@ -327,8 +327,8 @@ func TestRegisterVerifyAndLoginFlow(t *testing.T) {
 		t.Fatalf("sessions: %d %s", sessionsResp.status, sessionsResp.raw)
 	}
 	list, _ := sessionsResp.body["data"].(map[string]any)["sessions"].([]any)
-	if len(list) != 1 {
-		t.Fatalf("harus ada 1 sesi, dapat %d", len(list))
+	if len(list) != 2 {
+		t.Fatalf("harus ada 2 sesi (register + login), dapat %d", len(list))
 	}
 }
 
