@@ -14,7 +14,9 @@ values:
     value: ''
   - key: seller_password
     value: ''
-  - key: pre_auth_token
-    value: ''
   - key: csrf_token_buyer
+    value: ''
+  - key: idem_key
+    value: ''
+  - key: pre_auth_token
     value: ''
