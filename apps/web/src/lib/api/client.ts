@@ -78,7 +78,7 @@ async function refreshSession(): Promise<boolean> {
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: "POST",
       credentials: "include",
-      headers: csrf ? { "X-CSRF-Token": csrf } : {},
+      headers: { "ngrok-skip-browser-warning": "true", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
     });
     if (!response.ok) return false;
     const body = (await parseBody(response)) as ApiSuccess<{
@@ -103,7 +103,11 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     signal,
   } = options;
 
-  const finalHeaders: Record<string, string> = { Accept: "application/json", ...headers };
+  const finalHeaders: Record<string, string> = {
+    Accept: "application/json",
+    "ngrok-skip-browser-warning": "true",
+    ...headers,
+  };
   let payload: BodyInit | undefined;
 
   if (body instanceof FormData) {

@@ -1,0 +1,74 @@
+Berikut langkah lengkap menjalankan dari awal (urut):
+
+---
+
+## 1. Nyalakan Docker (dari WSL)
+Buka Docker desktop
+
+nyalakan di container 'infra'
+
+## 2. Migrasi database
+```powershell
+
+cd C:\Users\HP\Documents\marketplace
+$env:DATABASE_URL = "postgres://kantin:kantin@localhost:5432/kantin?sslmode=disable"
+migrate -path services/api/migrations -database $env:DATABASE_URL up
+migrate -path services/api/migrations -database $env:DATABASE_URL version
+
+# Harus: 9
+```
+
+## 3. Seed data demo (sekali)
+```powershell
+
+cd C:\Users\HP\Documents\marketplace\services\api
+go run ./cmd/seed
+cd ../..
+
+```
+
+## 4. Jalankan Backend — Terminal 1 (jangan ditutup)
+Buka terminal PowerShell baru:
+```powershell
+
+cd C:\Users\HP\Documents\marketplace
+Get-Content .env | ForEach-Object {
+  if ($_ -match '^\s*([^#=]+)=(.*)$') {
+    [Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), 'Process')
+  }
+}
+$env:DATABASE_URL = "postgres://kantin:kantin@localhost:5432/kantin?sslmode=disable"
+cd services/api
+go run ./cmd/api
+
+```
+Tunggu log: `memulai API kantin kampus ... addr :8080`.
+
+## 5. Jalankan Frontend — Terminal 2
+Buka terminal PowerShell baru:
+```powershell
+
+cd C:\Users\HP\Documents\marketplace\apps\web
+npm run dev
+
+```
+Tunggu `Local: http://localhost:3000` → buka browser.
+
+---
+
+
+## Akun & PW (dev)
+
+| 	Role 		|	Email				 | 	Password				|
+|-------------------------|---------------------------------------|-------------------------------------------- |
+| 	 Admin		| 	admin@kantin.local	 |	 kantin-dev-admin-123		|
+|	 Seller		| 	seller@kantin.local	 |	 kantin-dev-seller-123		|
+|	 Seller2		| 	seller2@kantin.loca	 |	 kantin-dev-seller-123		|
+|	 Buyer		| 	buyer@kantin.local	 |	 kantin-dev-buyer-123		|
+
+OTP muncul di log Terminal 1 (cari `"otp"`).
+
+## Hentikan
+- Terminal 1 & 2: **Ctrl+C**
+- DB: `matikan lewat docker desktop`
+-Masuk tabel 'docker exec -it kantin-postgres psql -U kantin -d kantin

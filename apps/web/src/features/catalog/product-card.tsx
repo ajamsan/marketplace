@@ -32,11 +32,23 @@ export const ProductPhoto = memo(function ProductPhoto({
         role="img"
         aria-label={alt}
         className={cn(
-          "flex items-center justify-center overflow-hidden bg-surface-muted text-xs text-muted-foreground",
+          "flex flex-col items-center justify-center gap-1 overflow-hidden bg-surface-muted text-xs text-muted-foreground",
           className,
         )}
       >
-        Tanpa foto
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          className="h-6 w-6"
+          aria-hidden="true"
+        >
+          <path d="M3 7a2 2 0 0 1 2-2h2l1.5-2h7L17 5h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+          <circle cx="12" cy="12" r="3.5" />
+        </svg>
+        <span>Tanpa foto</span>
       </div>
     );
   }

@@ -26,7 +26,9 @@ export function Header() {
       <div className="flex items-center gap-2 md:hidden">
         <span className="text-sm font-bold text-foreground">Kantin Kampus</span>
       </div>
-      <div className="hidden md:block" />
+      <div className="hidden items-center gap-2 md:flex">
+        <span className="text-sm font-semibold text-foreground">Kantin Kampus</span>
+      </div>
       <div className="flex items-center gap-2">
         <AccentPicker />
         <ThemeToggle />
