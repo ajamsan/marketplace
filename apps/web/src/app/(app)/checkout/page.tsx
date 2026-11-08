@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 
-// Memvalidasi keranjang, memuat pratinjau harga, lalu menampilkan konfirmasi checkout.
+// Memvalidasi keranjang, memuat pratinjau harga, lalu menampilkan konfirmasi checkout dengan estetika kurasi.
 export default function CheckoutPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -33,12 +33,10 @@ export default function CheckoutPage() {
 
   const preview = useQuery({
     queryKey: ["orders", "preview", items],
-    // Menghitung ulang harga di server untuk item yang akan dipesan.
     queryFn: () => previewOrder(items),
     enabled: isBuyer && items.length > 0,
   });
 
-  // Membersihkan cache keranjang dan membuka detail pesanan yang baru dibuat.
   const handleCreated = (orderId: string) => {
     void queryClient.invalidateQueries({ queryKey: ["cart"] });
     void queryClient.invalidateQueries({ queryKey: ["orders"] });
@@ -54,10 +52,11 @@ export default function CheckoutPage() {
 
   if (!isBuyer) {
     return (
-      <div className="pb-28 md:pb-24">
-        <Card>
-          <p className="text-sm text-foreground">
-            Halaman checkout hanya untuk akun pembeli.
+      <div className="pb-32 md:pb-24 max-w-3xl mx-auto px-4 pt-6">
+        <Card className="rounded-md border border-border bg-surface p-8 text-center">
+          <h2 className="font-serif text-xl font-bold text-foreground">Akses Khusus Pembeli</h2>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Halaman checkout pesanan hanya dapat diakses oleh akun peran pembeli.
           </p>
         </Card>
         <CartBar />
@@ -66,19 +65,24 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="pb-28 md:pb-24">
-      <div className="flex flex-col gap-4">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-xl font-bold text-foreground">Checkout</h1>
-          <p className="text-sm text-muted-foreground">
-            Periksa ringkasan sebelum membuat pesanan.
+    <div className="pb-32 md:pb-24 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <div className="flex flex-col gap-6">
+        <header className="flex flex-col gap-1 border-b border-border/80 pb-6">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
+            Tahap Akhir Pemesanan
+          </span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Konfirmasi Pesanan Kurasi
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            Periksa kembali rincian sajian dan stan atelier sebelum membuat pesanan resmi.
           </p>
         </header>
 
         {cart.isPending ? (
-          <div className="flex flex-col gap-3">
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-40 w-full" />
+          <div className="flex flex-col gap-4">
+            <Skeleton className="h-32 w-full rounded-md" />
+            <Skeleton className="h-40 w-full rounded-md" />
           </div>
         ) : cart.isError ? (
           <ErrorState
@@ -89,30 +93,31 @@ export default function CheckoutPage() {
           />
         ) : items.length === 0 ? (
           <EmptyState
-            title="Keranjang masih kosong"
-            description="Tambahkan produk dari katalog sebelum checkout."
+            title="Keranjang kurasi masih kosong"
+            description="Tambahkan kreasi hidangan dari katalog sebelum melanjutkan ke checkout."
             action={
               <Button
                 variant="secondary"
                 onClick={() => {
                   router.push("/catalog");
                 }}
+                className="rounded-sm uppercase tracking-wider text-xs font-semibold px-5 py-2.5 mt-2"
               >
-                Buka katalog
+                Eksplorasi Katalog
               </Button>
             }
           />
         ) : preview.isPending ? (
-          <div className="flex flex-col gap-3">
-            <Skeleton className="h-48 w-full" />
-            <Skeleton className="h-32 w-full" />
+          <div className="flex flex-col gap-4">
+            <Skeleton className="h-48 w-full rounded-md" />
+            <Skeleton className="h-32 w-full rounded-md" />
           </div>
         ) : preview.isError || !preview.data ? (
           <div className="flex flex-col gap-3">
             {previewFields.length > 0 ? (
               <div
                 role="alert"
-                className="rounded-lg border border-danger/40 bg-danger-soft p-3 text-sm text-foreground"
+                className="rounded-sm border border-danger/40 bg-danger-soft p-3 text-xs text-foreground"
               >
                 {previewFields.map((message) => (
                   <p key={message}>{message}</p>

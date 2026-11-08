@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 
 import { useCart } from "./use-cart";
 import { useAuthStore } from "@/features/auth/auth-store";
 import { formatIDR } from "@/lib/format";
 
-// Menampilkan jumlah dan subtotal keranjang sebagai akses cepat bagi pembeli.
+// Menampilkan jumlah dan subtotal keranjang sebagai akses cepat bagi pembeli dengan estetika mewah.
 export function CartBar() {
   const role = useAuthStore((state) => state.user?.role);
   const isBuyer = role === "buyer";
@@ -19,37 +19,40 @@ export function CartBar() {
   const count = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = cart?.subtotal_minor ?? 0;
 
+  if (count === 0 && !isPending) return null;
+
   return (
     <aside
-      aria-label="Keranjang"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface"
+      aria-label="Akses Cepat Keranjang"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border/80 bg-surface/95 backdrop-blur-md shadow-lg"
     >
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 md:px-6">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 md:px-8">
         <div className="flex min-w-0 items-center gap-3">
           <span
             aria-hidden="true"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-foreground"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-foreground text-background"
           >
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingBag className="h-4 w-4" />
           </span>
           <div className="min-w-0">
             {isPending ? (
-              <p className="text-sm font-semibold text-foreground">Memuat keranjang...</p>
+              <p className="text-xs font-semibold text-foreground">Menghubungkan ke pesanan...</p>
             ) : (
               <p className="truncate text-sm font-semibold text-foreground">
-                {count} item · {formatIDR(subtotal)}
+                <span className="font-serif font-bold text-base">{count}</span> sajian terkurasi &bull;{" "}
+                <span className="font-serif font-bold text-base">{formatIDR(subtotal)}</span>
               </p>
             )}
-            <p className="text-xs text-muted-foreground">
-              Total indikatif; harga final dihitung server saat checkout.
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              Pembayaran tunai di kasir setelah pemesanan
             </p>
           </div>
         </div>
         <Link
           href="/cart"
-          className="shrink-0 rounded-lg border border-transparent bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:opacity-90"
+          className="shrink-0 rounded-sm bg-foreground px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-background hover:bg-foreground/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          Lihat keranjang
+          Buka Keranjang
         </Link>
       </div>
     </aside>

@@ -12,14 +12,13 @@ import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 
-// Memuat katalog berhalaman dan menggabungkannya untuk pencarian pembeli.
+// Memuat katalog berhalaman dan menggabungkannya untuk pencarian pembeli dengan gaya kurasi mewah.
 export default function CatalogPage() {
   const [search, setSearch] = useState("");
   const [stallId, setStallId] = useState("");
 
   const products = useInfiniteQuery({
     queryKey: ["products", { stall_id: stallId, q: search }],
-    // Mengambil hasil sesuai filter dan posisi halaman yang sedang diminta.
     queryFn: ({ pageParam }) =>
       listProducts({
         stall_id: stallId || undefined,
@@ -27,7 +26,6 @@ export default function CatalogPage() {
         cursor: pageParam,
       }),
     initialPageParam: undefined as string | undefined,
-    // Menghentikan paginasi saat server tidak lagi memberikan cursor lanjutan.
     getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined,
   });
 
@@ -39,31 +37,38 @@ export default function CatalogPage() {
   const errorMessage =
     products.error instanceof ApiError
       ? products.error.message
-      : "Gagal memuat katalog. Coba lagi.";
+      : "Gagal memuat katalog. Coba lagi sebentar.";
 
   return (
-    <div className="pb-28 md:pb-24">
-      <div className="flex flex-col gap-4">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-xl font-bold text-foreground">Katalog</h1>
-          <p className="text-sm text-muted-foreground">
-            Cari produk yang tersedia di kantin kampus.
+    <div className="pb-32 md:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <div className="flex flex-col gap-6">
+        <header className="flex flex-col gap-1 border-b border-border/80 pb-6">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
+            Eksplorasi Atelier Kampus
+          </span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Katalog Kurasi Gastronomi
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl">
+            Jelajahi sajian lezat dan kreasi minuman istimewa yang dipersiapkan segar setiap hari oleh para mitra stan terpilih.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {/* Filter controls */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 bg-surface p-4 rounded-md border border-border shadow-2xs">
           <SearchBox value={search} onChange={setSearch} />
           <StallFilter value={stallId} onChange={setStallId} />
         </div>
 
+        {/* Product listing states */}
         {products.isPending ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }, (_, index) => (
               <div
                 key={index}
-                className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4"
+                className="flex flex-col gap-3 rounded-md border border-border bg-surface p-4"
               >
-                <Skeleton className="aspect-[4/3] w-full" />
+                <Skeleton className="aspect-[4/3] w-full rounded-sm" />
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
                 <Skeleton className="h-5 w-1/3" />
@@ -79,26 +84,27 @@ export default function CatalogPage() {
           />
         ) : items.length === 0 ? (
           <EmptyState
-            title="Produk tidak ditemukan"
-            description="Coba ubah kata kunci pencarian atau pilih stan lain."
+            title="Sajian tidak ditemukan"
+            description="Coba gunakan kata kunci pencarian lain atau pilih stan atelier yang berbeda."
           />
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {items.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
             {products.hasNextPage ? (
-              <div className="flex justify-center">
+              <div className="flex justify-center pt-8">
                 <Button
                   variant="secondary"
                   onClick={() => {
                     void products.fetchNextPage();
                   }}
                   disabled={products.isFetchingNextPage}
+                  className="rounded-sm uppercase tracking-widest text-xs font-semibold px-6 py-3"
                 >
-                  {products.isFetchingNextPage ? "Memuat..." : "Muat lagi"}
+                  {products.isFetchingNextPage ? "Memuat Kreasi..." : "Muat Sajian Lainnya"}
                 </Button>
               </div>
             ) : null}

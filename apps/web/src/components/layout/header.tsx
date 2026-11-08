@@ -9,7 +9,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { useAuthStore } from "@/features/auth/auth-store";
 import { Button } from "@/components/ui/button";
 
-// Menampilkan identitas pengguna, preferensi tampilan, dan aksi keluar.
+// Menampilkan identitas pengguna, preferensi tampilan, dan aksi keluar berstandar atelier.
 export function Header() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -22,28 +22,45 @@ export function Header() {
   };
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-surface px-4 md:px-6">
-      <div className="flex items-center gap-2 md:hidden">
-        <span className="text-sm font-bold text-foreground">Kantin Kampus</span>
+    <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border/80 bg-surface/95 px-4 backdrop-blur-md md:px-8">
+      {/* Mobile brand header */}
+      <div className="flex flex-col md:hidden">
+        <Link href="/" className="font-serif text-sm font-semibold tracking-[0.2em] text-foreground">
+          MAISON KANTIN
+        </Link>
+        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground">
+          Atelier &bull; Gastronomy
+        </span>
       </div>
-      <div className="hidden items-center gap-2 md:flex">
-        <span className="text-sm font-semibold text-foreground">Kantin Kampus</span>
+
+      {/* Desktop label */}
+      <div className="hidden items-center gap-3 md:flex">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          Ruang Kurasi Kuliner
+        </span>
       </div>
-      <div className="flex items-center gap-2">
+
+      {/* Action controls */}
+      <div className="flex items-center gap-2.5">
         <AccentPicker />
         <ThemeToggle />
         {user ? (
           <>
             <Link
               href="/settings"
-              className="hidden items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground hover:bg-surface-muted sm:inline-flex"
+              className="hidden items-center gap-2 rounded-sm border border-border bg-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-surface-muted transition-colors sm:inline-flex"
             >
-              <User className="h-4 w-4" aria-hidden="true" />
-              {user.username}
+              <User className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+              <span>{user.username}</span>
             </Link>
-            <Button variant="secondary" size="sm" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-              Keluar
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleSignOut}
+              className="rounded-sm uppercase tracking-wider text-xs font-semibold"
+            >
+              <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Keluar</span>
             </Button>
           </>
         ) : null}

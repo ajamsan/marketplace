@@ -32,7 +32,7 @@ export const ProductPhoto = memo(function ProductPhoto({
         role="img"
         aria-label={alt}
         className={cn(
-          "flex flex-col items-center justify-center gap-1 overflow-hidden bg-surface-muted text-xs text-muted-foreground",
+          "flex flex-col items-center justify-center gap-1.5 overflow-hidden bg-surface-muted text-xs text-muted-foreground uppercase tracking-widest",
           className,
         )}
       >
@@ -42,13 +42,13 @@ export const ProductPhoto = memo(function ProductPhoto({
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="h-6 w-6"
+          className="h-6 w-6 text-muted-foreground/60"
           aria-hidden="true"
         >
           <path d="M3 7a2 2 0 0 1 2-2h2l1.5-2h7L17 5h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
           <circle cx="12" cy="12" r="3.5" />
         </svg>
-        <span>Tanpa foto</span>
+        <span className="text-[10px]">Tanpa Foto</span>
       </div>
     );
   }
@@ -59,7 +59,7 @@ export const ProductPhoto = memo(function ProductPhoto({
       src={src}
       alt={alt}
       loading="lazy"
-      className={cn("object-cover", className)}
+      className={cn("object-cover transition-transform duration-500 group-hover:scale-105", className)}
     />
   );
 });
@@ -71,32 +71,52 @@ export function ProductCard({ product }: { product: Product }) {
   const available = product.availability_status === "available";
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden p-0">
+    <Card className="group flex h-full flex-col overflow-hidden rounded-md border border-border bg-surface p-0 transition-all duration-300 hover:border-foreground/30 hover:shadow-md">
       <Link
         href={`/products/${product.id}`}
-        className="block focus-visible:outline-none"
-        aria-label={`Lihat detail ${product.name}`}
+        className="block overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        aria-label={`Lihat rincian lengkap ${product.name}`}
       >
         <ProductPhoto
           src={product.image_url}
-          alt={`Foto ${product.name}`}
+          alt={`Foto sajian ${product.name}`}
           className="aspect-[4/3] w-full"
         />
       </Link>
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-semibold text-foreground">
-            <Link href={`/products/${product.id}`} className="hover:underline">
+      <div className="flex flex-1 flex-col justify-between gap-3 p-5">
+        <div>
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              {product.stall_name}
+            </span>
+            <AvailabilityBadge status={product.availability_status} />
+          </div>
+          <h3 className="mt-1 font-serif text-base font-bold tracking-tight text-foreground">
+            <Link
+              href={`/products/${product.id}`}
+              className="hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xs"
+            >
               {product.name}
             </Link>
           </h3>
-          <AvailabilityBadge status={product.availability_status} />
+          {product.description ? (
+            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+              {product.description}
+            </p>
+          ) : null}
         </div>
-        <p className="text-xs text-muted-foreground">{product.stall_name}</p>
-        <p className="text-base font-semibold text-foreground">
-          {formatIDR(product.price_minor)}
-        </p>
-        {isBuyer ? <ProductActions product={product} available={available} /> : null}
+
+        <div className="border-t border-border/70 pt-3">
+          <div className="flex items-baseline justify-between mb-3">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+              Harga
+            </span>
+            <span className="text-base font-semibold text-foreground">
+              {formatIDR(product.price_minor)}
+            </span>
+          </div>
+          {isBuyer ? <ProductActions product={product} available={available} /> : null}
+        </div>
       </div>
     </Card>
   );
@@ -121,9 +141,7 @@ function ProductActions({ product, available }: { product: Product; available: b
     addToCart.mutate(
       { productId: product.id, quantity: inCart + 1 },
       {
-        // Menghapus pesan lama setelah penambahan berhasil.
         onSuccess: () => setMessage(null),
-        // Menyajikan pesan server bila penambahan tidak dapat disimpan.
         onError: (error) =>
           setMessage(
             error instanceof ApiError
@@ -136,18 +154,15 @@ function ProductActions({ product, available }: { product: Product; available: b
 
   if (!available) {
     return (
-      <p className="mt-auto text-xs text-muted-foreground">
-        Produk ini tidak dapat ditambahkan ke keranjang.
+      <p className="mt-auto text-xs text-muted-foreground text-center py-1">
+        Sajian belum tersedia saat ini.
       </p>
     );
   }
 
   return (
     <div className="flex flex-1 flex-col gap-2">
-      <p className="min-h-[1.25rem] text-xs text-muted-foreground">
-        {inCart > 0 ? `Di keranjang: ${inCart} item` : "\u00a0"}
-      </p>
-      <div className="mt-auto min-h-[2.5rem] w-full">
+      <div className="mt-auto w-full">
         {inCart > 0 ? (
           <CartQuantityStepper
             productId={product.id}
@@ -160,10 +175,10 @@ function ProductActions({ product, available }: { product: Product; available: b
             size="sm"
             onClick={handleAdd}
             disabled={addToCart.isPending || atLimit}
-            className="w-full"
+            className="w-full rounded-sm uppercase tracking-wider text-xs font-semibold py-2.5 px-2 flex items-center justify-center gap-1.5"
           >
-            <ShoppingCart className="h-4 w-4" aria-hidden="true" />
-            {addToCart.isPending ? "Menambahkan..." : "Tambah ke keranjang"}
+            <ShoppingCart className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span className="truncate">{addToCart.isPending ? "Menambahkan..." : "Tambah ke Keranjang"}</span>
           </Button>
         )}
       </div>
@@ -171,7 +186,7 @@ function ProductActions({ product, available }: { product: Product; available: b
         <p
           role="status"
           className={cn(
-            "text-xs font-medium",
+            "text-xs font-medium text-center",
             addToCart.isError ? "text-danger" : "text-muted-foreground",
           )}
         >

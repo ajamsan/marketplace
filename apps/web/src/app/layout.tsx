@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -16,9 +16,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Kantin Kampus",
-  description: "Temukan makanan di stan kantin kampus, pesan dan bayar tunai di kasir.",
+  title: "Maison Kantin | Haute Gastronomy & Artisanal Campus Marketplace",
+  description: "Kurasi kuliner mewah, sajian artisanal dari koki terkemuka kampus, dan pengalaman bersantap tanpa kompromi.",
 };
 
 const themeBootstrap = `
@@ -44,13 +50,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="id"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
         <Script id="theme-bootstrap" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

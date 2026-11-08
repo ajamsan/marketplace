@@ -19,8 +19,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen w-full bg-background">
         <Sidebar role={user?.role} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <Header />
-          <MobileNav role={user?.role} />
+          <div className="sticky top-0 z-30 flex flex-col bg-surface/95 backdrop-blur-md">
+            <Header />
+            <MobileNav role={user?.role} />
+          </div>
           <main className="flex-1 px-4 py-5 md:px-6 md:py-6">{children}</main>
         </div>
       </div>

@@ -19,7 +19,7 @@ import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 import { formatIDR } from "@/lib/format";
 
-// Menampilkan rincian produk dan aksi penambahan jumlah ke keranjang.
+// Menampilkan rincian produk dan aksi penambahan jumlah ke keranjang dengan estetika gastronomi.
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -32,7 +32,6 @@ export default function ProductDetailPage() {
 
   const product = useQuery({
     queryKey: ["products", id],
-    // Memuat data produk berdasarkan ID pada alamat halaman.
     queryFn: () => getProduct(id),
   });
 
@@ -41,7 +40,6 @@ export default function ProductDetailPage() {
   const inCart = cart?.items.find((item) => item.product_id === id)?.quantity ?? 0;
   const atLimit = inCart + quantity > MAX_QUANTITY;
 
-  // Memeriksa batas jumlah dan mengirim hasil pilihan ke keranjang.
   const handleAdd = () => {
     if (!data) return;
     setMessage(null);
@@ -52,9 +50,7 @@ export default function ProductDetailPage() {
     addToCart.mutate(
       { productId: data.id, quantity: inCart + quantity },
       {
-        // Memberi umpan balik setelah server menerima perubahan keranjang.
-        onSuccess: () => setMessage("Masuk keranjang."),
-        // Menampilkan alasan kegagalan dari API atau pesan umum jaringan.
+        onSuccess: () => setMessage("Berhasil ditambahkan ke pesanan Anda."),
         onError: (error) =>
           setMessage(
             error instanceof ApiError
@@ -66,25 +62,28 @@ export default function ProductDetailPage() {
   };
 
   const errorMessage =
-    product.error instanceof ApiError ? product.error.message : "Gagal memuat produk.";
+    product.error instanceof ApiError ? product.error.message : "Gagal memuat detail sajian.";
 
   return (
-    <div className="pb-28 md:pb-24">
-      <div className="flex flex-col gap-4">
+    <div className="pb-32 md:pb-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <div className="flex flex-col gap-6">
         <Link
           href="/catalog"
-          className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-foreground hover:underline"
+          className="inline-flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xs"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Kembali ke katalog
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>Kembali ke Katalog Kurasi</span>
         </Link>
 
         {product.isPending ? (
-          <Card className="flex flex-col gap-3">
-            <Skeleton className="aspect-[4/3] w-full" />
-            <Skeleton className="h-5 w-2/3" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-9 w-1/3" />
+          <Card className="flex flex-col sm:flex-row gap-6 p-6">
+            <Skeleton className="aspect-[4/3] w-full sm:w-1/2 rounded-md" />
+            <div className="flex-1 flex flex-col gap-3">
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-8 w-1/4" />
+              <Skeleton className="h-20 w-full mt-4" />
+            </div>
           </Card>
         ) : product.isError || !data ? (
           <ErrorState
@@ -94,55 +93,84 @@ export default function ProductDetailPage() {
             }}
           />
         ) : (
-          <Card className="flex flex-col gap-4 p-0 sm:flex-row">
-            <ProductPhoto
-              src={data.image_url}
-              alt={`Foto ${data.name}`}
-              className="aspect-[4/3] w-full sm:w-2/5"
-            />
-            <div className="flex flex-1 flex-col gap-3 p-4">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <h1 className="text-xl font-bold text-foreground">{data.name}</h1>
-                <AvailabilityBadge status={data.availability_status} />
+          <Card className="flex flex-col sm:flex-row gap-8 p-6 sm:p-8 rounded-md border border-border bg-surface shadow-md">
+            <div className="w-full sm:w-1/2 overflow-hidden rounded-sm bg-surface-muted">
+              <ProductPhoto
+                src={data.image_url}
+                alt={`Foto sajian ${data.name}`}
+                className="aspect-[4/3] w-full object-cover"
+              />
+            </div>
+
+            <div className="flex flex-1 flex-col justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                    Atelier: {data.stall_name}
+                  </span>
+                  <AvailabilityBadge status={data.availability_status} />
+                </div>
+
+                <h1 className="mt-2 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                  {data.name}
+                </h1>
+
+                <div className="mt-3">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block font-medium">
+                    Harga Satuan
+                  </span>
+                  <span className="font-serif text-2xl font-bold text-foreground">
+                    {formatIDR(data.price_minor)}
+                  </span>
+                </div>
+
+                {data.description ? (
+                  <p className="mt-4 text-xs sm:text-sm leading-relaxed text-muted-foreground">
+                    {data.description}
+                  </p>
+                ) : (
+                  <p className="mt-4 text-xs italic text-muted-foreground">
+                    Sajian artisanal dipersiapkan segar dari dapur stan pilihan.
+                  </p>
+                )}
               </div>
-              <p className="text-sm text-muted-foreground">Stan {data.stall_name}</p>
-              <p className="text-lg font-semibold text-foreground">
-                {formatIDR(data.price_minor)}
-              </p>
-              {data.description ? (
-                <p className="text-sm text-foreground">{data.description}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground">Tanpa deskripsi.</p>
-              )}
 
               {available ? (
-                <div className="flex flex-col gap-3 border-t border-border pt-4">
+                <div className="flex flex-col gap-4 border-t border-border/80 pt-6">
                   {inCart > 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      Sudah ada {inCart} item di keranjang. Kuantitas di bawah akan
-                      ditambahkan.
-                    </p>
+                    <div className="rounded-xs border border-border bg-surface-muted/50 p-2.5 text-xs text-muted-foreground">
+                      Telah ada <strong>{inCart} porsi</strong> di keranjang Anda.
+                    </div>
                   ) : null}
-                  <QuantityStepper
-                    value={quantity}
-                    onChange={setQuantity}
-                    label={data.name}
-                    busy={addToCart.isPending}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Jumlah yang ditambahkan ke keranjang.
-                  </p>
-                  <Button onClick={handleAdd} disabled={addToCart.isPending || atLimit}>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-foreground mb-2">
+                      Jumlah Porsi
+                    </label>
+                    <QuantityStepper
+                      value={quantity}
+                      onChange={setQuantity}
+                      label={data.name}
+                      busy={addToCart.isPending}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleAdd}
+                    disabled={addToCart.isPending || atLimit}
+                    className="w-full uppercase tracking-widest text-xs font-semibold py-3"
+                  >
                     <ShoppingCart className="h-4 w-4" aria-hidden="true" />
-                    {addToCart.isPending ? "Menambahkan..." : "Tambah ke keranjang"}
+                    <span>{addToCart.isPending ? "Menyimpan ke Pesanan..." : "Tambah ke Keranjang"}</span>
                   </Button>
+
                   {message ? (
                     <p
                       role="status"
                       className={
                         addToCart.isError
-                          ? "text-xs font-medium text-danger"
-                          : "text-xs font-medium text-muted-foreground"
+                          ? "text-xs font-medium text-danger text-center"
+                          : "text-xs font-medium text-success text-center"
                       }
                     >
                       {message}
@@ -150,9 +178,11 @@ export default function ProductDetailPage() {
                   ) : null}
                 </div>
               ) : (
-                <p className="border-t border-border pt-4 text-sm font-medium text-muted-foreground">
-                  Produk ini sedang tidak tersedia dan tidak dapat ditambahkan ke keranjang.
-                </p>
+                <div className="border-t border-border/80 pt-6">
+                  <p className="text-xs font-medium text-muted-foreground text-center py-2">
+                    Sajian ini sedang tidak tersedia untuk dipesan saat ini.
+                  </p>
+                </div>
               )}
             </div>
           </Card>

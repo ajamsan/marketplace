@@ -7,7 +7,7 @@ import { z } from "zod";
 import { authApi } from "./api";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/form";
 
 const loginSchema = z.object({
@@ -77,8 +77,19 @@ export function LoginForm() {
   }
 
   return (
-    <Card>
-      <CardHeader title="Masuk" description="Masuk untuk melanjutkan pesananmu." />
+    <Card className="rounded-md border border-border bg-surface p-6 sm:p-8 shadow-md">
+      <div className="mb-6">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
+          Autentikasi Akun
+        </span>
+        <h1 className="mt-1 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          Selamat Datang Kembali
+        </h1>
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          Masuk untuk melanjutkan pengalaman gastronomi dan memantau pesanan Anda.
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <Field label="Email" htmlFor="email" error={fieldErrors.email}>
           <Input
@@ -117,16 +128,16 @@ export function LoginForm() {
         </Field>
 
         {formError ? (
-          <p role="alert" className="rounded-lg border border-danger/40 bg-danger-soft p-3 text-sm text-foreground">
+          <p role="alert" className="rounded-sm border border-danger/40 bg-danger-soft p-3 text-xs text-foreground">
             {formError}
           </p>
         ) : null}
 
-        <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Memproses..." : "Lanjut"}
+        <Button type="submit" size="lg" disabled={pending} className="mt-2 uppercase tracking-widest text-xs font-semibold">
+          {pending ? "Memproses..." : "Masuk ke Akun"}
         </Button>
-        <p className="text-center text-xs text-muted-foreground">
-          Setelah password benar, kami kirim kode OTP ke emailmu.
+        <p className="text-center text-[11px] text-muted-foreground">
+          Kode verifikasi OTP aman akan dikirimkan ke alamat email Anda.
         </p>
       </form>
     </Card>

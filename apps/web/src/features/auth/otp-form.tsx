@@ -8,7 +8,7 @@ import { authApi } from "./api";
 import { homePathForRole, useAuthStore } from "./auth-store";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/form";
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -49,11 +49,11 @@ export function OtpForm({
     setOtpError(null);
 
     if (!/^\d{6}$/.test(otp)) {
-      setOtpError("Masukkan 6 digit kode OTP.");
+      setOtpError("Masukkan 6 digit angka kode OTP.");
       return;
     }
     if (purpose === "login" && !preAuthToken) {
-      setFormError("Verifikasi login tidak lengkap. Silakan ulangi login.");
+      setFormError("Sesi verifikasi login kedaluwarsa. Silakan ulangi proses masuk.");
       return;
     }
 
@@ -74,14 +74,14 @@ export function OtpForm({
         if (error.code === "OTP_INVALID_OR_EXPIRED" || error.status === 400) {
           setOtpError(error.message);
         } else if (error.status === 401) {
-          setFormError("Verifikasi login kedaluwarsa. Silakan ulangi login.");
+          setFormError("Verifikasi login kedaluwarsa. Silakan ulangi proses masuk.");
         } else if (error.status === 429) {
           setFormError(`${error.message} Tunggu sebentar sebelum mencoba lagi.`);
         } else {
           setFormError(error.message);
         }
       } else {
-        setFormError("Terjadi kesalahan jaringan. Coba lagi sebentar.");
+        setFormError("Terjadi kendala jaringan. Coba lagi sebentar.");
       }
     } finally {
       setPending(false);
@@ -96,7 +96,7 @@ export function OtpForm({
     try {
       await authApi.resendOtp({ email, purpose });
       setResendSeconds(RESEND_COOLDOWN_SECONDS);
-      setStatus("Jika alamat email valid, kode OTP baru telah dikirim.");
+      setStatus("Jika alamat email terdaftar, kode OTP baru telah dikirimkan.");
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 429) {
@@ -114,20 +114,28 @@ export function OtpForm({
   }
 
   const resendLabel =
-    resendSeconds > 0 ? `Kirim ulang kode (${resendSeconds}d)` : "Kirim ulang kode";
+    resendSeconds > 0 ? `Kirim ulang kode (${resendSeconds} detik)` : "Kirim ulang kode OTP";
 
   return (
-    <Card>
-      <CardHeader
-        title="Masukkan kode OTP"
-        description={`Kode 6 digit dikirim ke ${email || "emailmu"}.`}
-      />
+    <Card className="rounded-md border border-border bg-surface p-6 sm:p-8 shadow-md">
+      <div className="mb-6">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
+          Verifikasi Dua Langkah
+        </span>
+        <h1 className="mt-1 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          Konfirmasi Kode Keamanan
+        </h1>
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          Masukkan 6 digit kode OTP yang kami kirimkan ke <strong>{email || "email Anda"}</strong>.
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <Field
-          label="Kode OTP"
+          label="Kode OTP 6 Digit"
           htmlFor="otp"
           error={otpError ?? undefined}
-          hint="Kode hanya berlaku sekali dan berakhir setelah beberapa menit."
+          hint="Kode berlaku terbatas beberapa menit untuk keamanan akun Anda."
         >
           <Input
             id="otp"
@@ -142,24 +150,26 @@ export function OtpForm({
             pattern="[0-9]*"
             maxLength={6}
             placeholder="000000"
-            className="text-center text-lg tracking-[0.4em]"
+            className="text-center font-mono text-xl tracking-[0.5em] font-semibold py-3"
             aria-invalid={otpError ? true : undefined}
             aria-describedby={otpError ? "otp-error" : undefined}
           />
         </Field>
 
         {formError ? (
-          <p role="alert" className="rounded-lg border border-danger/40 bg-danger-soft p-3 text-sm text-foreground">
+          <p role="alert" className="rounded-sm border border-danger/40 bg-danger-soft p-3 text-xs text-foreground">
             {formError}
           </p>
         ) : null}
 
-        <p aria-live="polite" className="text-sm text-muted-foreground">
-          {status}
-        </p>
+        {status ? (
+          <p aria-live="polite" className="text-xs text-success font-medium">
+            {status}
+          </p>
+        ) : null}
 
-        <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Memverifikasi..." : "Verifikasi"}
+        <Button type="submit" size="lg" disabled={pending} className="mt-2 uppercase tracking-widest text-xs font-semibold">
+          {pending ? "Memverifikasi..." : "Verifikasi & Lanjutkan"}
         </Button>
 
         <Button
@@ -167,8 +177,9 @@ export function OtpForm({
           variant="secondary"
           onClick={handleResend}
           disabled={resendPending || resendSeconds > 0}
+          className="uppercase tracking-wider text-xs"
         >
-          {resendPending ? "Mengirim..." : resendLabel}
+          {resendPending ? "Mengirim Ulang..." : resendLabel}
         </Button>
       </form>
     </Card>

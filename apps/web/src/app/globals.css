@@ -128,14 +128,32 @@
   --radius-app: var(--radius);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
 }
 
 * {
   border-color: var(--border);
 }
 
+a[href],
+button,
+summary,
+select,
+label[for],
+[role="button"] {
+  cursor: pointer;
+}
+
+:disabled,
+[disabled],
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 html {
   color-scheme: light;
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 html[data-theme="dark"] {

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { authApi } from "./api";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/form";
 
 type RegisterValues = {
@@ -24,13 +24,13 @@ const USERNAME_PATTERN = /^[\p{L}][\p{L}' ]{1,28}[\p{L}']$/u;
 const ROLE_OPTIONS: { id: "buyer" | "seller"; label: string; description: string }[] = [
   {
     id: "buyer",
-    label: "Buyer",
-    description: "Beli makanan di kantinampus dan pantau pesananmu.",
+    label: "Pembeli / Connoisseur",
+    description: "Nikmati kurasi kuliner artisan, pesan hidangan tanpa antre, dan pantau status pesanan.",
   },
   {
     id: "seller",
-    label: "Seller",
-    description: "Kelola stan, produk, dan pesanan yang masuk.",
+    label: "Artisan / Pengelola Stan",
+    description: "Kelola menu atelier, perbarui ketersediaan bahan, dan terima konfirmasi pesanan masuk.",
   },
 ];
 
@@ -117,14 +117,25 @@ export function RegisterForm() {
   }
 
   return (
-    <Card>
-      <CardHeader title="Daftar akun" description="Buat akun untuk memesan di kantin kampus." />
+    <Card className="rounded-md border border-border bg-surface p-6 sm:p-8 shadow-md">
+      <div className="mb-6">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
+          Pendaftaran Akun
+        </span>
+        <h1 className="mt-1 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          Bergabung dengan Maison Kantin
+        </h1>
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          Daftarkan akun untuk menjelajahi kurasi gastronomi kampus dan memesan dengan mudah.
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <Field
           label="Username"
           htmlFor="username"
           error={fieldErrors.username}
-          hint="3-30 karakter: huruf, spasi, dan apostrof."
+          hint="3-30 karakter: huruf, spasi, dan apostrof (nama asli)."
         >
           <Input
             id="username"
@@ -144,7 +155,7 @@ export function RegisterForm() {
           label="Email"
           htmlFor="email"
           error={fieldErrors.email}
-          hint="Kode OTP dikirim ke email ini."
+          hint="Kode OTP konfirmasi dikirim ke email ini."
         >
           <Input
             id="email"
@@ -165,7 +176,7 @@ export function RegisterForm() {
           label="Password"
           htmlFor="password"
           error={fieldErrors.password}
-          hint="Panjang 10-128 karakter."
+          hint="Keamanan tinggi: 10-128 karakter."
         >
           <Input
             id="password"
@@ -180,12 +191,14 @@ export function RegisterForm() {
           />
         </Field>
 
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-medium text-foreground">Peran akun</legend>
+        <fieldset className="flex flex-col gap-2.5">
+          <legend className="text-xs font-semibold uppercase tracking-wider text-foreground mb-1">
+            Pilihan Peran Akun
+          </legend>
           {ROLE_OPTIONS.map((option) => (
             <label
               key={option.id}
-              className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface p-3 has-[:checked]:border-accent"
+              className="flex cursor-pointer items-start gap-3 rounded-sm border border-border bg-surface p-3 transition-colors hover:border-foreground/40 has-[:checked]:border-foreground has-[:checked]:bg-surface-muted/50"
             >
               <input
                 type="radio"
@@ -193,11 +206,11 @@ export function RegisterForm() {
                 value={option.id}
                 checked={values.role === option.id}
                 onChange={() => update("role", option.id)}
-                className="mt-1 h-4 w-4 accent-accent"
+                className="mt-1 h-4 w-4 accent-foreground"
               />
               <span>
-                <span className="block text-sm font-medium text-foreground">{option.label}</span>
-                <span className="block text-xs text-muted-foreground">{option.description}</span>
+                <span className="block text-sm font-semibold text-foreground">{option.label}</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">{option.description}</span>
               </span>
             </label>
           ))}
@@ -209,13 +222,13 @@ export function RegisterForm() {
         </fieldset>
 
         {formError ? (
-          <p role="alert" className="rounded-lg border border-danger/40 bg-danger-soft p-3 text-sm text-foreground">
+          <p role="alert" className="rounded-sm border border-danger/40 bg-danger-soft p-3 text-xs text-foreground">
             {formError}
           </p>
         ) : null}
 
-        <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Mengirim..." : "Daftar"}
+        <Button type="submit" size="lg" disabled={pending} className="mt-2 uppercase tracking-widest text-xs font-semibold">
+          {pending ? "Mengirim Pendaftaran..." : "Daftar Akun Sekarang"}
         </Button>
       </form>
     </Card>
