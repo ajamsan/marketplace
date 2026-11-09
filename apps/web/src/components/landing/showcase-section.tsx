@@ -125,19 +125,15 @@ export function ShowcaseSection() {
             />
           ) : (
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {items.map((product, index) => {
-                // Memusatkan kartu terakhir saat baris terakhir hanya berisi satu kartu.
-                const lastRowOrphan = items.length % 3 === 1 && index === items.length - 1;
-                return (
-                  <li
-                    key={product.id}
-                    className={lastRowOrphan ? "reveal xl:col-start-2" : "reveal"}
-                    style={{ animationDelay: `${index * 80}ms` }}
-                  >
-                    <ProductCard product={product} />
-                  </li>
-                );
-              })}
+              {items.map((product, index) => (
+                <li
+                  key={product.id}
+                  className="reveal"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
+                  <ProductCard product={product} />
+                </li>
+              ))}
             </ul>
           )}
         </div>

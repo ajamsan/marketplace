@@ -18,7 +18,7 @@ Rollback: `git reset --hard 9fc943b` mengembalikan seluruh pohon sumber ke kondi
 | 14 | "Buka Keranjang" di bottom bar < 44px | Selesai | `cart-bar.tsx`: `min-h-11`, `inline-flex items-center` |
 | 15 | Konten Seller/Admin melebar penuh | Selesai | `max-w` pada halaman stan (4xl), produk (6xl/2xl/2xl), orders (5xl), admin (6xl); Harga + Status ketersediaan jadi dua kolom di form produk |
 | 16 | Status pemenuhan tampil dua kali | Selesai | Baris duplikat dihapus dari `order-queue.tsx`; FulfillmentControls satu-satunya sumber status |
-| 17 | Kartu produk terakhir sendirian di grid 3 kolom | Selesai | Kartu terakhir ter-center (`xl:col-start-2`) di showcase landing dan katalog |
+| 17 | Kartu produk terakhir sendirian di grid 3 kolom | Diputuskan pemilik produk: grid flow kiri ke kanan seperti biasa (tidak di-center), di showcase dan katalog. | `showcase-section.tsx`, `catalog/page.tsx` |
 | 18 | Blok cakupan pilot berat sebelah | Selesai | Catatan pilot jadi banner penuh; panel "Sudah berjalan" dan "Belum ada" berdampingan dua kolom seimbang di `scope-section.tsx` |
 | 19 | Catatan Admin menempel di bagian Buyer | Selesai | Catatan kini blok kutipan di dalam artikel Admin pada `roles-section.tsx` |
 
