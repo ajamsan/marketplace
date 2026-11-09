@@ -39,7 +39,7 @@ export function formatDate(value: string | Date | null | undefined): string {
   }).format(date);
 }
 
-/** Label teks status pesanan — aksen warna tidak menggantikan label (PRD §7). */
+/** Label teks status pesanan: aksen warna tidak menggantikan label (PRD §7). */
 export const ORDER_STATUS_LABEL: Record<string, string> = {
   awaiting_payment: "Menunggu pembayaran",
   confirmed: "Lunas",

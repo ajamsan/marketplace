@@ -27,7 +27,7 @@ const icons: Record<string, LucideIcon> = {
   admin: ShieldCheck,
 };
 
-/** Navigasi ringkas untuk layar kecil dengan estetika kurasi atelier; tetap dapat diakses keyboard. */
+/** Navigasi ringkas untuk layar kecil; tetap dapat diakses keyboard. */
 export function MobileNav({ role }: { role: Role | null | undefined }) {
   const pathname = usePathname();
   const items = navItemsForRole(role);
@@ -46,7 +46,7 @@ export function MobileNav({ role }: { role: Role | null | undefined }) {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex shrink-0 items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all",
+              "flex min-h-11 shrink-0 items-center gap-2 rounded-sm border px-4 text-xs font-semibold uppercase tracking-wider transition-all",
               active
                 ? "border-foreground bg-foreground text-background shadow-2xs"
                 : "border-border bg-surface text-muted-foreground hover:bg-surface-muted hover:text-foreground",

@@ -20,7 +20,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { href: "/settings", label: "Pengaturan", icon: "settings" },
   ],
   admin: [
-    { href: "/admin", label: "Persetujuan stan", icon: "admin" },
+    { href: "/admin", label: "Ruang admin", icon: "admin" },
     { href: "/settings", label: "Pengaturan", icon: "settings" },
   ],
 };

@@ -9,6 +9,7 @@ import {
   fulfillmentStatusLabel,
   paymentStatusLabel,
 } from "@/lib/format";
+import { OrderTimeline } from "./order-timeline";
 
 interface StallGroup {
   stallId: string;
@@ -76,9 +77,19 @@ export function OrderDetail({ order }: { order: OrderDetailData }) {
             {formatIDR(order.total_minor)}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Tunjukkan kode pesanan ini di kasir stan saat mengambil pesanan.
-        </p>
+        {order.status === "completed" ? (
+          <p className="text-sm text-success font-medium">
+            Pesanan telah diterima pada {formatDateTime(order.created_at)}.
+          </p>
+        ) : order.status === "cancelled" || order.status === "rejected" || order.status === "expired" ? (
+          <p className="text-sm text-danger font-medium">
+            Pesanan tidak dapat diproses.
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Tunjukkan kode pesanan ini di kasir stan saat mengambil pesanan.
+          </p>
+        )}
       </Card>
 
       <Card>
@@ -163,6 +174,8 @@ export function OrderDetail({ order }: { order: OrderDetailData }) {
           </ul>
         )}
       </Card>
+
+      <OrderTimeline order={order} />
 
       <Card>
         <CardHeader title="Ringkasan pembayaran" />

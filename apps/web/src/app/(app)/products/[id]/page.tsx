@@ -19,7 +19,7 @@ import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 import { formatIDR } from "@/lib/format";
 
-// Menampilkan rincian produk dan aksi penambahan jumlah ke keranjang dengan estetika gastronomi.
+// Menampilkan rincian produk dan aksi penambahan jumlah ke keranjang.
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
           className="inline-flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xs"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>Kembali ke Katalog Kurasi</span>
+          <span>Kembali ke katalog</span>
         </Link>
 
         {product.isPending ? (
@@ -106,7 +106,7 @@ export default function ProductDetailPage() {
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                    Atelier: {data.stall_name}
+                    Stan: {data.stall_name}
                   </span>
                   <AvailabilityBadge status={data.availability_status} />
                 </div>
@@ -129,8 +129,8 @@ export default function ProductDetailPage() {
                     {data.description}
                   </p>
                 ) : (
-                  <p className="mt-4 text-xs italic text-muted-foreground">
-                    Sajian artisanal dipersiapkan segar dari dapur stan pilihan.
+                  <p className="mt-4 text-xs text-muted-foreground">
+                    Penjual belum menambahkan deskripsi untuk produk ini.
                   </p>
                 )}
               </div>

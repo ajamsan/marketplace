@@ -5,7 +5,6 @@ import { useEffect, type ReactNode } from "react";
 
 import { homePathForRole, useAuthStore } from "./auth-store";
 import type { Role } from "@/lib/api/types";
-import { FullPageLoader } from "@/components/ui/feedback";
 
 /**
  * Route guard sisi klien: memeriksa status sesi dan role sebelum menampilkan
@@ -28,7 +27,8 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     }
   }, [status, pathname, router]);
 
-  if (status !== "authenticated") return <FullPageLoader label="Memuat sesi..." />;
+  // Loading state handled by AppShell; only render children when authenticated
+  if (status !== "authenticated") return null;
   return <>{children}</>;
 }
 
@@ -49,8 +49,8 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
     }
   }, [status, user, roles, router]);
 
-  if (status !== "authenticated" || !user) return <FullPageLoader label="Memuat sesi..." />;
-  if (!roles.includes(user.role)) return <FullPageLoader label="Mengalihkan..." />;
+  if (status !== "authenticated" || !user) return null;
+  if (!roles.includes(user.role)) return <div role="status" className="sr-only">Mengalihkan...</div>;
   return <>{children}</>;
 }
 
@@ -71,6 +71,6 @@ export function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
     }
   }, [status, user, router]);
 
-  if (status === "authenticated") return <FullPageLoader label="Mengalihkan..." />;
+  if (status === "authenticated") return <div role="status" className="sr-only">Mengalihkan...</div>;
   return <>{children}</>;
 }

@@ -9,7 +9,7 @@ import { ApiError } from "@/lib/api/client";
 import type { OrderPreview } from "@/lib/api/types";
 import { formatIDR } from "@/lib/format";
 
-// Menampilkan ringkasan biaya dan mengirim pesanan dengan kunci idempotensi berstandar gastronomi.
+// Menampilkan ringkasan biaya dan mengirim pesanan dengan kunci idempotensi.
 export function CheckoutSummary({
   preview,
   items,
@@ -59,10 +59,10 @@ export function CheckoutSummary({
       <Card className="rounded-md border border-border bg-surface p-6 sm:p-8 shadow-xs">
         <div className="border-b border-border/80 pb-4 mb-6">
           <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
-            Rincian Sajian
+            Rincian item
           </span>
           <h2 className="font-serif text-xl sm:text-2xl font-bold text-foreground mt-1">
-            Ringkasan Pesanan Terkurasi
+            Ringkasan pesanan
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
             Harga akhir diverifikasi resmi oleh server.
@@ -73,7 +73,7 @@ export function CheckoutSummary({
           {preview.stalls.map((stall) => (
             <div key={stall.stall_id} className="rounded-sm border border-border/60 bg-surface-muted/20 p-4">
               <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground block">
-                Stan Atelier
+                Stan
               </span>
               <h3 className="font-serif text-base font-bold text-foreground">{stall.stall_name}</h3>
               <ul className="mt-3 flex flex-col gap-2.5">
@@ -141,7 +141,7 @@ export function CheckoutSummary({
                 Tunai Langsung di Kasir Stan
               </span>
               <span className="block text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                Lakukan pembayaran tunai kepada kasir stan atelier saat mengambil pesanan Anda.
+                Lakukan pembayaran tunai kepada kasir stan saat mengambil pesanan Anda.
               </span>
             </span>
           </label>
@@ -158,7 +158,7 @@ export function CheckoutSummary({
                 QRIS &bull; Pembayaran Digital (Segera Hadir)
               </span>
               <span className="block text-xs text-muted-foreground mt-0.5">
-                Integrasi pembayaran kode QR sedang dalam persiapan atelier.
+                Pembayaran QRIS belum tersedia di build ini.
               </span>
             </span>
           </label>

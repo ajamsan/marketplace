@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 
-// Memuat katalog berhalaman dan menggabungkannya untuk pencarian pembeli dengan gaya kurasi mewah.
+// Memuat katalog berhalaman dan menggabungkannya untuk pencarian pembeli.
 export default function CatalogPage() {
   const [search, setSearch] = useState("");
   const [stallId, setStallId] = useState("");
@@ -44,13 +44,14 @@ export default function CatalogPage() {
       <div className="flex flex-col gap-6">
         <header className="flex flex-col gap-1 border-b border-border/80 pb-6">
           <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
-            Eksplorasi Atelier Kampus
+            Menu stan kampus
           </span>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Katalog Kurasi Gastronomi
+            Katalog produk
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl">
-            Jelajahi sajian lezat dan kreasi minuman istimewa yang dipersiapkan segar setiap hari oleh para mitra stan terpilih.
+            Cari produk berdasarkan nama atau pilih stan. Status ketersediaan diperbarui oleh
+            penjual, jadi yang tampil di sini adalah kondisi terakhir dari stan.
           </p>
         </header>
 
@@ -85,7 +86,7 @@ export default function CatalogPage() {
         ) : items.length === 0 ? (
           <EmptyState
             title="Sajian tidak ditemukan"
-            description="Coba gunakan kata kunci pencarian lain atau pilih stan atelier yang berbeda."
+            description="Coba kata kunci lain atau pilih stan yang berbeda."
           />
         ) : (
           <>

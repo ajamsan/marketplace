@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 
 import { authApi } from "./api";
@@ -24,13 +24,13 @@ const USERNAME_PATTERN = /^[\p{L}][\p{L}' ]{1,28}[\p{L}']$/u;
 const ROLE_OPTIONS: { id: "buyer" | "seller"; label: string; description: string }[] = [
   {
     id: "buyer",
-    label: "Pembeli / Connoisseur",
-    description: "Nikmati kurasi kuliner artisan, pesan hidangan tanpa antre, dan pantau status pesanan.",
+    label: "Pembeli",
+    description: "Cari menu dari stan kampus, susun keranjang, dan pantau status pesanan sampai siap diambil.",
   },
   {
     id: "seller",
-    label: "Artisan / Pengelola Stan",
-    description: "Kelola menu atelier, perbarui ketersediaan bahan, dan terima konfirmasi pesanan masuk.",
+    label: "Penjual / Pengelola stan",
+    description: "Ajukan stan → tunggu persetujuan admin → kelola produk & pesanan, konfirmasi pembayaran tunai.",
   },
 ];
 
@@ -58,15 +58,21 @@ function issuesToFieldErrors(error: z.ZodError): Partial<Record<FieldKey, string
   return result;
 }
 
+// Menentukan peran awal dari ?role=seller bila tautan mendaftarkan penjual.
+function initialRole(value: string | null): RegisterValues["role"] {
+  return value === "seller" || value === "buyer" ? value : "buyer";
+}
+
 // Mengelola pendaftaran akun dan meneruskan pengguna ke langkah verifikasi email.
 export function RegisterForm() {
   const router = useRouter();
-  const [values, setValues] = useState<RegisterValues>({
+  const searchParams = useSearchParams();
+  const [values, setValues] = useState<RegisterValues>(() => ({
     username: "",
     email: "",
     password: "",
-    role: "buyer",
-  });
+    role: initialRole(searchParams.get("role")),
+  }));
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -123,10 +129,10 @@ export function RegisterForm() {
           Pendaftaran Akun
         </span>
         <h1 className="mt-1 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-          Bergabung dengan Maison Kantin
+          Bergabung dengan Kantin Kampus
         </h1>
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          Daftarkan akun untuk menjelajahi kurasi gastronomi kampus dan memesan dengan mudah.
+          Daftarkan akun untuk melihat menu stan kampus dan memesan tanpa antre.
         </p>
       </div>
 

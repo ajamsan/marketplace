@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { authApi } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/auth-store";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Badge, Card, CardHeader } from "@/components/ui/card";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
+import { Avatar } from "@/components/ui/avatar";
 import { Field, Input, Label } from "@/components/ui/form";
 
 const ROLE_LABEL: Record<string, string> = {
@@ -110,6 +112,18 @@ export function ProfileForm() {
   return (
     <Card>
       <CardHeader title="Profil" description="Data yang dipakai untuk identifikasi akunmu." />
+      <div className="mb-5 flex items-center gap-4 rounded-lg border border-border bg-surface-muted p-4">
+        <Avatar username={profile.username} imageUrl={profile.profile_image_url} size={64} />
+        <div className="min-w-0">
+          <p className="truncate font-serif text-lg font-bold tracking-tight text-foreground">
+            {profile.username}
+          </p>
+          <p className="truncate text-sm text-muted-foreground">{profile.email}</p>
+          <Badge tone="accent" className="mt-1.5">
+            {ROLE_LABEL[profile.role] ?? profile.role}
+          </Badge>
+        </div>
+      </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <Field label="Username" htmlFor="profile-username" error={usernameError ?? undefined}>
           <Input
@@ -131,7 +145,9 @@ export function ProfileForm() {
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="profile-email">Email</Label>
-          <Input id="profile-email" value={profile.email} readOnly aria-readonly="true" />
+          <div className="rounded-lg border border-border/50 bg-surface-muted px-3 py-2 text-sm text-muted-foreground">
+            {profile.email}
+          </div>
           <p className="text-xs text-muted-foreground">
             Email belum dapat diubah pada versi ini.
           </p>
@@ -139,12 +155,9 @@ export function ProfileForm() {
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="profile-role">Peran</Label>
-          <Input
-            id="profile-role"
-            value={ROLE_LABEL[profile.role] ?? profile.role}
-            readOnly
-            aria-readonly="true"
-          />
+          <div className="rounded-lg border border-border/50 bg-surface-muted px-3 py-2 text-sm text-muted-foreground">
+            {ROLE_LABEL[profile.role] ?? profile.role}
+          </div>
           <p className="text-xs text-muted-foreground">
             Peran akun tidak dapat diubah setelah pendaftaran.
           </p>

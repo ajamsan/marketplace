@@ -31,8 +31,12 @@ export async function createOrder(
 }
 
 // Memuat pesanan pembeli berikut cursor untuk permintaan halaman berikutnya.
-export async function listOrders(cursor?: string): Promise<OrderPage> {
-  const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
+export async function listOrders(params?: { cursor?: string; q?: string; status?: string }): Promise<OrderPage> {
+  const searchParams = new URLSearchParams();
+  if (params?.cursor) searchParams.set("cursor", params.cursor);
+  if (params?.q) searchParams.set("q", params.q);
+  if (params?.status) searchParams.set("status", params.status);
+  const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
   const page = await api.get<{
     orders?: OrderSummary[] | null;
     next_cursor?: string | null;

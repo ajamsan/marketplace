@@ -548,6 +548,62 @@ func (s *Service) ListForSeller(ctx context.Context, sellerID string, cursor htt
 	return out, next, nil
 }
 
+// ListAllForAdmin mengembalikan pesanan lintas seluruh stan untuk laporan
+// antrian admin, terbaru dulu. Nomor antrian mengikuti aturan harian yang sama
+// dengan detail pembeli (reset pukul 00.00 WIB).
+func (s *Service) ListAllForAdmin(ctx context.Context, cursor httpx.Cursor, limit int) ([]Detail, string, error) {
+	query := `
+		SELECT o.id, o.public_code, o.status, u.username, o.currency,
+		       o.subtotal_minor, o.total_minor, o.created_at
+		FROM orders o
+		JOIN users u ON u.id = o.buyer_id`
+	args := []any{}
+	if cursor.ID != "" {
+		args = append(args, cursor.Timestamp, cursor.ID)
+		query += fmt.Sprintf(" WHERE (o.created_at, o.id) < ($%d, $%d)", len(args)-1, len(args))
+	}
+	args = append(args, limit+1)
+	query += fmt.Sprintf(" ORDER BY o.created_at DESC, o.id DESC LIMIT $%d", len(args))
+	rows, err := s.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, "", err
+	}
+	out := []Detail{}
+	for rows.Next() {
+		var d Detail
+		d.Items, d.Payments, d.Fulfillments = []ItemLine{}, []PaymentLine{}, []FulfillmentLine{}
+		if err := rows.Scan(&d.ID, &d.PublicCode, &d.Status, &d.BuyerUsername, &d.Currency,
+			&d.SubtotalMinor, &d.TotalMinor, &d.CreatedAt); err != nil {
+			rows.Close()
+			return nil, "", err
+		}
+		out = append(out, d)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return nil, "", err
+	}
+	next := ""
+	if len(out) > limit {
+		last := out[limit-1]
+		next = httpx.EncodeCursor(httpx.Cursor{Timestamp: last.CreatedAt, ID: last.ID})
+		out = out[:limit]
+	}
+	for i := range out {
+		if err := s.fillDetail(ctx, &out[i], ""); err != nil {
+			return nil, "", err
+		}
+		stallID := ""
+		if len(out[i].Payments) > 0 {
+			stallID = out[i].Payments[0].StallID
+		} else if len(out[i].Items) > 0 {
+			stallID = out[i].Items[0].StallID
+		}
+		out[i].QueueNumber = s.queueNumber(ctx, out[i].ID, stallID, out[i].CreatedAt, out[i].Payments)
+	}
+	return out, next, nil
+}
+
 // fillSellerSlice mengisi item/pembayaran/pemenuhan hanya untuk stan milik
 // seller ini pada order tersebut.
 // Melengkapi pesanan penjual dengan bagian item dan status yang ia kelola.
@@ -695,7 +751,8 @@ func (s *Service) RecalculateStatusTx(ctx context.Context, tx *sql.Tx, orderID s
 }
 
 // queueNumber mengembalikan nomor antrian order ini di antara order yang sudah
-// dibayar (cash_paid) untuk stan yang sama, berdasarkan waktu pembuatan.
+// dibayar (cash_paid) untuk stan yang sama PADA HARI YANG SAMA (Asia/Jakarta),
+// berdasarkan waktu pembuatan. Antrian di-restart dari #1 setiap pukul 00.00 WIB.
 // Mengembalikan 0 jika belum dibayar.
 func (s *Service) queueNumber(ctx context.Context, orderID, stallID string, createdAt time.Time, payments []PaymentLine) int {
 	for _, p := range payments {
@@ -706,14 +763,20 @@ func (s *Service) queueNumber(ctx context.Context, orderID, stallID string, crea
 	if len(payments) == 0 || stallID == "" {
 		return 0
 	}
+	jakarta, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		jakarta = time.FixedZone("WIB", 7*60*60)
+	}
+	dayStart := time.Date(createdAt.In(jakarta).Year(), createdAt.In(jakarta).Month(), createdAt.In(jakarta).Day(), 0, 0, 0, 0, jakarta)
 	var n int
-	err := s.DB.QueryRowContext(ctx, `
+	err = s.DB.QueryRowContext(ctx, `
 		SELECT count(DISTINCT o.id) + 1
 		FROM orders o
 		WHERE o.created_at < $1
+		  AND o.created_at >= $3
 		  AND EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.id AND oi.stall_id = $2)
 		  AND EXISTS (SELECT 1 FROM payments p WHERE p.order_id = o.id AND p.stall_id = $2 AND p.status = 'cash_paid')`,
-		createdAt, stallID).Scan(&n)
+		createdAt, stallID, dayStart).Scan(&n)
 	if err != nil {
 		return 0
 	}

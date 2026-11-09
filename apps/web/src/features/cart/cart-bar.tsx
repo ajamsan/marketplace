@@ -7,7 +7,7 @@ import { useCart } from "./use-cart";
 import { useAuthStore } from "@/features/auth/auth-store";
 import { formatIDR } from "@/lib/format";
 
-// Menampilkan jumlah dan subtotal keranjang sebagai akses cepat bagi pembeli dengan estetika mewah.
+// Menampilkan jumlah dan subtotal keranjang sebagai akses cepat bagi pembeli.
 export function CartBar() {
   const role = useAuthStore((state) => state.user?.role);
   const isBuyer = role === "buyer";
@@ -39,7 +39,7 @@ export function CartBar() {
               <p className="text-xs font-semibold text-foreground">Menghubungkan ke pesanan...</p>
             ) : (
               <p className="truncate text-sm font-semibold text-foreground">
-                <span className="font-serif font-bold text-base">{count}</span> sajian terkurasi &bull;{" "}
+                <span className="font-serif font-bold text-base">{count}</span> item di keranjang &bull;{" "}
                 <span className="font-serif font-bold text-base">{formatIDR(subtotal)}</span>
               </p>
             )}

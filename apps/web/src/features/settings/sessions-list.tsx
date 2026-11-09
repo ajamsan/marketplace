@@ -1,12 +1,24 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Globe, Laptop, Monitor, MonitorSmartphone, Smartphone } from "lucide-react";
 
 import { RevokeSessionButton } from "./revoke-session-button";
 import { authApi } from "@/features/auth/api";
 import { formatDateTime } from "@/lib/format";
 import { Badge, Card, CardHeader } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
+import { cn } from "@/lib/utils";
+
+// Memilih ikon perangkat dari teks platform yang dikirim API.
+function platformIcon(platform: string) {
+  const value = platform.toLowerCase();
+  if (/(android|iphone|ios|mobile|phone)/.test(value)) return Smartphone;
+  if (/(mac|windows|win|linux|desktop|komputer|laptop)/.test(value)) return Laptop;
+  if (/(tablet|ipad)/.test(value)) return MonitorSmartphone;
+  if (/(tv|monitor)/.test(value)) return Monitor;
+  return Globe;
+}
 
 // Menampilkan sesi akun dengan kondisi muat, gagal, kosong, dan aksi pencabutan.
 export function SessionsList() {
@@ -52,34 +64,55 @@ export function SessionsList() {
 
       {sessionsQuery.data && sessionsQuery.data.length > 0 ? (
         <ul className="flex flex-col gap-3">
-          {sessionsQuery.data.map((session) => (
-            <li
-              key={session.id}
-              className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border bg-surface-muted p-3"
-            >
-              <div className="flex min-w-0 flex-col gap-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold text-foreground">{session.label}</p>
-                  {session.is_current ? <Badge tone="accent">Sesi ini</Badge> : null}
+          {sessionsQuery.data.map((session) => {
+            const Icon = platformIcon(session.platform);
+            return (
+              <li
+                key={session.id}
+                className={cn(
+                  "flex flex-wrap items-start justify-between gap-3 rounded-lg border p-4",
+                  session.is_current
+                    ? "border-accent bg-accent-soft"
+                    : "border-border bg-surface-muted",
+                )}
+              >
+                <div className="flex min-w-0 items-start gap-3">
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border",
+                      session.is_current
+                        ? "border-accent/40 bg-surface text-accent"
+                        : "border-border bg-surface text-muted-foreground",
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground">{session.label}</p>
+                      {session.is_current ? <Badge tone="accent">Sesi ini</Badge> : null}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{session.platform}</p>
+                    <p className="text-xs text-muted-foreground">IP: {session.ip_masked}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Masuk: {formatDateTime(session.created_at)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Terakhir aktif: {formatDateTime(session.last_seen_at)}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">{session.platform}</p>
-                <p className="text-xs text-muted-foreground">IP: {session.ip_masked}</p>
-                <p className="text-xs text-muted-foreground">
-                  Masuk: {formatDateTime(session.created_at)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Terakhir aktif: {formatDateTime(session.last_seen_at)}
-                </p>
-              </div>
-              {session.is_current ? null : (
-                <RevokeSessionButton
-                  sessionId={session.id}
-                  sessionLabel={session.label}
-                  onRevoked={refresh}
-                />
-              )}
-            </li>
-          ))}
+                {session.is_current ? null : (
+                  <RevokeSessionButton
+                    sessionId={session.id}
+                    sessionLabel={session.label}
+                    onRevoked={refresh}
+                  />
+                )}
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </Card>

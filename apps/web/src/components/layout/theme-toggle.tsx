@@ -15,7 +15,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={nextLabel}
       title={nextLabel}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground hover:bg-surface-muted"
+      className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-surface text-foreground hover:bg-surface-muted"
     >
       {theme === "dark" ? (
         <Sun className="h-4 w-4" aria-hidden="true" />

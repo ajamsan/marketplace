@@ -1,22 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { useAuthStore } from "@/features/auth/auth-store";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { HeroSection } from "@/components/landing/hero-section";
 import { ShowcaseSection } from "@/components/landing/showcase-section";
-import { StorytellingSection } from "@/components/landing/storytelling-section";
-import { BrandValuesSection } from "@/components/landing/brand-values-section";
-import { MembershipSection } from "@/components/landing/membership-section";
 import { LandingFooter } from "@/components/landing/landing-footer";
 
 export default function HomePage() {
   const status = useAuthStore((state) => state.status);
   const bootstrap = useAuthStore((state) => state.bootstrap);
-  const [membershipModalOpen, setMembershipModalOpen] = useState(false);
 
-  // Memulihkan sesi pengguna di latar belakang saat halaman dimuat
   useEffect(() => {
     if (status === "idle") {
       void bootstrap();
@@ -24,18 +19,17 @@ export default function HomePage() {
   }, [status, bootstrap]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
+    <div className="flex min-h-screen flex-col bg-background text-foreground antialiased">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-foreground focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-background"
+      >
+        Lewati ke konten utama
+      </a>
       <LandingHeader />
-      <main className="flex-1">
-        <HeroSection onOpenMembership={() => setMembershipModalOpen(true)} />
+      <main id="main" className="flex-1">
+        <HeroSection />
         <ShowcaseSection />
-        <StorytellingSection />
-        <BrandValuesSection />
-        <MembershipSection
-          modalOpen={membershipModalOpen}
-          onOpenModal={() => setMembershipModalOpen(true)}
-          onCloseModal={() => setMembershipModalOpen(false)}
-        />
       </main>
       <LandingFooter />
     </div>

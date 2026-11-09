@@ -58,6 +58,8 @@ export const ProductPhoto = memo(function ProductPhoto({
     <img
       src={src}
       alt={alt}
+      width={600}
+      height={450}
       loading="lazy"
       className={cn("object-cover transition-transform duration-500 group-hover:scale-105", className)}
     />

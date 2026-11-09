@@ -50,7 +50,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
         <button
           type="button"
           onClick={onRetry}
-          className="rounded border border-border bg-surface px-3 py-1 text-sm font-medium hover:bg-surface-muted"
+          className="inline-flex min-h-11 items-center rounded border border-border bg-surface px-4 text-sm font-medium hover:bg-surface-muted"
         >
           Coba lagi
         </button>

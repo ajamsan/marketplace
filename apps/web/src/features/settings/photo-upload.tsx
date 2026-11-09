@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Image from "next/image";
+import { Camera, ImageIcon } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { authApi } from "@/features/auth/api";
@@ -9,7 +10,6 @@ import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
-import { Label } from "@/components/ui/form";
 
 const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/png", "image/jpeg"];
@@ -37,6 +37,18 @@ export function PhotoUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Menjaga satu object URL pratinjau sekaligus mencabutnya saat berkas berganti.
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
   const upload = useMutation({
     // Mengirim berkas pilihan ke endpoint foto profil.
@@ -72,6 +84,18 @@ export function PhotoUpload() {
     },
   });
 
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    setFile(event.target.files?.[0] ?? null);
+    setFormError(null);
+    setStatus(null);
+  }
+
+  function clearSelection() {
+    setFile(null);
+    setFormError(null);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
   // Memastikan berkas sesuai batas sebelum memulai unggahan.
   function handleSubmit() {
     setFormError(null);
@@ -95,7 +119,9 @@ export function PhotoUpload() {
     return (
       <Card>
         <CardHeader title="Foto profil" />
-        <Skeleton className="h-24 w-24 rounded-full" />
+        <div className="flex justify-center">
+          <Skeleton className="h-44 w-44 rounded-2xl" />
+        </div>
       </Card>
     );
   }
@@ -113,73 +139,101 @@ export function PhotoUpload() {
   }
 
   const profile = profileQuery.data;
+  const shownImage = previewUrl ?? profile.profile_image_url;
+  const hasSavedPhoto = Boolean(profile.profile_image_url);
 
   return (
     <Card>
       <CardHeader
         title="Foto profil"
-        description="Gunakan foto yang jelas. Format PNG atau JPG, maksimal 2 MB."
+        description="Ketuk kotak foto untuk memilih berkas. Format PNG atau JPG, maksimal 2 MB."
       />
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          {profile.profile_image_url ? (
+
+      <div className="flex flex-col items-center gap-4">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          aria-label={shownImage ? "Ganti foto profil" : "Pilih foto profil"}
+          className="group relative h-44 w-44 overflow-hidden rounded-2xl border-2 border-dashed border-border bg-surface-muted transition-colors hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          {shownImage ? (
             <Image
-              src={profile.profile_image_url}
+              src={shownImage}
               alt="Foto profil"
-              width={96}
-              height={96}
+              width={176}
+              height={176}
               unoptimized
-              className="h-24 w-24 rounded-full border border-border object-cover"
+              className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border border-dashed border-border bg-surface-muted text-xs text-muted-foreground">
-              Belum ada foto
-            </div>
+            <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-center">
+              <ImageIcon className="h-9 w-9 text-muted-foreground/60" aria-hidden="true" />
+              <span className="px-4 text-xs font-semibold leading-snug text-foreground">
+                Belum ada foto
+              </span>
+              <span className="px-4 text-[11px] leading-snug text-muted-foreground">
+                Ketuk untuk memilih
+              </span>
+            </span>
           )}
-        </div>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/45 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+          >
+            <Camera className="h-6 w-6 text-white" />
+            <span className="text-xs font-semibold text-white">
+              {shownImage ? "Ganti foto" : "Pilih foto"}
+            </span>
+          </span>
+        </button>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="profile-photo">Pilih foto</Label>
-          <input
-            id="profile-photo"
-            ref={inputRef}
-            type="file"
-            accept="image/png,image/jpeg"
-            onChange={(event) => {
-              setFile(event.target.files?.[0] ?? null);
-              setFormError(null);
-              setStatus(null);
-            }}
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground file:mr-3 file:rounded file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-semibold"
-          />
-        </div>
+        <input
+          id="profile-photo"
+          ref={inputRef}
+          type="file"
+          accept="image/png,image/jpeg"
+          onChange={handleFileChange}
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
 
-        {formError ? (
-          <p role="alert" className="rounded-lg border border-danger/40 bg-danger-soft p-3 text-sm text-foreground">
-            {formError}
-          </p>
-        ) : null}
-
-        <p aria-live="polite" className="text-sm text-muted-foreground">
-          {status}
+        <p className="max-w-64 truncate text-center text-xs text-muted-foreground" title={file?.name}>
+          {file ? `Dipilih: ${file.name}` : "PNG atau JPG, maks. 2 MB"}
         </p>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Button type="button" onClick={handleSubmit} disabled={upload.isPending}>
+        <div className="flex items-center justify-center gap-2">
+          {file ? (
+            <Button variant="ghost" size="md" onClick={clearSelection} disabled={upload.isPending}>
+              Batal
+            </Button>
+          ) : null}
+          <Button onClick={handleSubmit} disabled={!file || upload.isPending}>
             {upload.isPending ? "Mengunggah..." : "Unggah foto"}
           </Button>
-          {profile.profile_image_url ? (
+          {hasSavedPhoto && !file ? (
             <Button
-              type="button"
-              variant="danger"
+              variant="ghost"
+              size="sm"
               onClick={() => remove.mutate()}
               disabled={remove.isPending}
+              className="text-danger hover:bg-danger-soft"
             >
               {remove.isPending ? "Menghapus..." : "Hapus foto"}
             </Button>
           ) : null}
         </div>
       </div>
+
+      {formError ? (
+        <p role="alert" className="mt-4 rounded-lg border border-danger/40 bg-danger-soft p-3 text-sm text-foreground">
+          {formError}
+        </p>
+      ) : null}
+
+      <p aria-live="polite" className="mt-3 text-center text-sm text-muted-foreground">
+        {status}
+      </p>
     </Card>
   );
 }

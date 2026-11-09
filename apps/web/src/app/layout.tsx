@@ -23,8 +23,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Maison Kantin | Haute Gastronomy & Artisanal Campus Marketplace",
-  description: "Kurasi kuliner mewah, sajian artisanal dari koki terkemuka kampus, dan pengalaman bersantap tanpa kompromi.",
+  title: "Kantin Kampus | Marketplace stan kampus",
+  description:
+    "Pesan makanan dari stan kampus, bayar tunai di kasir, dan pantau status pesanan sampai siap diambil.",
 };
 
 const themeBootstrap = `
@@ -35,12 +36,12 @@ const themeBootstrap = `
       theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
     var accent = localStorage.getItem("kantin.accent");
-    if (["red","yellow","green","blue","purple"].indexOf(accent) === -1) accent = "blue";
+    if (["red","yellow","green","blue","purple"].indexOf(accent) === -1) accent = "green";
     document.documentElement.dataset.theme = theme;
     document.documentElement.dataset.accent = accent;
   } catch (e) {
     document.documentElement.dataset.theme = "light";
-    document.documentElement.dataset.accent = "blue";
+    document.documentElement.dataset.accent = "green";
   }
 })();
 `;

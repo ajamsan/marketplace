@@ -115,6 +115,27 @@ func (s *Server) handleOrdersList(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Menyajikan riwayat pesanan lintas seluruh stan untuk admin.
+// Menampilkan pesanan seluruh stan beserta nomor antrian hariannya.
+func (s *Server) handleAdminOrdersList(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	cursor, err := httpx.DecodeCursor(q.Get("cursor"))
+	if err != nil {
+		httpx.WriteError(w, r, http.StatusBadRequest, "VALIDATION_ERROR",
+			"Parameter cursor tidak valid.", nil)
+		return
+	}
+	limit := httpx.ClampLimit(parseIntDefault(q.Get("limit"), 0), 20, 50)
+	list, next, err := s.Orders.ListAllForAdmin(r.Context(), cursor, limit)
+	if err != nil {
+		s.writeDomainError(w, r, err)
+		return
+	}
+	httpx.WriteData(w, r, http.StatusOK, map[string]any{
+		"orders": list, "next_cursor": next,
+	})
+}
+
 // Mengambil rincian pesanan milik pembeli yang sedang masuk.
 func (s *Server) handleOrderGet(w http.ResponseWriter, r *http.Request) {
 	ac := currentAuth(r)

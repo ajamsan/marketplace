@@ -38,6 +38,6 @@ export async function waitForOtp(since: number, timeoutMs = 20_000): Promise<str
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   throw new Error(
-    `Kode OTP tidak ditemukan di ${logPath || "(E2E_API_LOG belum diisi)"} — jalankan API dengan APP_ENV=development dan arahkan output ke file log.`,
+    `Kode OTP tidak ditemukan di ${logPath || "(E2E_API_LOG belum diisi)"}: jalankan API dengan APP_ENV=development dan arahkan output ke file log.`,
   );
 }

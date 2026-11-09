@@ -91,6 +91,7 @@ func (s *Server) Routes() http.Handler {
 
 	// Admin.
 	mux.HandleFunc("GET /api/v1/admin/stalls", s.role("admin", s.handleAdminStallsList))
+	mux.HandleFunc("GET /api/v1/admin/orders", s.role("admin", s.handleAdminOrdersList))
 	mux.HandleFunc("POST /api/v1/admin/stalls/{id}/approve", s.role("admin", s.handleAdminTransition("approve")))
 	mux.HandleFunc("POST /api/v1/admin/stalls/{id}/reject", s.role("admin", s.handleAdminTransition("reject")))
 	mux.HandleFunc("POST /api/v1/admin/stalls/{id}/deactivate", s.role("admin", s.handleAdminTransition("deactivate")))

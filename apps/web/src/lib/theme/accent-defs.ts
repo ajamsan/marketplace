@@ -1,14 +1,14 @@
 export type AccentId = "red" | "yellow" | "green" | "blue" | "purple";
 
 export const ACCENTS: { id: AccentId; label: string; swatch: string }[] = [
-  { id: "red", label: "Merah", swatch: "#dc2626" },
-  { id: "yellow", label: "Kuning", swatch: "#ca8a04" },
-  { id: "green", label: "Hijau", swatch: "#15803d" },
-  { id: "blue", label: "Biru", swatch: "#2563eb" },
-  { id: "purple", label: "Ungu", swatch: "#7c3aed" },
+  { id: "red", label: "Merah", swatch: "#b91c1c" },
+  { id: "yellow", label: "Kuning", swatch: "#8a5306" },
+  { id: "green", label: "Hijau", swatch: "#1d4b38" },
+  { id: "blue", label: "Biru", swatch: "#1e40af" },
+  { id: "purple", label: "Ungu", swatch: "#6d28d9" },
 ];
 
-export const DEFAULT_ACCENT: AccentId = "blue";
+export const DEFAULT_ACCENT: AccentId = "green";
 
 // Memastikan nilai tersimpan termasuk salah satu aksen yang didukung aplikasi.
 export function isAccentId(value: unknown): value is AccentId {

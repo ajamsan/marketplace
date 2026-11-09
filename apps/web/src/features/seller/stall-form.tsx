@@ -22,10 +22,11 @@ const stallSchema = z.object({
 export interface StallFormProps {
   stall?: Stall;
   onSaved?: (stall: Stall) => void;
+  onCancel?: () => void;
 }
 
 // Mengirim data pembuatan atau perubahan stan beserta hasil validasinya.
-export function StallForm({ stall, onSaved }: StallFormProps) {
+export function StallForm({ stall, onSaved, onCancel }: StallFormProps) {
   const queryClient = useQueryClient();
   const [name, setName] = useState(stall?.name ?? "");
   const [description, setDescription] = useState(stall?.description ?? "");
@@ -81,11 +82,18 @@ export function StallForm({ stall, onSaved }: StallFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-      <p className="rounded-lg border border-info/40 bg-info-soft p-3 text-xs text-foreground">
-        Stan baru dikirim ke admin untuk persetujuan dan berstatus Menunggu persetujuan
-        admin. Seller tidak dapat mengubah status stan sendiri; keputusan aktif atau
-        nonaktif dibuat oleh admin.
-      </p>
+      {stall ? (
+        <p className="rounded-lg border border-info/40 bg-info-soft p-3 text-xs text-foreground">
+          Perubahan profil stan disimpan langsung. Status stan (aktif/nonaktif) tetap
+          ditentukan oleh admin dan tidak bisa diubah di sini.
+        </p>
+      ) : (
+        <p className="rounded-lg border border-info/40 bg-info-soft p-3 text-xs text-foreground">
+          Stan baru dikirim ke admin untuk persetujuan dan berstatus Menunggu persetujuan
+          admin. Seller tidak dapat mengubah status stan sendiri; keputusan aktif atau
+          nonaktif dibuat oleh admin.
+        </p>
+      )}
 
       <Field
         label="Nama stan"
@@ -153,6 +161,16 @@ export function StallForm({ stall, onSaved }: StallFormProps) {
               ? "Simpan perubahan stan"
               : "Ajukan stan baru"}
         </Button>
+        {onCancel ? (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onCancel}
+            disabled={mutation.isPending}
+          >
+            {stall ? "Batal perubahan stan" : "Batal"}
+          </Button>
+        ) : null}
       </div>
     </form>
   );

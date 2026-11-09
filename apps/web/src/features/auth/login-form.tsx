@@ -83,10 +83,10 @@ export function LoginForm() {
           Autentikasi Akun
         </span>
         <h1 className="mt-1 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-          Selamat Datang Kembali
+          Masuk ke akun
         </h1>
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          Masuk untuk melanjutkan pengalaman gastronomi dan memantau pesanan Anda.
+          Masuk untuk memesan dari stan kampus dan memantau status pesanan.
         </p>
       </div>
 

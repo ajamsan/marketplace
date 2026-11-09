@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ApiError } from "@/lib/api/client";
 
-// Memvalidasi keranjang, memuat pratinjau harga, lalu menampilkan konfirmasi checkout dengan estetika kurasi.
+// Memvalidasi keranjang, memuat pratinjau harga, lalu menampilkan konfirmasi checkout.
 export default function CheckoutPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -69,13 +69,14 @@ export default function CheckoutPage() {
       <div className="flex flex-col gap-6">
         <header className="flex flex-col gap-1 border-b border-border/80 pb-6">
           <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
-            Tahap Akhir Pemesanan
+            Tahap akhir pemesanan
           </span>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Konfirmasi Pesanan Kurasi
+            Konfirmasi pesanan
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Periksa kembali rincian sajian dan stan atelier sebelum membuat pesanan resmi.
+            Periksa rincian item dan stan sebelum pesanan dibuat. Setelah dibuat, pesanan tidak
+            bisa diubah dari halaman ini.
           </p>
         </header>
 
@@ -93,8 +94,8 @@ export default function CheckoutPage() {
           />
         ) : items.length === 0 ? (
           <EmptyState
-            title="Keranjang kurasi masih kosong"
-            description="Tambahkan kreasi hidangan dari katalog sebelum melanjutkan ke checkout."
+            title="Keranjang masih kosong"
+            description="Tambahkan produk dari katalog sebelum melanjutkan ke checkout."
             action={
               <Button
                 variant="secondary"

@@ -1,10 +1,15 @@
 import { api } from "@/lib/api/client";
-import type { AdminStall, Stall } from "@/lib/api/types";
+import type { AdminStall, OrderDetail, Stall } from "@/lib/api/types";
 
 export type AdminStallStatus = "pending_review" | "active" | "inactive";
 
 export interface AdminStallList {
   stalls: AdminStall[];
+}
+
+export interface AdminOrderPage {
+  orders: OrderDetail[];
+  next_cursor: string | null;
 }
 
 // Mengamankan identitas stan agar aman ditempatkan pada segmen URL.
@@ -37,4 +42,17 @@ export function deactivateStall(id: string): Promise<Stall> {
 // Mengaktifkan kembali stan yang telah dinonaktifkan.
 export function activateStall(id: string): Promise<Stall> {
   return api.post<Stall>(`/admin/stalls/${pathId(id)}/activate`, undefined);
+}
+
+// Memuat pesanan seluruh stan sebagai laporan antrian, terbaru dulu.
+export async function listAdminOrders(
+  { cursor, limit = 20 }: { cursor?: string; limit?: number } = {},
+): Promise<AdminOrderPage> {
+  const params = new URLSearchParams();
+  if (cursor) params.set("cursor", cursor);
+  params.set("limit", String(limit));
+  const data = await api.get<{ orders?: OrderDetail[] | null; next_cursor?: string | null }>(
+    `/admin/orders?${params}`,
+  );
+  return { orders: data?.orders ?? [], next_cursor: data?.next_cursor ?? null };
 }

@@ -1,102 +1,87 @@
 "use client";
 
-export function StorytellingSection() {
+const STORY_BLOCKS = [
+  {
+    number: "01",
+    title: "Dari antrean ke pesanan",
+    text: "Mahasiswa dulu menghabiskan istirahat berdiri di antrean, tidak tahu apa yang tersedia, dan membayar dengan uang pas yang sulit. Kini mereka membuka ponsel, melihat menu lengkap dari tempat duduk, dan pesanan siap saat mereka tiba.",
+  },
+  {
+    number: "02",
+    title: "Stan yang terlihat, bukan yang paling bising",
+    text: "Dulu stan dengan suara terkeras mendapat pelanggan. Sekarang setiap stan tampil dengan foto, harga, dan ketersediaan yang jujur. Pembeli memilih berdasarkan selera, bukan kebisingan.",
+  },
+  {
+    number: "03",
+    title: "Pembayaran yang percaya pada kasir",
+    text: "Tidak ada payment gateway yang gagal, tidak ada QRIS yang error, tidak ada dana tersangkut. Uang tunai diserahkan ke kasir, kasir menekan tombol, sistem mencatat. Sederhana, dan itu justru yang paling andal.",
+  },
+];
+
+export function StorytellingSection({ titleAs = "h2" }: { titleAs?: "h1" | "h2" }) {
+  const TitleTag = titleAs;
+  const titleClass =
+    titleAs === "h1"
+      ? "font-serif text-3xl sm:text-4xl font-bold tracking-tight text-foreground"
+      : "font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground";
+
   return (
-    <section id="filosofi" className="border-b border-border bg-background py-20 md:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Intro */}
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="text-xs uppercase tracking-[0.3em] font-semibold text-muted-foreground">
-            Filosofi & Kisah Rasa
+    <section id="cerita" className="border-b border-border bg-surface-muted/30 py-20 md:py-28">
+      <div className="reveal mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-1 border-b border-border/80 pb-6 mb-10 md:mb-12 max-w-3xl">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground block">
+            Cerita kami
           </span>
-          <h2 className="mt-3 font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-            Seni Memasak Lambat di Tengah Dinamika Kampus
-          </h2>
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Maison Kantin lahir dari sebuah keyakinan sederhana: kualitas santapan mahasiswa dan akademisi 
-            tidak seharusnya dikorbankan demi kecepatan semata. Kami memadukan dedikasi koki berpengalaman 
-            dengan sumber daya bahan pangan lokal terbaik.
+          <TitleTag className={titleClass}>
+            Mengubah cara kampus makan, satu pesanan setiap saat
+          </TitleTag>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl">
+            Bukan tentang teknologi canggih. Tentang menghormati waktu, memperjuangkan kejujuran, dan
+            memberi ruang bagi makanan yang layak disantap.
           </p>
+        </header>
+
+        <div className="grid gap-8 md:grid-cols-3">
+          {STORY_BLOCKS.map((block, index) => (
+            <article
+              key={block.number}
+              className="group relative overflow-hidden"
+              style={{ transitionDelay: `${index * 100}ms` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true" />
+              <div className="relative p-6 bg-surface border border-border rounded-sm transition-all duration-300 hover:border-foreground/30 hover:shadow-lg">
+                <div className="flex items-baseline gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="font-serif text-4xl font-bold tracking-tight text-foreground/15 group-hover:text-foreground/30 transition-colors duration-300"
+                  >
+                    {block.number}
+                  </span>
+                  <h3 className="font-serif text-xl font-bold tracking-tight text-foreground">
+                    {block.title}
+                  </h3>
+                </div>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                  {block.text}
+                </p>
+              </div>
+            </article>
+          ))}
         </div>
 
-        {/* Narrative Movement 1: Sourcing & Terroir */}
-        <div className="mt-16 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-6">
-            <div className="relative overflow-hidden rounded-md border border-border bg-surface">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?q=80&w=1000&auto=format&fit=crop"
-                alt="Petani memanen rempah segar lokal di pagi hari"
-                width={1000}
-                height={667}
-                loading="lazy"
-                className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-105"
-              />
-            </div>
-          </div>
-
-          <div className="lg:col-span-6">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-              Babak I &bull; Integritas Bahan
-            </div>
-            <h3 className="mt-2 font-serif text-2xl font-bold text-foreground sm:text-3xl">
-              Dari Kebun Mitra ke Dapur Stan Pilihan
-            </h3>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Setiap pagi sebelum fajar menyapa kampus, bahan-bahan segar diantarkan langsung oleh petani dan pemasok binaan. 
-              Mulai dari kelapa tua segar yang diperas murni, cabai dan bawang pilihan, hingga beras organik aromatik. 
-              Kami menolak penggunaan perisa sintetik instan, menjaga kemurnian rasa sebagaimana alam menyediakannya.
+        <div className="mt-16 border-t border-border pt-10">
+          <blockquote className="relative pl-10 md:pl-16">
+            <span aria-hidden="true" className="absolute left-0 top-0 font-serif text-6xl font-bold text-foreground/10 leading-none">
+              &ldquo;
+            </span>
+            <p className="font-serif text-xl md:text-2xl font-medium leading-relaxed text-foreground">
+              &ldquo;Kami tidak membangun aplikasi. Kami membangun kepercayaan antara lapar dan masakan.&rdquo;
             </p>
-            <div className="mt-6 border-l-2 border-foreground/30 pl-4 italic text-sm text-foreground/80 font-serif">
-              &ldquo;Rasa sejati tidak dapat dipalsukan. Ia lahir dari ketulusan tanah dan ketelitian tangan yang merawatnya.&rdquo;
-            </div>
-          </div>
-        </div>
-
-        {/* Narrative Movement 2: Craftsmanship & Time */}
-        <div className="mt-20 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="order-2 lg:order-1 lg:col-span-6">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-              Babak II &bull; Keahlian & Waktu
-            </div>
-            <h3 className="mt-2 font-serif text-2xl font-bold text-foreground sm:text-3xl">
-              Kesabaran Memasak yang Menghasilkan Kedalaman Rasa
-            </h3>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Para juru masak stan di Maison Kantin mendedikasikan waktu berjam-jam untuk proses reduksi kuah kaldu, 
-              penyempurnaan fermentasi adonan, serta pemanggangan pada temperatur yang presisi. 
-              Sajian rendang wagyu misalnya, dimasak perlahan hingga delapan belas jam agar rempah meresap sempurna 
-              ke serat daging paling dalam.
-            </p>
-            <ul className="mt-6 space-y-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden="true" />
-                <span>Tanpa bahan pengawet sintetik atau pewarna buatan</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden="true" />
-                <span>Teknik pematangan bertahap menjaga nilai nutrisi optimal</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden="true" />
-                <span>Penyajian estetis yang menghormati kenyamanan indra penikmatnya</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="order-1 lg:order-2 lg:col-span-6">
-            <div className="relative overflow-hidden rounded-md border border-border bg-surface">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1000&auto=format&fit=crop"
-                alt="Koki menata sajian kuliner artisanal dengan konsentrasi tinggi"
-                width={1000}
-                height={667}
-                loading="lazy"
-                className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-105"
-              />
-            </div>
-          </div>
+            <footer className="mt-6 flex items-center gap-3 text-sm text-muted-foreground">
+              <span aria-hidden="true" className="h-px w-16 bg-foreground/30" />
+              <cite className="not-italic font-medium text-foreground">Tim Kantin Kampus</cite>
+            </footer>
+          </blockquote>
         </div>
       </div>
     </section>

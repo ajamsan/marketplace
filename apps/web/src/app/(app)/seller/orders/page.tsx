@@ -20,11 +20,11 @@ export default function SellerOrdersPage() {
 function SellerOrdersView() {
   const query = useInfiniteQuery({
     queryKey: ["seller", "orders"],
-    // Mengambil halaman antrean berdasarkan cursor terakhir dari server.
     queryFn: ({ pageParam }) => listSellerOrders(pageParam),
     initialPageParam: null as string | null,
-    // Meneruskan cursor untuk memuat batch antrean berikutnya.
     getNextPageParam: (lastPage) => lastPage.next_cursor,
+    // Memuat ulang setiap 10 detik agar pesanan baru langsung muncul tanpa refresh manual.
+    refetchInterval: 10_000,
   });
 
   const orders = query.data?.pages.flatMap((page) => page.orders) ?? [];

@@ -27,7 +27,7 @@ const icons: Record<string, LucideIcon> = {
   admin: ShieldCheck,
 };
 
-// Menyajikan tautan navigasi peran pada area samping layar lebar dengan estetika kurasi atelier.
+// Menyajikan tautan navigasi peran pada area samping layar lebar.
 export function Sidebar({ role }: { role: Role | null | undefined }) {
   const pathname = usePathname();
   const items = navItemsForRole(role);
@@ -43,13 +43,13 @@ export function Sidebar({ role }: { role: Role | null | undefined }) {
           <Link
             href="/"
             className="group flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
-            aria-label="Kembali ke Beranda Maison Kantin"
+            aria-label="Kembali ke beranda Kantin Kampus"
           >
-            <span className="font-serif text-base tracking-[0.2em] font-semibold text-foreground group-hover:text-accent transition-colors">
-              MAISON KANTIN
+            <span className="font-serif text-base font-semibold text-foreground transition-colors group-hover:text-accent">
+              Kantin Kampus
             </span>
-            <span className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground font-medium">
-              Campus Atelier &bull; Gastronomy
+            <span className="text-[11px] text-muted-foreground">
+              Marketplace stan kampus
             </span>
           </Link>
         </div>
@@ -65,7 +65,7 @@ export function Sidebar({ role }: { role: Role | null | undefined }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-3 rounded-sm px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all",
+                  "flex min-h-11 items-center gap-3 rounded-sm px-4 text-xs font-semibold uppercase tracking-wider transition-all",
                   active
                     ? "bg-foreground text-background shadow-xs"
                     : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",

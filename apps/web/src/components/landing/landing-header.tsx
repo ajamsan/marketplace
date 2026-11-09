@@ -4,8 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { LogOut, Menu, User, X } from "lucide-react";
 
-import { useAuthStore, homePathForRole } from "@/features/auth/auth-store";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { useAuthStore } from "@/features/auth/auth-store";
+
+const NAV_LINKS = [
+  { href: "/#koleksi", label: "Menu hari ini" },
+  { href: "/about", label: "Tentang" },
+];
 
 export function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -24,104 +28,81 @@ export function LandingHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-surface/95 backdrop-blur-md transition-colors">
-      <div className="mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand identity */}
+    <header className="sticky top-0 z-40 w-full h-16 border-b border-border/80 bg-surface/95 backdrop-blur-md">
+      <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="group flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
-          aria-label="Maison Kantin - Beranda"
+          className="flex h-full items-center min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
         >
-          <span className="font-serif text-xl tracking-[0.2em] font-semibold text-foreground transition-colors group-hover:text-accent sm:text-2xl">
-            MAISON KANTIN
-          </span>
-          <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground font-medium">
-            Haute Gastronomy &bull; Campus Atelier
+          <span className="font-serif text-xl font-bold leading-none tracking-tight text-foreground truncate">
+            Kantin Kampus
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav
-          className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.18em] font-medium text-foreground/80"
-          aria-label="Navigasi Utama"
-        >
-          <a
-            href="#koleksi"
-            className="transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm py-1"
-          >
-            Koleksi Kurasi
-          </a>
-          <a
-            href="#filosofi"
-            className="transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm py-1"
-          >
-            Penceritaan
-          </a>
-          <a
-            href="#nilai"
-            className="transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm py-1"
-          >
-            Nilai Merek
-          </a>
-          <a
-            href="#keanggotaan"
-            className="transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm py-1"
-          >
-            Keanggotaan PrivAc
-          </a>
+        <nav className="hidden items-center gap-6 md:flex" aria-label="Navigasi utama">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={closeMenu}
+              className="relative inline-flex h-full items-center text-sm font-medium text-muted-foreground transition-colors after:absolute after:bottom-[calc(50%-1px)] after:left-0 after:h-px after:w-0 after:bg-foreground after:transition-all after:duration-200 hover:text-foreground hover:after:w-full focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Right side controls */}
-        <div className="hidden md:flex items-center gap-3">
-          <ThemeToggle />
-
+        <div className="hidden items-center gap-2 md:flex">
           {isAuthenticated ? (
-            <div className="flex items-center gap-2">
+            <>
               <Link
-                href={homePathForRole(user.role)}
-                className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                href="/catalog"
+                className="inline-flex h-11 items-center gap-1.5 rounded-sm border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                <User className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>{user.username}</span>
+                <User className="h-4 w-4" aria-hidden="true" />
+                <span className="max-w-32 truncate">{user.username}</span>
+              </Link>
+              <Link
+                href="/orders"
+                className="inline-flex h-11 items-center gap-1.5 rounded-sm border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                Pesanan
               </Link>
               <button
                 type="button"
                 onClick={handleSignOut}
-                aria-label="Keluar dari akun"
-                className="inline-flex items-center gap-1.5 rounded-sm border border-border/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-danger hover:border-danger/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                className="inline-flex h-11 items-center gap-1.5 rounded-sm border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-danger/40 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
               >
-                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+                <LogOut className="h-4 w-4" aria-hidden="true" />
                 <span>Keluar</span>
               </button>
-            </div>
+            </>
           ) : (
-            <div className="flex items-center gap-2">
+            <>
               <Link
                 href="/login"
-                className="px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest text-foreground hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
+                className="inline-flex h-11 items-center rounded-sm px-3 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 Masuk
               </Link>
               <Link
                 href="/register"
-                className="rounded-sm bg-foreground px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-background hover:bg-foreground/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex h-11 items-center rounded-sm bg-foreground px-4 text-sm font-semibold text-background transition-colors hover:bg-foreground/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 Daftar
               </Link>
-            </div>
+            </>
           )}
         </div>
 
-        {/* Mobile controls */}
-        <div className="flex md:hidden items-center gap-2">
-          <ThemeToggle />
+        <div className="flex items-center gap-2 md:hidden">
           <button
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
             aria-controls="mobile-navigation"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-surface text-foreground hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-border text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             {mobileMenuOpen ? (
               <X className="h-5 w-5" aria-hidden="true" />
@@ -132,53 +113,38 @@ export function LandingHeader() {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
       {mobileMenuOpen ? (
-        <div
-          id="mobile-navigation"
-          className="border-b border-border bg-surface px-5 py-6 md:hidden shadow-lg animate-in fade-in"
-        >
-          <nav className="flex flex-col gap-4 text-sm font-medium uppercase tracking-wider text-foreground" aria-label="Navigasi Seluler">
-            <a
-              href="#koleksi"
-              onClick={closeMenu}
-              className="py-2 border-b border-border/50 hover:text-accent transition-colors"
-            >
-              Koleksi Kurasi
-            </a>
-            <a
-              href="#filosofi"
-              onClick={closeMenu}
-              className="py-2 border-b border-border/50 hover:text-accent transition-colors"
-            >
-              Penceritaan
-            </a>
-            <a
-              href="#nilai"
-              onClick={closeMenu}
-              className="py-2 border-b border-border/50 hover:text-accent transition-colors"
-            >
-              Nilai Merek
-            </a>
-            <a
-              href="#keanggotaan"
-              onClick={closeMenu}
-              className="py-2 border-b border-border/50 hover:text-accent transition-colors"
-            >
-              Keanggotaan PrivAc
-            </a>
+        <div id="mobile-navigation" className="border-t border-border bg-surface px-4 py-4 md:hidden">
+          <nav className="flex flex-col" aria-label="Navigasi seluler">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={closeMenu}
+                className="h-11 flex items-center rounded-sm px-3 text-sm font-medium text-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
-          <div className="mt-6 pt-4 border-t border-border flex flex-col gap-2.5">
+          <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
             {isAuthenticated ? (
               <>
                 <Link
-                  href={homePathForRole(user.role)}
+                  href="/catalog"
                   onClick={closeMenu}
-                  className="flex w-full items-center justify-center gap-2 rounded-sm bg-foreground py-2.5 text-xs font-semibold uppercase tracking-widest text-background"
+                  className="flex h-11 items-center justify-center gap-2 rounded-sm bg-foreground text-sm font-semibold text-background"
                 >
                   <User className="h-4 w-4" aria-hidden="true" />
-                  <span>Ruang Anggota ({user.username})</span>
+                  <span>Buka menu</span>
+                </Link>
+                <Link
+                  href="/orders"
+                  onClick={closeMenu}
+                  className="flex h-11 items-center justify-center gap-2 rounded-sm border border-border text-sm font-medium text-foreground"
+                >
+                  Pesanan
                 </Link>
                 <button
                   type="button"
@@ -186,25 +152,25 @@ export function LandingHeader() {
                     handleSignOut();
                     closeMenu();
                   }}
-                  className="flex w-full items-center justify-center gap-2 rounded-sm border border-border py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-danger"
+                  className="flex h-11 items-center justify-center gap-2 rounded-sm border border-border text-sm font-medium text-muted-foreground"
                 >
                   <LogOut className="h-4 w-4" aria-hidden="true" />
-                  <span>Keluar Akun</span>
+                  <span>Keluar akun</span>
                 </button>
               </>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <Link
                   href="/login"
                   onClick={closeMenu}
-                  className="flex items-center justify-center rounded-sm border border-border py-2.5 text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-surface-muted"
+                  className="flex h-11 items-center justify-center rounded-sm border border-border text-sm font-medium text-foreground"
                 >
                   Masuk
                 </Link>
                 <Link
                   href="/register"
                   onClick={closeMenu}
-                  className="flex items-center justify-center rounded-sm bg-foreground py-2.5 text-xs font-semibold uppercase tracking-widest text-background hover:bg-foreground/90"
+                  className="flex h-11 items-center justify-center rounded-sm bg-foreground text-sm font-semibold text-background"
                 >
                   Daftar
                 </Link>

@@ -21,7 +21,7 @@ interface CartStallGroup {
   subtotal: number;
 }
 
-// Mengelompokkan barang agar subtotal keranjang dapat ditampilkan per stan atelier.
+// Mengelompokkan barang agar subtotal keranjang dapat ditampilkan per stan.
 function groupByStall(items: CartItem[]): CartStallGroup[] {
   const groups = new Map<string, CartStallGroup>();
   for (const item of items) {
@@ -41,7 +41,7 @@ function groupByStall(items: CartItem[]): CartStallGroup[] {
   return [...groups.values()];
 }
 
-// Menyajikan isi keranjang, ketersediaan produk, dan jalur menuju checkout berstandar kurasi.
+// Menyajikan isi keranjang, ketersediaan produk, dan jalur menuju checkout.
 export default function CartPage() {
   const router = useRouter();
   const role = useAuthStore((state) => state.user?.role);
@@ -78,10 +78,11 @@ export default function CartPage() {
             Pemesanan Anda
           </span>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Keranjang Kurasi Sajian
+            Keranjang pesanan
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Periksa kembali kurasi hidangan sebelum melanjutkan ke konfirmasi dan pembayaran di kasir stan.
+            Periksa item dan jumlahnya sebelum lanjut ke checkout. Pembayaran dilakukan tunai di
+            kasir stan.
           </p>
         </header>
 
@@ -100,8 +101,8 @@ export default function CartPage() {
           />
         ) : items.length === 0 ? (
           <EmptyState
-            title="Keranjang kurasi masih kosong"
-            description="Jelajahi katalog untuk memilih kreasi kuliner dari atelier pilihan."
+            title="Keranjang masih kosong"
+            description="Buka katalog untuk memilih produk dari stan kampus."
             action={
               <Button
                 variant="secondary"
@@ -110,7 +111,7 @@ export default function CartPage() {
                 }}
                 className="rounded-sm uppercase tracking-wider text-xs font-semibold px-5 py-2.5 mt-2"
               >
-                Eksplorasi Katalog
+                Buka katalog
               </Button>
             }
           />
@@ -121,7 +122,7 @@ export default function CartPage() {
                 <div className="flex items-baseline justify-between border-b border-border/80 pb-3 mb-4">
                   <div>
                     <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground block">
-                      Stan Atelier
+                      Stan
                     </span>
                     <h2 className="font-serif text-lg font-bold text-foreground">
                       {group.stallName}

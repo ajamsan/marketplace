@@ -18,7 +18,7 @@ export function OrderList({ orders }: { orders: OrderSummary[] }) {
         action={
           <Link
             href="/catalog"
-            className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground hover:bg-surface-muted"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-surface px-4 text-sm font-medium text-foreground hover:bg-surface-muted"
           >
             Lihat katalog
           </Link>
@@ -54,7 +54,7 @@ export function OrderList({ orders }: { orders: OrderSummary[] }) {
               </p>
               <Link
                 href={`/orders/${order.id}`}
-                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground hover:bg-surface-muted"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-surface px-4 text-sm font-medium text-foreground hover:bg-surface-muted"
               >
                 Lihat detail
               </Link>

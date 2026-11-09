@@ -84,19 +84,22 @@ function SellerStallView() {
                   Dibuat: {formatDateTime(stall.created_at)}
                 </p>
 
-                <div className="mt-3">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => {
-                      setCreating(false);
-                      setEditingId((current) => (current === stall.id ? null : stall.id));
-                    }}
-                    aria-expanded={editingId === stall.id}
-                  >
-                    {editingId === stall.id ? "Tutup form ubah" : "Ubah stan"}
-                  </Button>
-                </div>
+                {/* Tombol hanya tampil saat form tertutup; menutup form pakai tombol di dalam form itu sendiri. */}
+                {editingId === stall.id ? null : (
+                  <div className="mt-3">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        setCreating(false);
+                        setEditingId(stall.id);
+                      }}
+                      aria-expanded={false}
+                    >
+                      Ubah stan
+                    </Button>
+                  </div>
+                )}
 
                 {editingId === stall.id ? (
                   <div className="mt-3 border-t border-border pt-3">
@@ -104,6 +107,7 @@ function SellerStallView() {
                       key={stall.id}
                       stall={stall}
                       onSaved={() => setEditingId(null)}
+                      onCancel={() => setEditingId(null)}
                     />
                   </div>
                 ) : null}
@@ -136,6 +140,7 @@ function SellerStallView() {
           <StallForm
             key="new-stall"
             onSaved={() => setCreating(false)}
+            onCancel={() => setCreating(false)}
           />
         ) : (
           <p className="text-sm text-muted-foreground">

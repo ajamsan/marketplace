@@ -64,7 +64,7 @@ function EditProductView() {
             action={
               <Link
                 href="/seller/products"
-                className="inline-flex items-center justify-center rounded-lg border border-transparent bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:opacity-90"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-transparent bg-accent px-4 text-sm font-semibold text-accent-foreground transition-colors hover:opacity-90"
               >
                 Kembali ke daftar produk
               </Link>

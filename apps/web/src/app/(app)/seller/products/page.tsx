@@ -46,12 +46,12 @@ function SellerProductsView() {
         <div>
           <h1 className="text-lg font-bold text-foreground">Produk</h1>
           <p className="text-sm text-muted-foreground">
-            Kelola produk pada stan yang Anda manages.
+            Kelola produk di stan yang Anda kelola.
           </p>
         </div>
         <Link
           href="/seller/products/new"
-          className="inline-flex items-center justify-center rounded-lg border border-transparent bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:opacity-90"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg border border-transparent bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:opacity-90"
         >
           Tambah produk
         </Link>
@@ -103,7 +103,7 @@ function SellerProductsView() {
             action={
               <Link
                 href="/seller/products/new"
-                className="inline-flex items-center justify-center rounded-lg border border-transparent bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:opacity-90"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-transparent bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:opacity-90"
               >
                 Tambah produk
               </Link>

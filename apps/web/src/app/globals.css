@@ -1,48 +1,47 @@
 @import "tailwindcss";
 
 /*
- * Tema，应用 Aksen 5 warna × terang/gelap (D19, DASH-02/03).
+ * Token tema: lima aksen warna x terang/gelap (D19, DASH-02/03).
  * Nilai warna disimpan sebagai CSS variable agar dapat diganti tanpa
  * menulis ulang utility class.
  */
 
 :root {
-  --background: #f6f7f9;
-  --surface: #ffffff;
-  --surface-muted: #f1f3f6;
-  --foreground: #16181d;
-  --muted-foreground: #5b6270;
-  --border: #e2e5ea;
-  --ring: #2563eb;
+  --background: #f7f4ed;
+  --surface: #fffefb;
+  --surface-muted: #efe9dd;
+  --foreground: #171512;
+  --muted-foreground: #6a6357;
+  --border: #ded4c3;
+  --ring: var(--accent);
 
-  --accent: #2563eb;
-  --accent-foreground: #ffffff;
-  --accent-soft: #e8efff;
+  --accent: #1d4b38;
+  --accent-foreground: #f7f4ed;
+  --accent-soft: #e4ece4;
 
-  --danger: #dc2626;
-  --danger-soft: #fdeaea;
-  --success: #15803d;
+  --danger: #b91c1c;
+  --danger-soft: #f8e4e2;
+  --success: #166534;
   --success-soft: #e7f6ec;
   --warning: #b45309;
-  --warning-soft: #fdf3e3;
+  --warning-soft: #fbefdd;
   --info: #0369a1;
-  --info-soft: #e6f2fb;
+  --info-soft: #e4eff7;
 
-  --radius: 0.75rem;
+  --radius: 0.375rem;
 }
 
 [data-theme="dark"] {
-  --background: #0f1115;
-  --surface: #171a21;
-  --surface-muted: #1f232c;
-  --foreground: #e9ecf1;
-  --muted-foreground: #9aa3b2;
-  --border: #2a2f3a;
-  --ring: #60a5fa;
+  --background: #12100d;
+  --surface: #1a1713;
+  --surface-muted: #23201a;
+  --foreground: #f0ece3;
+  --muted-foreground: #a9a196;
+  --border: #35302a;
 
-  --accent: #60a5fa;
-  --accent-foreground: #0b1220;
-  --accent-soft: #1b2740;
+  --accent: #8dbfa4;
+  --accent-foreground: #07130d;
+  --accent-soft: #1b2a22;
 
   --danger: #f87171;
   --danger-soft: #3a1d1d;
@@ -55,29 +54,29 @@
 }
 
 [data-accent="red"] {
-  --accent: #dc2626;
-  --accent-foreground: #ffffff;
-  --accent-soft: #fdeaea;
+  --accent: #b91c1c;
+  --accent-foreground: #fffefb;
+  --accent-soft: #f8e4e2;
 }
 [data-accent="yellow"] {
-  --accent: #a16207;
-  --accent-foreground: #1a1400;
-  --accent-soft: #fdf5e0;
+  --accent: #8a5306;
+  --accent-foreground: #fffefb;
+  --accent-soft: #faf0d8;
 }
 [data-accent="green"] {
-  --accent: #15803d;
-  --accent-foreground: #ffffff;
-  --accent-soft: #e7f6ec;
+  --accent: #1d4b38;
+  --accent-foreground: #f7f4ed;
+  --accent-soft: #e4ece4;
 }
 [data-accent="blue"] {
-  --accent: #2563eb;
-  --accent-foreground: #ffffff;
-  --accent-soft: #e8efff;
+  --accent: #1e40af;
+  --accent-foreground: #f7f4ed;
+  --accent-soft: #e7edf9;
 }
 [data-accent="purple"] {
-  --accent: #7c3aed;
-  --accent-foreground: #ffffff;
-  --accent-soft: #f1eafe;
+  --accent: #6d28d9;
+  --accent-foreground: #f7f4ed;
+  --accent-soft: #efe8fb;
 }
 
 [data-theme="dark"][data-accent="red"] {
@@ -91,17 +90,17 @@
   --accent-soft: #372b12;
 }
 [data-theme="dark"][data-accent="green"] {
-  --accent: #4ade80;
-  --accent-foreground: #062012;
-  --accent-soft: #14301f;
+  --accent: #8dbfa4;
+  --accent-foreground: #07130d;
+  --accent-soft: #1b2a22;
 }
 [data-theme="dark"][data-accent="blue"] {
-  --accent: #60a5fa;
+  --accent: #93c5fd;
   --accent-foreground: #071426;
   --accent-soft: #1b2740;
 }
 [data-theme="dark"][data-accent="purple"] {
-  --accent: #a78bfa;
+  --accent: #c4b5fd;
   --accent-foreground: #170b33;
   --accent-soft: #271a45;
 }
@@ -172,11 +171,44 @@ body {
   outline-offset: 2px;
 }
 
+::selection {
+  background: var(--accent-soft);
+  color: var(--foreground);
+}
+
+/* Scroll-linked entrance for long editorial sections; visible by default where unsupported. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-rise both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 18%;
+    }
+  }
+}
+
+@keyframes reveal-rise {
+  from {
+    translate: 0 24px;
+  }
+  to {
+    translate: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    animation: none !important;
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { RegisterForm } from "@/features/auth/register-form";
 import { RedirectIfAuthenticated } from "@/features/auth/guards";
@@ -10,7 +11,9 @@ export default function RegisterPage() {
   return (
     <RedirectIfAuthenticated>
       <div className="flex flex-col gap-4">
-        <RegisterForm />
+        <Suspense fallback={null}>
+          <RegisterForm />
+        </Suspense>
         <p className="text-center text-sm text-muted-foreground">
           Sudah punya akun?{" "}
           <Link
