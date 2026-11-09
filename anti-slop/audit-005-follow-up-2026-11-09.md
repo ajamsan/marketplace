@@ -26,7 +26,8 @@ Rollback: `git reset --hard 9fc943b` mengembalikan seluruh pohon sumber ke kondi
 - `tsc --noEmit` LULUS (exit 0), `vitest run` 14/14 LULUS.
 - `go build ./...` LULUS, `go vet` bersih.
 - Migrasi DB: `migrate up` sukses (version 10).
-- Halaman publik dimuat ulang tanpa console error baru: /, /about, /peran, /cakupan (hanya 401 auth-refresh pra-ada).
+- Halaman publik dimuat ulang tanpa console error baru: /, /about, /role, /scope (hanya 401 auth-refresh pra-ada).
+- Route `/peran` → `/role` dan `/cakupan` → `/scope` (9 November 2026, permintaan naming folder/file berbahasa Inggris dari pemilik proyek).
 - Sesi browser anonim saat audit lanjutan: halaman ber-autentikasi diverifikasi lewat kode + kompilasi, bukan klik nyata.
 
 ## Menunggu tindakan pemilik proyek

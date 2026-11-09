@@ -49,8 +49,8 @@ export function LandingFooter() {
               <li><Link href="/#koleksi" className={linkClass}>Menu hari ini</Link></li>
               <li><Link href="/about" className={linkClass}>Tentang</Link></li>
               <li><Link href="/about#cerita" className={linkClass}>Cerita kami</Link></li>
-              <li><Link href="/peran" className={linkClass}>Peran pembeli, penjual, admin</Link></li>
-              <li><Link href="/cakupan" className={linkClass}>Cakupan pilot</Link></li>
+              <li><Link href="/role" className={linkClass}>Peran pembeli, penjual, admin</Link></li>
+              <li><Link href="/scope" className={linkClass}>Cakupan pilot</Link></li>
             </ul>
           </div>
 
