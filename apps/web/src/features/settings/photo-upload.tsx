@@ -32,6 +32,7 @@ function uploadErrorMessage(error: unknown): string {
 export function PhotoUpload() {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+  const previewRef = useRef<string | null>(null);
   const profileQuery = useQuery({ queryKey: ["me"], queryFn: authApi.me });
 
   const [file, setFile] = useState<File | null>(null);
@@ -39,16 +40,19 @@ export function PhotoUpload() {
   const [status, setStatus] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // Menjaga satu object URL pratinjau sekaligus mencabutnya saat berkas berganti.
+  // Mencabut URL objek lama sebelum mengganti pratinjau agar memori dapat dilepas.
+  function replacePreview(next: string | null) {
+    if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    previewRef.current = next;
+    setPreviewUrl(next);
+  }
+
+  // Mencabut URL objek terakhir saat komponen dibongkar.
   useEffect(() => {
-    if (!file) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
+    return () => {
+      if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    };
+  }, []);
 
   const upload = useMutation({
     // Mengirim berkas pilihan ke endpoint foto profil.
@@ -58,6 +62,7 @@ export function PhotoUpload() {
       queryClient.setQueryData(["me"], profile);
       setFormError(null);
       setStatus("Foto profil berhasil diperbarui.");
+      replacePreview(null);
       setFile(null);
       if (inputRef.current) inputRef.current.value = "";
     },
@@ -85,12 +90,15 @@ export function PhotoUpload() {
   });
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    setFile(event.target.files?.[0] ?? null);
+    const selected = event.target.files?.[0] ?? null;
+    setFile(selected);
     setFormError(null);
     setStatus(null);
+    replacePreview(selected ? URL.createObjectURL(selected) : null);
   }
 
   function clearSelection() {
+    replacePreview(null);
     setFile(null);
     setFormError(null);
     if (inputRef.current) inputRef.current.value = "";

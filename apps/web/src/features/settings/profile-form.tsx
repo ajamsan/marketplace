@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { authApi } from "@/features/auth/api";
