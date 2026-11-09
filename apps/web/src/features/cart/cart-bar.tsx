@@ -50,7 +50,7 @@ export function CartBar() {
         </div>
         <Link
           href="/cart"
-          className="shrink-0 rounded-sm bg-foreground px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-background hover:bg-foreground/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="inline-flex min-h-11 shrink-0 items-center rounded-sm bg-foreground px-5 text-xs font-semibold uppercase tracking-widest text-background hover:bg-foreground/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           Buka Keranjang
         </Link>

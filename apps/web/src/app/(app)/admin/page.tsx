@@ -24,7 +24,7 @@ export default function AdminPage() {
 
   return (
     <RequireRole roles={["admin"]}>
-      <div className="flex flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
         <header className="flex flex-col gap-1">
           <h1 className="text-lg font-bold text-foreground">Ruang admin</h1>
           <p className="text-sm text-muted-foreground">

@@ -67,20 +67,24 @@ type StallSummary struct {
 }
 
 type PaymentLine struct {
-	ID          string `json:"id"`
-	StallID     string `json:"stall_id"`
-	StallName   string `json:"stall_name"`
-	Method      string `json:"method"`
-	Status      string `json:"status"`
-	AmountMinor int64  `json:"amount_minor"`
-	Currency    string `json:"currency"`
+	ID          string     `json:"id"`
+	StallID     string     `json:"stall_id"`
+	StallName   string     `json:"stall_name"`
+	Method      string     `json:"method"`
+	Status      string     `json:"status"`
+	AmountMinor int64      `json:"amount_minor"`
+	Currency    string     `json:"currency"`
+	PaidAt      *time.Time `json:"paid_at"`
 }
 
 type FulfillmentLine struct {
-	ID       string `json:"id"`
-	StallID  string `json:"stall_id"`
-	StallName string `json:"stall_name"`
-	Status   string `json:"status"`
+	ID             string     `json:"id"`
+	StallID        string     `json:"stall_id"`
+	StallName      string     `json:"stall_name"`
+	Status         string     `json:"status"`
+	InPreparationAt *time.Time `json:"in_preparation_at"`
+	ReadyForPickupAt *time.Time `json:"ready_for_pickup_at"`
+	CompletedAt    *time.Time `json:"completed_at"`
 }
 
 type Detail struct {
@@ -425,11 +429,12 @@ func (s *Service) fillDetail(ctx context.Context, d *Detail, stallFilter string)
 		FROM order_items oi JOIN stalls st ON st.id = oi.stall_id
 		WHERE oi.order_id = $1`
 	payQuery := `
-		SELECT p.id, p.stall_id, st.name, p.method, p.status, p.amount_minor, p.currency
+		SELECT p.id, p.stall_id, st.name, p.method, p.status, p.amount_minor, p.currency, p.paid_at
 		FROM payments p JOIN stalls st ON st.id = p.stall_id
 		WHERE p.order_id = $1`
 	fulQuery := `
-		SELECT f.id, f.stall_id, st.name, f.fulfillment_status
+		SELECT f.id, f.stall_id, st.name, f.fulfillment_status,
+		       f.in_preparation_at, f.ready_for_pickup_at, f.completed_at
 		FROM order_stall_fulfillments f JOIN stalls st ON st.id = f.stall_id
 		WHERE f.order_id = $1`
 	if stallFilter != "" {
@@ -468,9 +473,11 @@ func (s *Service) fillDetail(ctx context.Context, d *Detail, stallFilter string)
 	}
 	if err := fill(payQuery, func(rows *sql.Rows) error {
 		var p PaymentLine
-		if err := rows.Scan(&p.ID, &p.StallID, &p.StallName, &p.Method, &p.Status, &p.AmountMinor, &p.Currency); err != nil {
+		var paidAt sql.NullTime
+		if err := rows.Scan(&p.ID, &p.StallID, &p.StallName, &p.Method, &p.Status, &p.AmountMinor, &p.Currency, &paidAt); err != nil {
 			return err
 		}
+		p.PaidAt = timePtr(paidAt)
 		d.Payments = append(d.Payments, p)
 		return nil
 	}); err != nil {
@@ -478,12 +485,25 @@ func (s *Service) fillDetail(ctx context.Context, d *Detail, stallFilter string)
 	}
 	return fill(fulQuery, func(rows *sql.Rows) error {
 		var f FulfillmentLine
-		if err := rows.Scan(&f.ID, &f.StallID, &f.StallName, &f.Status); err != nil {
+		var inPrep, ready, completed sql.NullTime
+		if err := rows.Scan(&f.ID, &f.StallID, &f.StallName, &f.Status, &inPrep, &ready, &completed); err != nil {
 			return err
 		}
+		f.InPreparationAt = timePtr(inPrep)
+		f.ReadyForPickupAt = timePtr(ready)
+		f.CompletedAt = timePtr(completed)
 		d.Fulfillments = append(d.Fulfillments, f)
 		return nil
 	})
+}
+
+// Mengubah waktu nullable SQL menjadi pointer waktu untuk JSON (null bila belum terjadi).
+func timePtr(nt sql.NullTime) *time.Time {
+	if !nt.Valid {
+		return nil
+	}
+	t := nt.Time
+	return &t
 }
 
 type SellerOrder struct {
@@ -635,7 +655,7 @@ func (s *Service) fillSellerSlice(ctx context.Context, sellerID string, so *Sell
 	}
 
 	prows, err := s.DB.QueryContext(ctx, `
-		SELECT p.id, p.stall_id, st.name, p.method, p.status, p.amount_minor, p.currency
+		SELECT p.id, p.stall_id, st.name, p.method, p.status, p.amount_minor, p.currency, p.paid_at
 		FROM payments p
 		JOIN stalls st ON st.id = p.stall_id
 		WHERE p.order_id = $1
@@ -646,10 +666,12 @@ func (s *Service) fillSellerSlice(ctx context.Context, sellerID string, so *Sell
 	}
 	for prows.Next() {
 		var p PaymentLine
-		if err := prows.Scan(&p.ID, &p.StallID, &p.StallName, &p.Method, &p.Status, &p.AmountMinor, &p.Currency); err != nil {
+		var paidAt sql.NullTime
+		if err := prows.Scan(&p.ID, &p.StallID, &p.StallName, &p.Method, &p.Status, &p.AmountMinor, &p.Currency, &paidAt); err != nil {
 			prows.Close()
 			return err
 		}
+		p.PaidAt = timePtr(paidAt)
 		so.Payments = append(so.Payments, p)
 		so.StallTotalMinor += p.AmountMinor
 	}
@@ -659,7 +681,8 @@ func (s *Service) fillSellerSlice(ctx context.Context, sellerID string, so *Sell
 	}
 
 	frows, err := s.DB.QueryContext(ctx, `
-		SELECT f.id, f.stall_id, st.name, f.fulfillment_status
+		SELECT f.id, f.stall_id, st.name, f.fulfillment_status,
+		       f.in_preparation_at, f.ready_for_pickup_at, f.completed_at
 		FROM order_stall_fulfillments f
 		JOIN stalls st ON st.id = f.stall_id
 		WHERE f.order_id = $1
@@ -670,10 +693,14 @@ func (s *Service) fillSellerSlice(ctx context.Context, sellerID string, so *Sell
 	}
 	for frows.Next() {
 		var f FulfillmentLine
-		if err := frows.Scan(&f.ID, &f.StallID, &f.StallName, &f.Status); err != nil {
+		var inPrep, ready, completed sql.NullTime
+		if err := frows.Scan(&f.ID, &f.StallID, &f.StallName, &f.Status, &inPrep, &ready, &completed); err != nil {
 			frows.Close()
 			return err
 		}
+		f.InPreparationAt = timePtr(inPrep)
+		f.ReadyForPickupAt = timePtr(ready)
+		f.CompletedAt = timePtr(completed)
 		so.Fulfillments = append(so.Fulfillments, f)
 	}
 	return frows.Err()

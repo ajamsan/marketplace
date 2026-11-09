@@ -21,10 +21,12 @@ export const ProductPhoto = memo(function ProductPhoto({
   src,
   alt,
   className,
+  eager = false,
 }: {
   src: string | null;
   alt: string;
   className?: string;
+  eager?: boolean;
 }) {
   if (!src) {
     return (
@@ -60,7 +62,8 @@ export const ProductPhoto = memo(function ProductPhoto({
       alt={alt}
       width={600}
       height={450}
-      loading="lazy"
+      loading={eager ? "eager" : "lazy"}
+      fetchPriority={eager ? "high" : undefined}
       className={cn("object-cover transition-transform duration-500 group-hover:scale-105", className)}
     />
   );

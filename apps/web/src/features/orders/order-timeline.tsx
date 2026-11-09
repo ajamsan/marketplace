@@ -11,10 +11,11 @@ interface TimelineEvent {
   icon: React.ReactNode;
 }
 
-// Cek apakah string adalah ISO datetime valid
-function isValidISODate(value: string): boolean {
-  const date = new Date(value);
-  return !isNaN(date.getTime()) && value.includes("T");
+// Mengambil waktu paling awal dari beberapa pembayaran/pemenuhan di satu pesanan.
+function earliest(values: Array<string | null | undefined>): string | null {
+  const times = values.filter((v): v is string => Boolean(v));
+  if (times.length === 0) return null;
+  return times.reduce((min, value) => (new Date(value) < new Date(min) ? value : min));
 }
 
 function buildTimeline(order: OrderDetailData): TimelineEvent[] {
@@ -30,74 +31,56 @@ function buildTimeline(order: OrderDetailData): TimelineEvent[] {
   const paymentStatuses = order.payments.map((p) => p.status);
   const hasCashDue = paymentStatuses.includes("cash_due");
   const hasCashPaid = paymentStatuses.includes("cash_paid");
+  const paidAt = earliest(order.payments.map((p) => p.paid_at));
 
   if (hasCashDue || hasCashPaid) {
-    const payment = order.payments.find((p) => p.status === "cash_due" || p.status === "cash_paid");
-    const paymentTime = payment && isValidISODate(payment.id) ? payment.id : null;
     events.push({
-      label: "Menunggu pembayaran",
-      time: paymentTime,
+      label: hasCashPaid && !hasCashDue ? "Pembayaran diterima" : "Menunggu pembayaran",
+      time: paidAt,
       status: hasCashDue ? "current" : "completed",
       icon: hasCashDue
-        ? <Loader2 className="h-4 w-4 text-warning animate-spin" aria-hidden="true" />
+        ? <Clock className="h-4 w-4 text-warning" aria-hidden="true" />
         : <CheckCircle className="h-4 w-4 text-success" aria-hidden="true" />,
     });
   }
+
+  const inPrepAt = earliest(order.fulfillments.map((f) => f.in_preparation_at));
+  const readyAt = earliest(order.fulfillments.map((f) => f.ready_for_pickup_at));
+  const completedAt = earliest(order.fulfillments.map((f) => f.completed_at));
 
   const fulfillmentStatuses = order.fulfillments.map((f) => f.status);
   const hasInPrep = fulfillmentStatuses.includes("in_preparation");
   const hasReady = fulfillmentStatuses.includes("ready_for_pickup");
   const hasCompleted = fulfillmentStatuses.includes("completed");
+  const allCompleted = hasCompleted && fulfillmentStatuses.every((s) => s === "completed");
 
-  if (hasInPrep) {
-    const fulfillment = order.fulfillments.find((f) => f.status === "in_preparation");
-    const fulfillmentTime = fulfillment && isValidISODate(fulfillment.id) ? fulfillment.id : null;
+  if (hasInPrep || hasReady || hasCompleted) {
     events.push({
       label: "Disiapkan",
-      time: fulfillmentTime,
-      status: "current",
-      icon: <Loader2 className="h-4 w-4 text-accent animate-spin" aria-hidden="true" />,
-    });
-  } else if (hasReady || hasCompleted) {
-    const fulfillment = order.fulfillments.find((f) => f.status === "ready_for_pickup" || f.status === "completed");
-    const fulfillmentTime = fulfillment && isValidISODate(fulfillment.id) ? fulfillment.id : null;
-    events.push({
-      label: "Disiapkan",
-      time: fulfillmentTime,
-      status: "completed",
-      icon: <CheckCircle className="h-4 w-4 text-success" aria-hidden="true" />,
+      time: inPrepAt,
+      status: hasInPrep ? "current" : "completed",
+      icon: hasInPrep
+        ? <Loader2 className="h-4 w-4 text-accent animate-spin" aria-hidden="true" />
+        : <CheckCircle className="h-4 w-4 text-success" aria-hidden="true" />,
     });
   }
 
-  if (hasReady) {
-    const fulfillment = order.fulfillments.find((f) => f.status === "ready_for_pickup");
-    const fulfillmentTime = fulfillment && isValidISODate(fulfillment.id) ? fulfillment.id : null;
+  if (hasReady || hasCompleted) {
     events.push({
       label: "Siap diambil",
-      time: fulfillmentTime,
-      status: hasCompleted ? "completed" : "current",
-      icon: hasCompleted
+      time: readyAt,
+      status: allCompleted ? "completed" : "current",
+      icon: allCompleted
         ? <CheckCircle className="h-4 w-4 text-success" aria-hidden="true" />
         : <Loader2 className="h-4 w-4 text-accent animate-spin" aria-hidden="true" />,
-    });
-  } else if (hasCompleted) {
-    const fulfillment = order.fulfillments.find((f) => f.status === "completed");
-    const fulfillmentTime = fulfillment && isValidISODate(fulfillment.id) ? fulfillment.id : null;
-    events.push({
-      label: "Siap diambil",
-      time: fulfillmentTime,
-      status: "completed",
-      icon: <CheckCircle className="h-4 w-4 text-success" aria-hidden="true" />,
     });
   }
 
   if (hasCompleted) {
-    const fulfillment = order.fulfillments.find((f) => f.status === "completed");
-    const fulfillmentTime = fulfillment && isValidISODate(fulfillment.id) ? fulfillment.id : null;
     events.push({
       label: "Selesai",
-      time: fulfillmentTime,
-      status: "current",
+      time: completedAt,
+      status: allCompleted ? "completed" : "current",
       icon: <CheckCircle className="h-4 w-4 text-success" aria-hidden="true" />,
     });
   }
@@ -139,10 +122,7 @@ export function OrderTimeline({ order }: { order: OrderDetailData }) {
                     {formatDateTime(event.time)}
                   </>
                 ) : (
-                  <>
-                    <Clock className="h-3 w-3" aria-hidden="true" />
-                    <span className="italic">Waktu belum tercatat</span>
-                  </>
+                  <span>Belum</span>
                 )}
               </p>
             </div>

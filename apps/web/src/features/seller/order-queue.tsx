@@ -12,7 +12,6 @@ import type {
 import {
   formatDateTime,
   formatIDR,
-  fulfillmentStatusLabel,
   orderStatusLabel,
   paymentStatusLabel,
 } from "@/lib/format";
@@ -342,15 +341,10 @@ export function OrderQueue({
 
                     {slice.fulfillment ? (
                       <div className="mt-3 border-t border-border pt-3">
-                        <p className="text-sm text-muted-foreground">
-                          Status pemenuhan: {fulfillmentStatusLabel(slice.fulfillment.status)}
-                        </p>
-                        <div className="mt-2">
-                          <FulfillmentControls
-                            fulfillment={slice.fulfillment}
-                            paymentStatus={slice.payment?.status}
-                          />
-                        </div>
+                        <FulfillmentControls
+                          fulfillment={slice.fulfillment}
+                          paymentStatus={slice.payment?.status}
+                        />
                       </div>
                     ) : null}
                   </section>

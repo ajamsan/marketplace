@@ -136,6 +136,7 @@ export interface PaymentLine {
   status: string;
   amount_minor: number;
   currency: string;
+  paid_at: string | null;
 }
 
 export interface FulfillmentLine {
@@ -143,6 +144,9 @@ export interface FulfillmentLine {
   stall_id: string;
   stall_name: string;
   status: string;
+  in_preparation_at: string | null;
+  ready_for_pickup_at: string | null;
+  completed_at: string | null;
 }
 
 export interface OrderPreview {

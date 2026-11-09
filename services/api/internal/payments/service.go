@@ -176,9 +176,18 @@ func (s *Service) UpdateFulfillment(ctx context.Context, sellerID, fulfillmentID
 			if nextFulfillmentStatus[current] != newStatus {
 				return ErrFulfillmentInvalid
 			}
+			var stageColumn = ""
+			switch newStatus {
+			case "in_preparation":
+				stageColumn = "in_preparation_at"
+			case "ready_for_pickup":
+				stageColumn = "ready_for_pickup_at"
+			case "completed":
+				stageColumn = "completed_at"
+			}
 			res, err := tx.ExecContext(ctx, `
 				UPDATE order_stall_fulfillments
-				SET fulfillment_status = $2, updated_by = $3, updated_at = now()
+				SET fulfillment_status = $2, updated_by = $3, updated_at = now(), `+stageColumn+` = now()
 				WHERE id = $1 AND fulfillment_status = $4`,
 				fulfillmentID, newStatus, sellerID, current)
 			if err != nil {

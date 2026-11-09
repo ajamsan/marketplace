@@ -99,6 +99,7 @@ export default function ProductDetailPage() {
                 src={data.image_url}
                 alt={`Foto sajian ${data.name}`}
                 className="aspect-[4/3] w-full object-cover"
+                eager
               />
             </div>
 

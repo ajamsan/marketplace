@@ -4,12 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { LogOut, Menu, User, X } from "lucide-react";
 
-import { useAuthStore } from "@/features/auth/auth-store";
+import { useAuthStore, homePathForRole } from "@/features/auth/auth-store";
 
 const NAV_LINKS = [
   { href: "/#koleksi", label: "Menu hari ini" },
   { href: "/about", label: "Tentang" },
 ];
+
+const ROLE_HOME_LABEL: Record<string, string> = {
+  buyer: "Buka katalog",
+  seller: "Pesanan stan",
+  admin: "Ruang admin",
+};
 
 export function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -18,6 +24,8 @@ export function LandingHeader() {
   const signOut = useAuthStore((state) => state.signOut);
 
   const isAuthenticated = status === "authenticated" && !!user;
+  const roleHome = user ? homePathForRole(user.role) : "/catalog";
+  const roleHomeLabel = user ? (ROLE_HOME_LABEL[user.role] ?? "Ruang kerja") : "Katalog";
 
   const handleSignOut = async () => {
     await signOut();
@@ -56,18 +64,21 @@ export function LandingHeader() {
           {isAuthenticated ? (
             <>
               <Link
-                href="/catalog"
+                href={roleHome}
+                aria-label={roleHomeLabel}
                 className="inline-flex h-11 items-center gap-1.5 rounded-sm border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <User className="h-4 w-4" aria-hidden="true" />
                 <span className="max-w-32 truncate">{user.username}</span>
               </Link>
-              <Link
-                href="/orders"
-                className="inline-flex h-11 items-center gap-1.5 rounded-sm border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              >
-                Pesanan
-              </Link>
+              {user.role === "buyer" ? (
+                <Link
+                  href="/orders"
+                  className="inline-flex h-11 items-center gap-1.5 rounded-sm border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  Pesanan
+                </Link>
+              ) : null}
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -132,20 +143,22 @@ export function LandingHeader() {
             {isAuthenticated ? (
               <>
                 <Link
-                  href="/catalog"
+                  href={roleHome}
                   onClick={closeMenu}
                   className="flex h-11 items-center justify-center gap-2 rounded-sm bg-foreground text-sm font-semibold text-background"
                 >
                   <User className="h-4 w-4" aria-hidden="true" />
-                  <span>Buka menu</span>
+                  <span>{roleHomeLabel}</span>
                 </Link>
-                <Link
-                  href="/orders"
-                  onClick={closeMenu}
-                  className="flex h-11 items-center justify-center gap-2 rounded-sm border border-border text-sm font-medium text-foreground"
-                >
-                  Pesanan
-                </Link>
+                {user.role === "buyer" ? (
+                  <Link
+                    href="/orders"
+                    onClick={closeMenu}
+                    className="flex h-11 items-center justify-center gap-2 rounded-sm border border-border text-sm font-medium text-foreground"
+                  >
+                    Pesanan
+                  </Link>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => {

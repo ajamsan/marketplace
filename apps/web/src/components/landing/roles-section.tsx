@@ -34,6 +34,7 @@ const ROLES = [
       "Setujui, tolak, atau nonaktifkan stan dengan alasan.",
       "Pantau status stan tanpa mengubah data transaksi.",
     ],
+    note: "Akun admin tidak dibuka untuk pendaftaran umum. Akun tersebut dibuat oleh operator kampus yang mengelola stan.",
   },
 ];
 
@@ -60,52 +61,49 @@ export function RolesSection({ titleAs = "h2" }: { titleAs?: "h1" | "h2" }) {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-4">
-            <p className="mt-10 border-t border-border pt-5 text-sm leading-relaxed text-muted-foreground">
-              Akun admin tidak dibuka untuk pendaftaran umum. Akun tersebut dibuat oleh operator
-              kampus yang mengelola stan.
-            </p>
-          </div>
-
-          <div className="lg:col-span-8">
-            {ROLES.map((role) => (
-              <article
-                key={role.index}
-                className="grid grid-cols-1 gap-4 border-t border-border py-9 first:border-t-0 first:pt-0 sm:grid-cols-[3.5rem_1fr] sm:gap-6"
+        <div className="max-w-5xl">
+          {ROLES.map((role) => (
+            <article
+              key={role.index}
+              className="grid grid-cols-1 gap-4 border-t border-border py-9 first:border-t-0 first:pt-0 sm:grid-cols-[3.5rem_1fr] sm:gap-6"
+            >
+              <span
+                aria-hidden="true"
+                className="font-serif text-sm font-semibold tabular-nums text-muted-foreground"
               >
-                <span
-                  aria-hidden="true"
-                  className="font-serif text-sm font-semibold tabular-nums text-muted-foreground"
-                >
-                  {role.index}
-                </span>
-                <div>
-                  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                    <h3 className="font-serif text-2xl font-bold tracking-tight text-foreground">
-                      {role.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">{role.audience}</p>
-                  </div>
-
-                  <ul className="mt-5 grid grid-cols-1 gap-x-10 gap-y-2.5 sm:grid-cols-2">
-                    {role.items.map((item) => (
-                      <li
-                        key={item}
-                        className="flex gap-2.5 text-sm leading-relaxed text-muted-foreground"
-                      >
-                        <span
-                          aria-hidden="true"
-                          className="mt-2 h-1 w-1 shrink-0 rounded-full bg-foreground/60"
-                        />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {role.index}
+              </span>
+              <div>
+                <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                  <h3 className="font-serif text-2xl font-bold tracking-tight text-foreground">
+                    {role.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{role.audience}</p>
                 </div>
-              </article>
-            ))}
-          </div>
+
+                <ul className="mt-5 grid grid-cols-1 gap-x-10 gap-y-2.5 sm:grid-cols-2">
+                  {role.items.map((item) => (
+                    <li
+                      key={item}
+                      className="flex gap-2.5 text-sm leading-relaxed text-muted-foreground"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="mt-2 h-1 w-1 shrink-0 rounded-full bg-foreground/60"
+                      />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {"note" in role && role.note ? (
+                  <p className="mt-5 border-l-2 border-foreground/20 pl-4 text-sm leading-relaxed text-muted-foreground">
+                    {role.note}
+                  </p>
+                ) : null}
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>

@@ -91,9 +91,15 @@ export default function CatalogPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {items.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {items.map((product, index) => {
+                // Memusatkan kartu terakhir saat baris terakhir hanya berisi satu kartu.
+                const lastRowOrphan = items.length % 3 === 1 && index === items.length - 1;
+                return (
+                  <div key={product.id} className={lastRowOrphan ? "xl:col-start-2" : undefined}>
+                    <ProductCard product={product} />
+                  </div>
+                );
+              })}
             </div>
             {products.hasNextPage ? (
               <div className="flex justify-center pt-8">

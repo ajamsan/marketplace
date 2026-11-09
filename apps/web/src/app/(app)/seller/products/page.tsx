@@ -41,7 +41,7 @@ function SellerProductsView() {
     : null;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h1 className="text-lg font-bold text-foreground">Produk</h1>

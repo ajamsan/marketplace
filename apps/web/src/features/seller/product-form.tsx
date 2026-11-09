@@ -196,50 +196,52 @@ export function ProductForm({
         />
       </Field>
 
-      <Field
-        label="Harga (rupiah)"
-        htmlFor="product-price"
-        error={fieldErrors.price_rupiah}
-        hint={
-          priceRupiah.trim() && Number.isFinite(priceNumber)
-            ? `Dikirim ke server sebagai ${formatIDR(priceMinor)}.`
-            : "Masukkan harga dalam rupiah, contoh 15000."
-        }
-      >
-        <Input
-          id="product-price"
-          name="price"
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={MAX_PRICE_MINOR / 100}
-          step="1"
-          value={priceRupiah}
-          onChange={(event) => setPriceRupiah(event.target.value)}
-          aria-invalid={fieldErrors.price_rupiah ? true : undefined}
-          aria-describedby={fieldErrors.price_rupiah ? "product-price-error" : undefined}
-        />
-      </Field>
-
-      <Field
-        label="Status ketersediaan"
-        htmlFor="product-availability"
-        error={fieldErrors.availability_status}
-      >
-        <Select
-          id="product-availability"
-          name="availability_status"
-          value={availability}
-          onChange={(event) => setAvailability(event.target.value)}
-          aria-invalid={fieldErrors.availability_status ? true : undefined}
-          aria-describedby={
-            fieldErrors.availability_status ? "product-availability-error" : undefined
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field
+          label="Harga (rupiah)"
+          htmlFor="product-price"
+          error={fieldErrors.price_rupiah}
+          hint={
+            priceRupiah.trim() && Number.isFinite(priceNumber)
+              ? `Dikirim ke server sebagai ${formatIDR(priceMinor)}.`
+              : "Masukkan harga dalam rupiah, contoh 15000."
           }
         >
-          <option value="available">Tersedia</option>
-          <option value="unavailable">Tidak tersedia</option>
-        </Select>
-      </Field>
+          <Input
+            id="product-price"
+            name="price"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={MAX_PRICE_MINOR / 100}
+            step="1"
+            value={priceRupiah}
+            onChange={(event) => setPriceRupiah(event.target.value)}
+            aria-invalid={fieldErrors.price_rupiah ? true : undefined}
+            aria-describedby={fieldErrors.price_rupiah ? "product-price-error" : undefined}
+          />
+        </Field>
+
+        <Field
+          label="Status ketersediaan"
+          htmlFor="product-availability"
+          error={fieldErrors.availability_status}
+        >
+          <Select
+            id="product-availability"
+            name="availability_status"
+            value={availability}
+            onChange={(event) => setAvailability(event.target.value)}
+            aria-invalid={fieldErrors.availability_status ? true : undefined}
+            aria-describedby={
+              fieldErrors.availability_status ? "product-availability-error" : undefined
+            }
+          >
+            <option value="available">Tersedia</option>
+            <option value="unavailable">Tidak tersedia</option>
+          </Select>
+        </Field>
+      </div>
 
       {formError ? (
         <p role="alert" className="text-sm font-medium text-danger">
